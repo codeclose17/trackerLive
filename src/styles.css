@@ -1776,12 +1776,8 @@ app-tracker-grid, app-stats-dashboard, app-daily-glance {
   display: flex;
   flex-direction: column;
   height: 100%;
-  overflow-y: auto;
+  overflow: hidden;
   padding-right: 4px;
-}
-
-.glance-dashboard-container::-webkit-scrollbar {
-  width: 4px;
 }
 
 .glance-header {
@@ -1796,11 +1792,174 @@ app-tracker-grid, app-stats-dashboard, app-daily-glance {
   color: var(--text-primary);
 }
 
-.glance-cards-grid {
+/* Split Layout Structures */
+.glance-split-layout {
+  display: flex;
+  gap: 1.5rem;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.glance-detail-col {
+  width: 30%;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.glance-cards-col {
+  width: 70%;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+/* Detail Card Styling */
+.glance-detail-card {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  padding: 1.5rem;
+  height: 100%;
+  overflow-y: auto;
+  border-color: var(--border-color);
+}
+
+.glance-detail-card.today {
+  border-color: rgba(168, 85, 247, 0.4);
+  box-shadow: 0 0 16px rgba(168, 85, 247, 0.05);
+}
+
+.detail-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 0.75rem;
+}
+
+.detail-hour-strip-section,
+.detail-allocations-section,
+.detail-notes-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.detail-hour-strip-section h5,
+.detail-allocations-section h5,
+.detail-notes-section h5 {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  color: var(--text-tertiary);
+  letter-spacing: 0.05em;
+  font-weight: 600;
+  margin: 0;
+}
+
+.mini-hour-strip.large {
+  height: 20px;
+  border-radius: 6px;
+}
+
+.detail-alloc-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+.detail-alloc-row {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.alloc-row-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
+.alloc-row-name {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  color: var(--text-primary);
+}
+
+.alloc-row-name .dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+}
+
+.alloc-row-hours {
+  color: var(--text-secondary);
+}
+
+.alloc-row-progress-track {
+  height: 6px;
+  background: rgba(0, 0, 0, 0.15);
+  border-radius: 3px;
+  overflow: hidden;
+  border: 1px solid var(--border-color);
+}
+
+.alloc-row-progress-fill {
+  height: 100%;
+  border-radius: 3px;
+}
+
+.detail-notes-body {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  line-height: 1.5;
+  white-space: pre-wrap;
+  word-break: break-word;
+  max-height: 220px;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+.detail-notes-body.empty {
+  color: var(--text-tertiary);
+  font-style: italic;
+}
+
+.detail-notes-body::-webkit-scrollbar {
+  width: 4px;
+}
+
+.edit-day-btn {
+  margin-top: auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  width: 100%;
+  padding: 0.65rem;
+  font-weight: 600;
+  flex-shrink: 0;
+}
+
+/* Cards List Grid */
+.glance-cards-grid.scrollable {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
   gap: 1rem;
+  overflow-y: auto;
+  flex: 1;
+  padding-right: 4px;
   padding-bottom: 1.5rem;
+}
+
+.glance-cards-grid.scrollable::-webkit-scrollbar {
+  width: 4px;
 }
 
 .glance-day-card {
@@ -1810,6 +1969,7 @@ app-tracker-grid, app-stats-dashboard, app-daily-glance {
   padding: 1.25rem;
   transition: transform var(--transition-fast), border-color var(--transition-fast);
   cursor: pointer;
+  border-color: var(--border-color);
 }
 
 .glance-day-card:hover {
@@ -1818,9 +1978,18 @@ app-tracker-grid, app-stats-dashboard, app-daily-glance {
   box-shadow: var(--shadow-md);
 }
 
+.glance-day-card.active {
+  border-color: var(--accent-color);
+  background: var(--accent-glow);
+}
+
 .glance-day-card.today {
   border-color: rgba(168, 85, 247, 0.4);
   box-shadow: 0 0 12px rgba(168, 85, 247, 0.05);
+}
+
+.glance-day-card.active.today {
+  border-color: var(--accent-color);
 }
 
 .card-title-row {
@@ -1926,6 +2095,30 @@ app-tracker-grid, app-stats-dashboard, app-daily-glance {
 .reflection-text.empty {
   color: var(--text-tertiary);
   font-style: italic;
+}
+
+/* Responsive collapse for split structures */
+@media (max-width: 900px) {
+  .glance-split-layout {
+    flex-direction: column;
+    overflow-y: auto;
+  }
+  
+  .glance-detail-col {
+    width: 100%;
+    height: auto;
+  }
+  
+  .glance-cards-col {
+    width: 100%;
+    height: auto;
+    overflow: visible;
+  }
+  
+  .glance-cards-grid.scrollable {
+    overflow-y: visible;
+    padding-bottom: 0;
+  }
 }
 
 /* Theme Selector dropdown menu styles */
