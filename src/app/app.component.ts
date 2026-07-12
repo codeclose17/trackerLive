@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, HostListener } from '@angular/core';
+import { Component, OnInit, OnDestroy, HostListener, NgZone } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { HeaderComponent } from './components/header/header.component';
 import { CategoryPickerComponent } from './components/category-picker/category-picker.component';
@@ -92,7 +92,7 @@ export class AppComponent implements OnInit, OnDestroy {
   private unsubscribeCategoriesRealtime: () => void = () => {};
   private syncTimers: Record<string, any> = {};
 
-  constructor(private dbService: DbService) {}
+  constructor(private dbService: DbService, private zone: NgZone) {}
 
   ngOnInit(): void {
     // Load local settings & records
@@ -162,11 +162,15 @@ export class AppComponent implements OnInit, OnDestroy {
 
     const { supabaseUrl, supabaseAnonKey, syncEnabled } = this.settings;
     if (!syncEnabled || !supabaseUrl || !supabaseAnonKey) {
-      this.syncState = { status: 'idle' };
+      this.zone.run(() => {
+        this.syncState = { status: 'idle' };
+      });
       return;
     }
 
-    this.syncState = { status: 'syncing' };
+    this.zone.run(() => {
+      this.syncState = { status: 'syncing' };
+    });
 
     try {
       // 1. Pull and merge categories
@@ -212,9 +216,11 @@ export class AppComponent implements OnInit, OnDestroy {
         const idleCat = mergedCategories.find(c => c.id === 'idle') || { id: 'idle', name: 'Idle / Uncategorized', color: '#27272a' };
         const finalCategories = [...activeCats, idleCat];
 
-        this.settings = { ...this.settings, categories: finalCategories };
-        this.dbService.saveLocalSettings(this.settings);
-        this.applyCssVariables();
+        this.zone.run(() => {
+          this.settings = { ...this.settings, categories: finalCategories };
+          this.dbService.saveLocalSettings(this.settings);
+          this.applyCssVariables();
+        });
       }
 
       // 2. Pull remote records
@@ -242,77 +248,83 @@ export class AppComponent implements OnInit, OnDestroy {
         }
       });
 
-      if (hasChanges) {
-        this.dbService.saveLocalRecords(mergedRecords);
-        this.records = mergedRecords;
-      }
+      this.zone.run(() => {
+        if (hasChanges) {
+          this.dbService.saveLocalRecords(mergedRecords);
+          this.records = mergedRecords;
+        }
 
-      this.syncState = {
-        status: 'success',
-        lastSyncedAt: new Date().toLocaleTimeString()
-      };
+        this.syncState = {
+          status: 'success',
+          lastSyncedAt: new Date().toLocaleTimeString()
+        };
+      });
 
       // Set up real-time sync stream for categories
       this.unsubscribeCategoriesRealtime = this.dbService.subscribeToCategoryChanges(
         supabaseUrl,
         supabaseAnonKey,
         (updatedCat) => {
-          const index = this.settings.categories.findIndex(c => c.id === updatedCat.id);
-          const remoteTime = updatedCat.updatedAt ? new Date(updatedCat.updatedAt).getTime() : 0;
-          
-          if (index === -1) {
-            const activeCats = this.settings.categories.filter(c => c.id !== 'idle');
-            const idleCat = this.settings.categories.find(c => c.id === 'idle') || { id: 'idle', name: 'Idle / Uncategorized', color: '#27272a' };
-            const finalCategories = [...activeCats, updatedCat, idleCat];
+          this.zone.run(() => {
+            const index = this.settings.categories.findIndex(c => c.id === updatedCat.id);
+            const remoteTime = updatedCat.updatedAt ? new Date(updatedCat.updatedAt).getTime() : 0;
             
-            this.settings = { ...this.settings, categories: finalCategories };
-            this.dbService.saveLocalSettings(this.settings);
-            this.applyCssVariables();
-          } else {
-            const localCat = this.settings.categories[index];
-            const localTime = localCat.updatedAt ? new Date(localCat.updatedAt).getTime() : 0;
-            if (remoteTime > localTime) {
-              const updatedCategories = this.settings.categories.map(c => c.id === updatedCat.id ? updatedCat : c);
-              this.settings = { ...this.settings, categories: updatedCategories };
+            if (index === -1) {
+              const activeCats = this.settings.categories.filter(c => c.id !== 'idle');
+              const idleCat = this.settings.categories.find(c => c.id === 'idle') || { id: 'idle', name: 'Idle / Uncategorized', color: '#27272a' };
+              const finalCategories = [...activeCats, updatedCat, idleCat];
+              
+              this.settings = { ...this.settings, categories: finalCategories };
               this.dbService.saveLocalSettings(this.settings);
               this.applyCssVariables();
+            } else {
+              const localCat = this.settings.categories[index];
+              const localTime = localCat.updatedAt ? new Date(localCat.updatedAt).getTime() : 0;
+              if (remoteTime > localTime) {
+                const updatedCategories = this.settings.categories.map(c => c.id === updatedCat.id ? updatedCat : c);
+                this.settings = { ...this.settings, categories: updatedCategories };
+                this.dbService.saveLocalSettings(this.settings);
+                this.applyCssVariables();
+              }
             }
-          }
+          });
         },
         (deletedCatId) => {
-          const exists = this.settings.categories.some(c => c.id === deletedCatId);
-          if (exists) {
-            const updatedCategories = this.settings.categories.filter((c) => c.id !== deletedCatId);
-            this.settings = { ...this.settings, categories: updatedCategories };
-            this.dbService.saveLocalSettings(this.settings);
+          this.zone.run(() => {
+            const exists = this.settings.categories.some(c => c.id === deletedCatId);
+            if (exists) {
+              const updatedCategories = this.settings.categories.filter((c) => c.id !== deletedCatId);
+              this.settings = { ...this.settings, categories: updatedCategories };
+              this.dbService.saveLocalSettings(this.settings);
 
-            // Reset deleted categories in local records to 'idle'
-            const nextRecords = { ...this.records };
-            let affected = false;
+              // Reset deleted categories in local records to 'idle'
+              const nextRecords = { ...this.records };
+              let affected = false;
 
-            Object.keys(nextRecords).forEach((d) => {
-              const record = nextRecords[d];
-              if (record.hours.includes(deletedCatId)) {
-                affected = true;
-                nextRecords[d] = {
-                  ...record,
-                  hours: record.hours.map((h) => (h === deletedCatId ? 'idle' : h)),
-                  updatedAt: new Date().toISOString()
-                };
+              Object.keys(nextRecords).forEach((d) => {
+                const record = nextRecords[d];
+                if (record.hours.includes(deletedCatId)) {
+                  affected = true;
+                  nextRecords[d] = {
+                    ...record,
+                    hours: record.hours.map((h) => (h === deletedCatId ? 'idle' : h)),
+                    updatedAt: new Date().toISOString()
+                  };
+                }
+              });
+
+              if (affected) {
+                this.dbService.saveLocalRecords(nextRecords);
+                this.records = nextRecords;
               }
-            });
 
-            if (affected) {
-              this.dbService.saveLocalRecords(nextRecords);
-              this.records = nextRecords;
+              if (this.activeCategoryId === deletedCatId) {
+                this.activeCategoryId = 'work';
+              }
+              
+              this.applyCssVariables();
             }
-
-            if (this.activeCategoryId === deletedCatId) {
-              this.activeCategoryId = 'work';
-            }
-            
-            this.applyCssVariables();
-          }
+          });
         }
       );
 
@@ -321,26 +333,30 @@ export class AppComponent implements OnInit, OnDestroy {
         supabaseUrl,
         supabaseAnonKey,
         (updatedRecord) => {
-          const localRec = this.records[updatedRecord.date];
-          const remoteTime = new Date(updatedRecord.updatedAt).getTime();
-          const localTime = localRec ? new Date(localRec.updatedAt).getTime() : 0;
+          this.zone.run(() => {
+            const localRec = this.records[updatedRecord.date];
+            const remoteTime = new Date(updatedRecord.updatedAt).getTime();
+            const localTime = localRec ? new Date(localRec.updatedAt).getTime() : 0;
 
-          if (remoteTime > localTime) {
-            this.records = {
-              ...this.records,
-              [updatedRecord.date]: updatedRecord
-            };
-            this.dbService.saveLocalRecords(this.records);
-          }
+            if (remoteTime > localTime) {
+              this.records = {
+                ...this.records,
+                [updatedRecord.date]: updatedRecord
+              };
+              this.dbService.saveLocalRecords(this.records);
+            }
+          });
         }
       );
 
     } catch (err: any) {
       console.error('Initial sync failed:', err);
-      this.syncState = {
-        status: 'error',
-        errorMessage: err.message || 'Failed to sync with cloud database.'
-      };
+      this.zone.run(() => {
+        this.syncState = {
+          status: 'error',
+          errorMessage: err.message || 'Failed to sync with cloud database.'
+        };
+      });
     }
   }
 

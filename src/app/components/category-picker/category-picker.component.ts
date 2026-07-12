@@ -117,6 +117,8 @@ import { Category } from '../../types';
             <input
               type="color"
               [value]="cat.color"
+              [id]="'edit-color-' + cat.id"
+              [name]="'edit-color-' + cat.id"
               class="color-picker-input"
               (change)="onColorChange(cat, $event)"
             />
@@ -124,6 +126,8 @@ import { Category } from '../../types';
             <input
               type="text"
               [value]="cat.name"
+              [id]="'edit-name-' + cat.id"
+              [name]="'edit-name-' + cat.id"
               class="form-input text-input-sm"
               (input)="onNameChange(cat, $event)"
             />
@@ -144,17 +148,19 @@ import { Category } from '../../types';
           </div>
         </div>
 
-        <form (submit)="handleAdd($event)" class="add-category-form">
+        <form (ngSubmit)="handleAdd($event)" class="add-category-form">
           <div class="form-row">
             <input
               type="color"
               [(ngModel)]="newCatColor"
+              id="new-cat-color"
               name="newCatColor"
               class="color-picker-input"
             />
             <input
               type="text"
               [(ngModel)]="newCatName"
+              id="new-cat-name"
               name="newCatName"
               placeholder="New Category Name..."
               class="form-input text-input-sm"
