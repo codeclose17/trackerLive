@@ -64,7 +64,7 @@ import { Category, DayRecord } from '../../types';
           <div class="reflection-preview-box">
             <h5>Reflections</h5>
             <p class="reflection-text" [class.empty]="!getNotes(dateStr)">
-              {{ getNotes(dateStr) || 'No daily notes written yet.' }}
+              {{ getFormattedNotes(dateStr) || 'No daily notes written yet.' }}
             </p>
           </div>
         </div>
@@ -125,6 +125,19 @@ export class DailyGlanceComponent {
   getNotes(dateStr: string): string {
     const rec = this.records[dateStr];
     return rec ? rec.notes : '';
+  }
+
+  getFormattedNotes(dateStr: string): string {
+    const notes = this.getNotes(dateStr);
+    if (!notes) return '';
+    return notes.split('\n').map(line => {
+      const trimmed = line.trimStart();
+      if (trimmed.startsWith('->')) {
+        const leadingSpacesCount = line.length - trimmed.length;
+        return ' '.repeat(leadingSpacesCount) + '• ' + trimmed.substring(2).trimStart();
+      }
+      return line;
+    }).join('\n');
   }
 
   handleCardClick(dateStr: string): void {
