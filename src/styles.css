@@ -2310,5 +2310,49 @@ app-tracker-grid, app-stats-dashboard, app-daily-glance {
   font-size: 0.8rem;
 }
 
+/* Daily Glance & Stats Binge Count Styles */
+.card-badges-container {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  grid-column: 3;
+  justify-self: end;
+}
+
+.binge-pill {
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--accent-color);
+  background: var(--accent-glow);
+  border: 1px solid rgba(168, 85, 247, 0.25);
+  padding: 2px 6px;
+  border-radius: 4px;
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.detail-binge-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding-bottom: 0.25rem;
+}
+
+.detail-binge-value {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+}
+
+.detail-binge-value .value {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--accent-color);
+  text-shadow: 0 0 8px var(--accent-glow);
+}
+
 
 

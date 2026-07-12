@@ -72,6 +72,16 @@ import { Category, DayRecord } from '../../types';
               </div>
             </div>
 
+            <!-- Binge Sessions -->
+            <div class="detail-binge-section">
+              <h5>Binge Sessions</h5>
+              <div class="detail-binge-value">
+                <span class="emoji">🔥</span>
+                <span class="value">{{ getBingeCount(selectedGlanceDate) }}</span>
+                <span class="lbl">{{ getBingeCount(selectedGlanceDate) === 1 ? 'session' : 'sessions' }} logged today</span>
+              </div>
+            </div>
+
             <!-- Full reflections -->
             <div class="detail-notes-section">
               <h5>Reflections</h5>
@@ -99,7 +109,10 @@ import { Category, DayRecord } from '../../types';
                   <span class="day-long">{{ getDayNameLong(dateStr) }}</span>
                   <span class="date-short">{{ getFormattedDate(dateStr) }}</span>
                 </div>
-                <span *ngIf="isToday(dateStr)" class="today-badge">Today</span>
+                <div class="card-badges-container">
+                  <span *ngIf="getBingeCount(dateStr) > 0" class="binge-pill">🔥 {{ getBingeCount(dateStr) }}</span>
+                  <span *ngIf="isToday(dateStr)" class="today-badge">Today</span>
+                </div>
               </div>
 
               <!-- Mini Hour strip -->
@@ -231,5 +244,10 @@ export class DailyGlanceComponent implements OnChanges {
 
   handleEditClick(dateStr: string): void {
     this.selectDateAndTab.emit({ date: dateStr, tab: 'grid' });
+  }
+
+  getBingeCount(dateStr: string): number {
+    const rec = this.records[dateStr];
+    return rec && rec.bingeCount ? rec.bingeCount : 0;
   }
 }

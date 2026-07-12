@@ -66,6 +66,13 @@ interface Insight {
               </div>
             </div>
           </ng-container>
+          <!-- Daily Binge Count Average Box -->
+          <div class="avg-box binge-avg-box" style="border-left-color: var(--accent-color);">
+            <div class="avg-title" style="color: var(--accent-color);">Daily Binges</div>
+            <div class="avg-val">
+              <span class="big-num">{{ getBingeAverage() }}</span> per day
+            </div>
+          </div>
         </div>
       </div>
 
@@ -161,6 +168,15 @@ export class StatsDashboardComponent implements OnChanges {
     const socialAvg = parseFloat(this.getCategoryAverage('social'));
     const learnAvg = parseFloat(this.getCategoryAverage('learn'));
     const workAvg = parseFloat(this.getCategoryAverage('work'));
+    const bingeAvg = parseFloat(this.getBingeAverage());
+
+    if (bingeAvg > 3) {
+      return {
+        type: 'warning',
+        title: 'High Binge Frequency',
+        message: `You are averaging ${bingeAvg} binge sessions per day. Frequent multitasking or quick switching depletes your cognitive attention spans. Try focusing on a single task for 25 minutes (Pomodoro technique) before taking a break.`
+      };
+    }
 
     if (sleepAvg < 7) {
       return {
@@ -199,5 +215,22 @@ export class StatsDashboardComponent implements OnChanges {
       title: 'Healthy Rhythm',
       message: 'You are maintaining a balanced breakdown. A steady division of labor, learning, and sleep stabilizes dopamine baseline levels, helping you prevent task paralysis.'
     };
+  }
+
+  getTotalBinges(): number {
+    let total = 0;
+    this.dates.forEach((dateStr) => {
+      const record = this.records[dateStr];
+      if (record && record.bingeCount) {
+        total += record.bingeCount;
+      }
+    });
+    return total;
+  }
+
+  getBingeAverage(): string {
+    const total = this.getTotalBinges();
+    const days = this.activeRecordsCount || this.dates.length || 1;
+    return (total / days).toFixed(1);
   }
 }
