@@ -89,6 +89,7 @@ export class AppComponent implements OnInit, OnDestroy {
   syncState: SyncState = { status: 'idle' };
 
   private unsubscribeRealtime: () => void = () => {};
+  private unsubscribeCategoriesRealtime: () => void = () => {};
   private syncTimers: Record<string, any> = {};
 
   constructor(private dbService: DbService) {}
@@ -122,6 +123,9 @@ export class AppComponent implements OnInit, OnDestroy {
     if (this.unsubscribeRealtime) {
       this.unsubscribeRealtime();
     }
+    if (this.unsubscribeCategoriesRealtime) {
+      this.unsubscribeCategoriesRealtime();
+    }
   }
 
   private applyCssVariables(): void {
@@ -152,6 +156,9 @@ export class AppComponent implements OnInit, OnDestroy {
     if (this.unsubscribeRealtime) {
       this.unsubscribeRealtime();
     }
+    if (this.unsubscribeCategoriesRealtime) {
+      this.unsubscribeCategoriesRealtime();
+    }
 
     const { supabaseUrl, supabaseAnonKey, syncEnabled } = this.settings;
     if (!syncEnabled || !supabaseUrl || !supabaseAnonKey) {
@@ -162,7 +169,55 @@ export class AppComponent implements OnInit, OnDestroy {
     this.syncState = { status: 'syncing' };
 
     try {
-      // Pull remote records
+      // 1. Pull and merge categories
+      const remoteCategoriesList = await this.dbService.fetchCategories(supabaseUrl, supabaseAnonKey);
+      const localCategories = this.settings.categories;
+      const mergedCategories: Category[] = [...localCategories];
+      let categoriesChanged = false;
+
+      const remoteCatMap = new Map(remoteCategoriesList.map(c => [c.id, c]));
+      const localCatMap = new Map(localCategories.map(c => [c.id, c]));
+
+      remoteCategoriesList.forEach((remoteCat) => {
+        const localCat = localCatMap.get(remoteCat.id);
+        if (!localCat) {
+          mergedCategories.push(remoteCat);
+          categoriesChanged = true;
+        } else {
+          const remoteTime = remoteCat.updatedAt ? new Date(remoteCat.updatedAt).getTime() : 0;
+          const localTime = localCat.updatedAt ? new Date(localCat.updatedAt).getTime() : 0;
+          if (remoteTime > localTime) {
+            const index = mergedCategories.findIndex(c => c.id === remoteCat.id);
+            if (index !== -1) {
+              mergedCategories[index] = remoteCat;
+              categoriesChanged = true;
+            }
+          } else if (localTime > remoteTime) {
+            this.dbService.upsertCategory(supabaseUrl, supabaseAnonKey, localCat).catch(console.error);
+          }
+        }
+      });
+
+      localCategories.forEach((localCat) => {
+        if (!remoteCatMap.has(localCat.id)) {
+          this.dbService.upsertCategory(supabaseUrl, supabaseAnonKey, {
+            ...localCat,
+            updatedAt: localCat.updatedAt || new Date().toISOString()
+          }).catch(console.error);
+        }
+      });
+
+      if (categoriesChanged) {
+        const activeCats = mergedCategories.filter(c => c.id !== 'idle');
+        const idleCat = mergedCategories.find(c => c.id === 'idle') || { id: 'idle', name: 'Idle / Uncategorized', color: '#27272a' };
+        const finalCategories = [...activeCats, idleCat];
+
+        this.settings = { ...this.settings, categories: finalCategories };
+        this.dbService.saveLocalSettings(this.settings);
+        this.applyCssVariables();
+      }
+
+      // 2. Pull remote records
       const remoteRecordsList = await this.dbService.fetchRecords(supabaseUrl, supabaseAnonKey);
       
       const localRecords = this.dbService.getLocalRecords();
@@ -197,7 +252,71 @@ export class AppComponent implements OnInit, OnDestroy {
         lastSyncedAt: new Date().toLocaleTimeString()
       };
 
-      // Set up real-time sync stream
+      // Set up real-time sync stream for categories
+      this.unsubscribeCategoriesRealtime = this.dbService.subscribeToCategoryChanges(
+        supabaseUrl,
+        supabaseAnonKey,
+        (updatedCat) => {
+          const index = this.settings.categories.findIndex(c => c.id === updatedCat.id);
+          const remoteTime = updatedCat.updatedAt ? new Date(updatedCat.updatedAt).getTime() : 0;
+          
+          if (index === -1) {
+            const activeCats = this.settings.categories.filter(c => c.id !== 'idle');
+            const idleCat = this.settings.categories.find(c => c.id === 'idle') || { id: 'idle', name: 'Idle / Uncategorized', color: '#27272a' };
+            const finalCategories = [...activeCats, updatedCat, idleCat];
+            
+            this.settings = { ...this.settings, categories: finalCategories };
+            this.dbService.saveLocalSettings(this.settings);
+            this.applyCssVariables();
+          } else {
+            const localCat = this.settings.categories[index];
+            const localTime = localCat.updatedAt ? new Date(localCat.updatedAt).getTime() : 0;
+            if (remoteTime > localTime) {
+              const updatedCategories = this.settings.categories.map(c => c.id === updatedCat.id ? updatedCat : c);
+              this.settings = { ...this.settings, categories: updatedCategories };
+              this.dbService.saveLocalSettings(this.settings);
+              this.applyCssVariables();
+            }
+          }
+        },
+        (deletedCatId) => {
+          const exists = this.settings.categories.some(c => c.id === deletedCatId);
+          if (exists) {
+            const updatedCategories = this.settings.categories.filter((c) => c.id !== deletedCatId);
+            this.settings = { ...this.settings, categories: updatedCategories };
+            this.dbService.saveLocalSettings(this.settings);
+
+            // Reset deleted categories in local records to 'idle'
+            const nextRecords = { ...this.records };
+            let affected = false;
+
+            Object.keys(nextRecords).forEach((d) => {
+              const record = nextRecords[d];
+              if (record.hours.includes(deletedCatId)) {
+                affected = true;
+                nextRecords[d] = {
+                  ...record,
+                  hours: record.hours.map((h) => (h === deletedCatId ? 'idle' : h)),
+                  updatedAt: new Date().toISOString()
+                };
+              }
+            });
+
+            if (affected) {
+              this.dbService.saveLocalRecords(nextRecords);
+              this.records = nextRecords;
+            }
+
+            if (this.activeCategoryId === deletedCatId) {
+              this.activeCategoryId = 'work';
+            }
+            
+            this.applyCssVariables();
+          }
+        }
+      );
+
+      // Set up real-time sync stream for records
       this.unsubscribeRealtime = this.dbService.subscribeToChanges(
         supabaseUrl,
         supabaseAnonKey,
@@ -360,26 +479,53 @@ export class AppComponent implements OnInit, OnDestroy {
   handleAddCategory(newCat: Category): void {
     const activeCats = this.settings.categories.filter(c => c.id !== 'idle');
     const idleCat = this.settings.categories.find(c => c.id === 'idle')!;
-    const updatedCategories = [...activeCats, newCat, idleCat];
+    
+    const timestampedCat = {
+      ...newCat,
+      updatedAt: new Date().toISOString()
+    };
+    const updatedCategories = [...activeCats, timestampedCat, idleCat];
     
     this.settings = { ...this.settings, categories: updatedCategories };
     this.dbService.saveLocalSettings(this.settings);
     this.applyCssVariables();
+
+    // Sync in background
+    const { supabaseUrl, supabaseAnonKey, syncEnabled } = this.settings;
+    if (syncEnabled && supabaseUrl && supabaseAnonKey) {
+      this.dbService.upsertCategory(supabaseUrl, supabaseAnonKey, timestampedCat).catch(console.error);
+    }
   }
 
   handleUpdateCategory(updatedCat: Category): void {
+    const timestampedCat = {
+      ...updatedCat,
+      updatedAt: new Date().toISOString()
+    };
     const updatedCategories = this.settings.categories.map((c) =>
-      c.id === updatedCat.id ? updatedCat : c
+      c.id === updatedCat.id ? timestampedCat : c
     );
     this.settings = { ...this.settings, categories: updatedCategories };
     this.dbService.saveLocalSettings(this.settings);
     this.applyCssVariables();
+
+    // Sync in background
+    const { supabaseUrl, supabaseAnonKey, syncEnabled } = this.settings;
+    if (syncEnabled && supabaseUrl && supabaseAnonKey) {
+      this.dbService.upsertCategory(supabaseUrl, supabaseAnonKey, timestampedCat).catch(console.error);
+    }
   }
 
   handleDeleteCategory(catId: string): void {
     const updatedCategories = this.settings.categories.filter((c) => c.id !== catId);
     this.settings = { ...this.settings, categories: updatedCategories };
     this.dbService.saveLocalSettings(this.settings);
+
+    // Sync deletion in background
+    const { supabaseUrl, supabaseAnonKey, syncEnabled } = this.settings;
+    if (syncEnabled && supabaseUrl && supabaseAnonKey) {
+      this.dbService.deleteCategory(supabaseUrl, supabaseAnonKey, catId).catch(console.error);
+    }
 
     // Reset deleted categories in local records to 'idle'
     const nextRecords = { ...this.records };
@@ -396,7 +542,6 @@ export class AppComponent implements OnInit, OnDestroy {
         };
 
         // Sync updates in background
-        const { supabaseUrl, supabaseAnonKey, syncEnabled } = this.settings;
         if (syncEnabled && supabaseUrl && supabaseAnonKey) {
           this.dbService.upsertRecord(supabaseUrl, supabaseAnonKey, nextRecords[d]).catch(console.error);
         }

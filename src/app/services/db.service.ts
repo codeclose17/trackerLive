@@ -136,6 +136,108 @@ export class DbService {
     };
   }
 
+  // Fetch all categories from Supabase
+  async fetchCategories(url: string, anonKey: string): Promise<Category[]> {
+    const client = this.getSupabaseClient(url, anonKey);
+    if (!client) return [];
+
+    const { data, error } = await client
+      .from('tracker_categories')
+      .select('*')
+      .order('id', { ascending: true });
+
+    if (error) {
+      throw new Error(error.message);
+    }
+
+    return (data || []).map(row => ({
+      id: row.id,
+      name: row.name,
+      color: row.color,
+      isCustom: !!row.is_custom,
+      updatedAt: row.updated_at
+    }));
+  }
+
+  // Upsert a category to Supabase
+  async upsertCategory(url: string, anonKey: string, category: Category): Promise<void> {
+    const client = this.getSupabaseClient(url, anonKey);
+    if (!client) return;
+
+    const { error } = await client
+      .from('tracker_categories')
+      .upsert({
+        id: category.id,
+        name: category.name,
+        color: category.color,
+        is_custom: !!category.isCustom,
+        updated_at: category.updatedAt || new Date().toISOString()
+      });
+
+    if (error) {
+      throw new Error(error.message);
+    }
+  }
+
+  // Delete a category from Supabase
+  async deleteCategory(url: string, anonKey: string, categoryId: string): Promise<void> {
+    const client = this.getSupabaseClient(url, anonKey);
+    if (!client) return;
+
+    const { error } = await client
+      .from('tracker_categories')
+      .delete()
+      .eq('id', categoryId);
+
+    if (error) {
+      throw new Error(error.message);
+    }
+  }
+
+  // Subscribe to realtime category updates
+  subscribeToCategoryChanges(
+    url: string,
+    anonKey: string,
+    onInsertOrUpdate: (category: Category) => void,
+    onDelete: (categoryId: string) => void
+  ): () => void {
+    const client = this.getSupabaseClient(url, anonKey);
+    if (!client) return () => {};
+
+    const channel = client
+      .channel('tracker_categories_realtime_changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'tracker_categories'
+        },
+        (payload) => {
+          if (payload.eventType === 'INSERT' || payload.eventType === 'UPDATE') {
+            const newRow = payload.new;
+            onInsertOrUpdate({
+              id: newRow['id'],
+              name: newRow['name'],
+              color: newRow['color'],
+              isCustom: !!newRow['is_custom'],
+              updatedAt: newRow['updated_at']
+            });
+          } else if (payload.eventType === 'DELETE') {
+            const oldRow = payload.old;
+            if (oldRow && oldRow['id']) {
+              onDelete(oldRow['id']);
+            }
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      client.removeChannel(channel);
+    };
+  }
+
   // Local Storage - Records
   getLocalRecords(): Record<string, DayRecord> {
     const data = localStorage.getItem(this.LOCAL_STORAGE_RECORDS_KEY);

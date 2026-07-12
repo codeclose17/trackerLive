@@ -208,7 +208,7 @@ export class SettingsModalComponent implements OnInit {
   importing = false;
   importStatus: 'idle' | 'success' | 'failed' = 'idle';
 
-  sqlSnippet = `-- 1. Create the tracker table
+  sqlSnippet = `-- 1. Create the tracker table & categories table
 create table if not exists public.tracker_records (
   date text primary key,
   hours text[] not null,
@@ -216,11 +216,23 @@ create table if not exists public.tracker_records (
   updated_at timestamp with time zone default timezone('utc'::text, now()) not null
 );
 
+create table if not exists public.tracker_categories (
+  id text primary key,
+  name text not null,
+  color text not null,
+  is_custom boolean default false,
+  updated_at timestamp with time zone default timezone('utc'::text, now()) not null
+);
+
 -- 2. Disable RLS (Easiest setup for private database using anon key)
 alter table public.tracker_records disable row level security;
+alter table public.tracker_categories disable row level security;
 
--- 3. Enable Realtime sync for this table
-alter publication supabase_realtime add table public.tracker_records;`;
+-- 3. Enable Realtime sync for these tables
+-- Note: If tracker_records is already in publication, you can run this individually for tracker_categories:
+alter publication supabase_realtime add table public.tracker_categories;
+-- (For clean installation, also add tracker_records if not already added)
+-- alter publication supabase_realtime add table public.tracker_records;`;
 
   constructor(private dbService: DbService) {}
 

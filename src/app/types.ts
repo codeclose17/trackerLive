@@ -3,6 +3,7 @@ export interface Category {
   name: string;
   color: string;
   isCustom?: boolean;
+  updatedAt?: string;
 }
 
 export type DayHours = string[]; // Array of 24 category IDs
