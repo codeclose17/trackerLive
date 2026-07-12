@@ -493,7 +493,21 @@ export class AppComponent implements OnInit, OnDestroy {
     // Sync in background
     const { supabaseUrl, supabaseAnonKey, syncEnabled } = this.settings;
     if (syncEnabled && supabaseUrl && supabaseAnonKey) {
-      this.dbService.upsertCategory(supabaseUrl, supabaseAnonKey, timestampedCat).catch(console.error);
+      this.syncState = { status: 'syncing' };
+      this.dbService.upsertCategory(supabaseUrl, supabaseAnonKey, timestampedCat)
+        .then(() => {
+          this.syncState = {
+            status: 'success',
+            lastSyncedAt: new Date().toLocaleTimeString()
+          };
+        })
+        .catch((err) => {
+          console.error('Failed to sync category addition:', err);
+          this.syncState = {
+            status: 'error',
+            errorMessage: err.message || 'Failed to sync category addition.'
+          };
+        });
     }
   }
 
@@ -512,7 +526,21 @@ export class AppComponent implements OnInit, OnDestroy {
     // Sync in background
     const { supabaseUrl, supabaseAnonKey, syncEnabled } = this.settings;
     if (syncEnabled && supabaseUrl && supabaseAnonKey) {
-      this.dbService.upsertCategory(supabaseUrl, supabaseAnonKey, timestampedCat).catch(console.error);
+      this.syncState = { status: 'syncing' };
+      this.dbService.upsertCategory(supabaseUrl, supabaseAnonKey, timestampedCat)
+        .then(() => {
+          this.syncState = {
+            status: 'success',
+            lastSyncedAt: new Date().toLocaleTimeString()
+          };
+        })
+        .catch((err) => {
+          console.error('Failed to sync category update:', err);
+          this.syncState = {
+            status: 'error',
+            errorMessage: err.message || 'Failed to sync category update.'
+          };
+        });
     }
   }
 
@@ -524,7 +552,21 @@ export class AppComponent implements OnInit, OnDestroy {
     // Sync deletion in background
     const { supabaseUrl, supabaseAnonKey, syncEnabled } = this.settings;
     if (syncEnabled && supabaseUrl && supabaseAnonKey) {
-      this.dbService.deleteCategory(supabaseUrl, supabaseAnonKey, catId).catch(console.error);
+      this.syncState = { status: 'syncing' };
+      this.dbService.deleteCategory(supabaseUrl, supabaseAnonKey, catId)
+        .then(() => {
+          this.syncState = {
+            status: 'success',
+            lastSyncedAt: new Date().toLocaleTimeString()
+          };
+        })
+        .catch((err) => {
+          console.error('Failed to sync category deletion:', err);
+          this.syncState = {
+            status: 'error',
+            errorMessage: err.message || 'Failed to sync category deletion.'
+          };
+        });
     }
 
     // Reset deleted categories in local records to 'idle'
