@@ -1926,11 +1926,18 @@ app-tracker-grid, app-stats-dashboard, app-daily-glance {
 }
 
 .detail-hour-strip-section,
-.detail-allocations-section,
+.detail-allocations-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
 .detail-notes-section {
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
+  flex: 1;
+  min-height: 0;
 }
 
 .detail-hour-strip-section h5,
@@ -2005,7 +2012,7 @@ app-tracker-grid, app-stats-dashboard, app-daily-glance {
   line-height: 1.5;
   white-space: pre-wrap;
   word-break: break-word;
-  max-height: 220px;
+  flex: 1;
   overflow-y: auto;
   padding-right: 4px;
 }

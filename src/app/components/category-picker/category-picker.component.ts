@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter, OnChanges, SimpleChanges } from '@angular/core';
+import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Category } from '../../types';
@@ -174,7 +174,7 @@ import { Category } from '../../types';
     </ng-template>
   `
 })
-export class CategoryPickerComponent implements OnChanges {
+export class CategoryPickerComponent {
   @Input() categories: Category[] = [];
   @Input() activeCategoryId = '';
   @Input() layout: 'card' | 'inline' = 'card';
@@ -188,23 +188,11 @@ export class CategoryPickerComponent implements OnChanges {
   newCatName = '';
   newCatColor = '#8b5cf6';
 
-  // Lifecycle hook to detect changes in inputs
-  ngOnChanges(changes: SimpleChanges): void {
-    if (changes['categories']) {
-      console.log('CategoryPickerComponent - categories changed:', changes['categories'].currentValue);
-    }
-    if (changes['activeCategoryId']) {
-      console.log('CategoryPickerComponent - activeCategoryId changed:', changes['activeCategoryId'].currentValue);
-    }
-  }
-
   onColorChange(cat: Category, event: any): void {
-    console.log('Color change for category', cat.id, 'new color:', event.target.value);
     this.updateCategory.emit({ ...cat, color: event.target.value });
   }
 
   onNameChange(cat: Category, event: any): void {
-    console.log('Name change for category', cat.id, 'new name:', event.target.value);
     this.updateCategory.emit({ ...cat, name: event.target.value });
   }
 
@@ -219,7 +207,6 @@ export class CategoryPickerComponent implements OnChanges {
       color: this.newCatColor,
       isCustom: true
     };
-    console.log('Adding new category:', newCategory);
     this.addCategory.emit(newCategory);
     this.newCatName = '';
   }

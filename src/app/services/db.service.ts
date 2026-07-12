@@ -12,13 +12,7 @@ export class DbService {
   private readonly LOCAL_STORAGE_RECORDS_KEY = 'box_tracker_records';
   private readonly LOCAL_STORAGE_SETTINGS_KEY = 'box_tracker_settings';
 
-  public logCallback: (msg: string, type: 'info' | 'success' | 'error') => void = (msg, type) => {
-    if (type === 'error') {
-      console.error(`[DbService] ${msg}`);
-    } else {
-      console.log(`[DbService] ${msg}`);
-    }
-  };
+  public logCallback: (msg: string, type: 'info' | 'success' | 'error') => void = () => {};
 
   constructor() {}
 
