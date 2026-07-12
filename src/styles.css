@@ -1372,6 +1372,14 @@ input:checked + .slider:before {
   flex-direction: column;
 }
 
+app-tracker-grid, app-stats-dashboard, app-daily-glance {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+}
+
 @media (max-width: 1200px) {
   .dashboard-content {
     overflow: visible;
