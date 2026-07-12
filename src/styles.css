@@ -1834,11 +1834,34 @@ app-tracker-grid, app-stats-dashboard, app-daily-glance {
 }
 
 .detail-card-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
   border-bottom: 1px solid var(--border-color);
   padding-bottom: 0.75rem;
+  position: relative;
+}
+
+.edit-day-icon-btn {
+  grid-column: 2;
+  justify-self: center;
+  width: 32px !important;
+  height: 32px !important;
+  border-radius: 50% !important;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 !important;
+}
+
+.detail-card-header .card-day-info {
+  grid-column: 1;
+  justify-self: start;
+}
+
+.detail-card-header .today-badge {
+  grid-column: 3;
+  justify-self: end;
 }
 
 .detail-hour-strip-section,
@@ -1935,17 +1958,7 @@ app-tracker-grid, app-stats-dashboard, app-daily-glance {
   width: 4px;
 }
 
-.edit-day-btn {
-  margin-top: auto;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  width: 100%;
-  padding: 0.65rem;
-  font-weight: 600;
-  flex-shrink: 0;
-}
+/* Cards List Grid */
 
 /* Cards List Grid */
 .glance-cards-grid.scrollable {

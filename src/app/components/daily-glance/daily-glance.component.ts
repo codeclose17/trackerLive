@@ -22,6 +22,12 @@ import { Category, DayRecord } from '../../types';
                 <span class="day-long">{{ getDayNameLong(selectedGlanceDate) }}</span>
                 <span class="date-short">{{ getFormattedDate(selectedGlanceDate) }}</span>
               </div>
+              
+              <!-- Centered Edit Icon Button -->
+              <button class="btn btn-secondary btn-icon edit-day-icon-btn" (click)="handleEditClick(selectedGlanceDate)" title="Edit this day in Grid">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+              </button>
+              
               <span *ngIf="isToday(selectedGlanceDate)" class="today-badge">Today</span>
             </div>
 
@@ -73,12 +79,6 @@ import { Category, DayRecord } from '../../types';
                 {{ getFormattedNotes(selectedGlanceDate) || 'No notes logged for this day.' }}
               </div>
             </div>
-
-            <!-- Edit Button link to grid -->
-            <button class="btn btn-primary edit-day-btn" (click)="handleEditClick(selectedGlanceDate)">
-              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 6px;"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
-              <span>Edit Hours</span>
-            </button>
           </div>
         </div>
 
