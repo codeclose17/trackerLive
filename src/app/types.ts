@@ -13,6 +13,7 @@ export interface DayRecord {
   hours: DayHours; // 24 entries, mapping 0..23 to Category.id
   notes: string; // Daily reflection notes
   updatedAt: string; // ISO string representing when the record was last saved
+  bingeCount?: number; // Daily manual counter of binge sessions
 }
 
 export interface Settings {

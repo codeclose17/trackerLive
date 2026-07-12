@@ -136,10 +136,18 @@ import { Category, DayRecord } from '../../types';
             [ngModel]="getSelectedNotes()"
             (ngModelChange)="onNotesChange($event)"
           ></textarea>
-          <div class="notes-tip">
-            <!-- Sparkles SVG -->
-            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: var(--accent-color);"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275Z"/><path d="m5 3 1 2.5L8.5 6 6 7 5 9.5 4 7 1.5 6 4 5.5Z"/><path d="m19 17 1 2.5 2.5.5-2.5 1-1 2.5-1-2.5-2.5-1 2.5-1Z"/></svg>
-            <span>Reflecting on your hours helps combat distraction and strengthens focus patterns.</span>
+          <!-- Binge Count Section instead of tip -->
+          <div class="binge-count-section">
+            <span class="binge-label">
+              <!-- AlertCircle SVG -->
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="color: var(--accent-color);"><circle cx="12" cy="12" r="10"/><line x1="12" x2="12" y1="8" y2="12"/><line x1="12" x2="12.01" y1="16" y2="16"/></svg>
+              Daily Binge Count:
+            </span>
+            <div class="binge-counter">
+              <button class="btn btn-secondary btn-icon btn-sm-square" (click)="adjustBingeCount(-1)" [disabled]="isRowLocked(selectedDate)">-</button>
+              <span class="binge-value">{{ getSelectedBingeCount() }}</span>
+              <button class="btn btn-secondary btn-icon btn-sm-square" (click)="adjustBingeCount(1)" [disabled]="isRowLocked(selectedDate)">+</button>
+            </div>
           </div>
         </div>
       </div>
@@ -156,6 +164,7 @@ export class TrackerGridComponent {
   @Output() paintCell = new EventEmitter<{ date: string; hourIndex: number; categoryId: string }>();
   @Output() selectDate = new EventEmitter<string>();
   @Output() updateNotes = new EventEmitter<{ date: string; notes: string }>();
+  @Output() updateBingeCount = new EventEmitter<{ date: string; count: number }>();
 
   hoursArray = Array(24).fill(0);
   lockedDates: Record<string, boolean> = {};
@@ -263,6 +272,18 @@ export class TrackerGridComponent {
 
   onNotesChange(newNotes: string): void {
     this.updateNotes.emit({ date: this.selectedDate, notes: newNotes });
+  }
+
+  getSelectedBingeCount(): number {
+    const record = this.records[this.selectedDate];
+    return record && record.bingeCount ? record.bingeCount : 0;
+  }
+
+  adjustBingeCount(amount: number): void {
+    if (this.isRowLocked(this.selectedDate)) return;
+    const current = this.getSelectedBingeCount();
+    const newCount = Math.max(0, current + amount);
+    this.updateBingeCount.emit({ date: this.selectedDate, count: newCount });
   }
 
   // Selected Day Stats helpers

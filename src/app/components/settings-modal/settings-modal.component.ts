@@ -213,8 +213,12 @@ create table if not exists public.tracker_records (
   date text primary key,
   hours text[] not null,
   notes text default '',
+  binge_count integer default 0,
   updated_at timestamp with time zone default timezone('utc'::text, now()) not null
 );
+
+-- Note: For existing databases, run this individually to add the new column:
+-- alter table public.tracker_records add column if not exists binge_count integer default 0;
 
 create table if not exists public.tracker_categories (
   id text primary key,

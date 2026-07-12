@@ -474,6 +474,32 @@ export class AppComponent implements OnInit, OnDestroy {
     this.queueSupabaseSync(date);
   }
 
+  // Update Binge Count
+  handleUpdateBingeCount(event: { date: string; count: number }): void {
+    const { date, count } = event;
+    const existingRecord = this.records[date] || {
+      date: date,
+      hours: Array(24).fill('idle'),
+      notes: '',
+      updatedAt: new Date().toISOString()
+    };
+
+    const updatedRecord: DayRecord = {
+      ...existingRecord,
+      bingeCount: count,
+      updatedAt: new Date().toISOString()
+    };
+
+    this.records = {
+      ...this.records,
+      [date]: updatedRecord
+    };
+    this.dbService.saveLocalRecords(this.records);
+
+    // Sync in background
+    this.queueSupabaseSync(date);
+  }
+
   // Save Settings Modal
   handleSaveSettings(newSyncSettings: {
     supabaseUrl: string;

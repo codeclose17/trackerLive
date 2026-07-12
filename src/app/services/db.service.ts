@@ -92,7 +92,8 @@ export class DbService {
       date: row.date,
       hours: row.hours,
       notes: row.notes || '',
-      updatedAt: row.updated_at
+      updatedAt: row.updated_at,
+      bingeCount: row.binge_count || 0
     }));
   }
 
@@ -111,6 +112,7 @@ export class DbService {
         date: record.date,
         hours: record.hours,
         notes: record.notes,
+        binge_count: record.bingeCount || 0,
         updated_at: new Date().toISOString()
       });
 
@@ -149,7 +151,8 @@ export class DbService {
               date: newRow['date'],
               hours: newRow['hours'],
               notes: newRow['notes'] || '',
-              updatedAt: newRow['updated_at']
+              updatedAt: newRow['updated_at'],
+              bingeCount: newRow['binge_count'] || 0
             });
           }
         }
