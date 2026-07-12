@@ -1,20 +1,43 @@
 <div class="container dashboard-layout">
-  <!-- 1. HEADER COMPONENT WITH PALETTE -->
-  <app-header
-    [dateRangeText]="getDateRangeText()"
-    [syncState]="syncState"
-    [isSyncEnabled]="settings.syncEnabled"
-    [categories]="settings.categories"
-    [activeCategoryId]="activeCategoryId"
-    (selectCategory)="activeCategoryId = $event"
-    (addCategory)="handleAddCategory($event)"
-    (updateCategory)="handleUpdateCategory($event)"
-    (deleteCategory)="handleDeleteCategory($event)"
-    (prevPeriod)="handlePrevPeriod()"
-    (nextPeriod)="handleNextPeriod()"
-    (resetPeriod)="handleResetPeriod()"
-    (openSettings)="isSettingsOpen = true"
-  ></app-header>
+  <!-- 1. MAIN DASHBOARD CONTENT AREA (AT THE VERY TOP) -->
+  <div class="dashboard-content">
+    <!-- VIEW A: TRACKER GRID TAB -->
+    <div *ngIf="activeTab === 'grid'" class="grid-tab-container">
+      <div class="grid-wrapper">
+        <app-tracker-grid
+          [dates]="dates"
+          [records]="records"
+          [categories]="settings.categories"
+          [activeCategoryId]="activeCategoryId"
+          [selectedDate]="selectedDate"
+          (paintCell)="handlePaintCell($event)"
+          (selectDate)="selectedDate = $event"
+          (updateNotes)="handleUpdateNotes($event)"
+        ></app-tracker-grid>
+      </div>
+
+      <!-- FLOATING PALETTE BAR -->
+      <div class="bottom-palette-bar">
+        <app-category-picker
+          [layout]="'inline'"
+          [categories]="settings.categories"
+          [activeCategoryId]="activeCategoryId"
+          (selectCategory)="activeCategoryId = $event"
+          (addCategory)="handleAddCategory($event)"
+          (updateCategory)="handleUpdateCategory($event)"
+          (deleteCategory)="handleDeleteCategory($event)"
+        ></app-category-picker>
+      </div>
+    </div>
+
+    <!-- VIEW B: STATS DASHBOARD TAB -->
+    <app-stats-dashboard
+      *ngIf="activeTab === 'stats'"
+      [dates]="dates"
+      [records]="records"
+      [categories]="settings.categories"
+    ></app-stats-dashboard>
+  </div>
 
   <!-- 2. TAB SELECTOR BAR -->
   <div class="tab-container">
@@ -30,29 +53,16 @@
     </button>
   </div>
 
-  <!-- 3. MAIN DASHBOARD CONTENT AREA -->
-  <div class="dashboard-content">
-    <!-- VIEW A: TRACKER GRID & RIGHT COLUMN DETAILS -->
-    <app-tracker-grid
-      *ngIf="activeTab === 'grid'"
-      [dates]="dates"
-      [records]="records"
-      [categories]="settings.categories"
-      [activeCategoryId]="activeCategoryId"
-      [selectedDate]="selectedDate"
-      (paintCell)="handlePaintCell($event)"
-      (selectDate)="selectedDate = $event"
-      (updateNotes)="handleUpdateNotes($event)"
-    ></app-tracker-grid>
-
-    <!-- VIEW B: STATS DASHBOARD -->
-    <app-stats-dashboard
-      *ngIf="activeTab === 'stats'"
-      [dates]="dates"
-      [records]="records"
-      [categories]="settings.categories"
-    ></app-stats-dashboard>
-  </div>
+  <!-- 3. COMPACT CONTROLS HEADER (NOW AT THE BOTTOM) -->
+  <app-header
+    [dateRangeText]="getDateRangeText()"
+    [syncState]="syncState"
+    [isSyncEnabled]="settings.syncEnabled"
+    (prevPeriod)="handlePrevPeriod()"
+    (nextPeriod)="handleNextPeriod()"
+    (resetPeriod)="handleResetPeriod()"
+    (openSettings)="isSettingsOpen = true"
+  ></app-header>
 
   <!-- 4. DATABASE SETTINGS MODAL -->
   <app-settings-modal

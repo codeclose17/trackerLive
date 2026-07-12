@@ -75,6 +75,7 @@ export class AppComponent implements OnInit, OnDestroy {
   syncState: SyncState = { status: 'idle' };
 
   private unsubscribeRealtime: () => void = () => {};
+  private syncTimers: Record<string, any> = {};
 
   constructor(private dbService: DbService) {}
 
@@ -199,6 +200,46 @@ export class AppComponent implements OnInit, OnDestroy {
     }
   }
 
+  // Debounced database sync queue
+  private queueSupabaseSync(date: string): void {
+    const { supabaseUrl, supabaseAnonKey, syncEnabled } = this.settings;
+    if (!syncEnabled || !supabaseUrl || !supabaseAnonKey) return;
+
+    this.syncState = { status: 'syncing' };
+
+    if (this.syncTimers[date]) {
+      clearTimeout(this.syncTimers[date]);
+    }
+
+    this.syncTimers[date] = setTimeout(() => {
+      this.syncRecordToSupabase(date);
+      delete this.syncTimers[date];
+    }, 750); // 750ms debounce window (ensures drag/typing is finished)
+  }
+
+  private syncRecordToSupabase(date: string): void {
+    const record = this.records[date];
+    if (!record) return;
+
+    const { supabaseUrl, supabaseAnonKey, syncEnabled } = this.settings;
+    if (!syncEnabled || !supabaseUrl || !supabaseAnonKey) return;
+
+    this.dbService.upsertRecord(supabaseUrl, supabaseAnonKey, record)
+      .then(() => {
+        this.syncState = {
+          status: 'success',
+          lastSyncedAt: new Date().toLocaleTimeString()
+        };
+      })
+      .catch((err) => {
+        console.error(`Failed to sync record for date ${date}:`, err);
+        this.syncState = {
+          status: 'error',
+          errorMessage: 'Failed to sync modifications.'
+        };
+      });
+  }
+
   // Paint a cell
   handlePaintCell(event: { date: string; hourIndex: number; categoryId: string }): void {
     const { date, hourIndex, categoryId } = event;
@@ -224,24 +265,8 @@ export class AppComponent implements OnInit, OnDestroy {
     };
     this.dbService.saveLocalRecords(this.records);
 
-    // Sync in background if configured
-    const { supabaseUrl, supabaseAnonKey, syncEnabled } = this.settings;
-    if (syncEnabled && supabaseUrl && supabaseAnonKey) {
-      this.dbService.upsertRecord(supabaseUrl, supabaseAnonKey, updatedRecord)
-        .then(() => {
-          this.syncState = {
-            status: 'success',
-            lastSyncedAt: new Date().toLocaleTimeString()
-          };
-        })
-        .catch((err) => {
-          console.error('Failed to sync changes:', err);
-          this.syncState = {
-            status: 'error',
-            errorMessage: 'Failed to sync modifications.'
-          };
-        });
-    }
+    // Debounce background sync to avoid concurrent write race conditions
+    this.queueSupabaseSync(date);
   }
 
   // Update Notes
@@ -266,24 +291,8 @@ export class AppComponent implements OnInit, OnDestroy {
     };
     this.dbService.saveLocalRecords(this.records);
 
-    // Sync in background if configured
-    const { supabaseUrl, supabaseAnonKey, syncEnabled } = this.settings;
-    if (syncEnabled && supabaseUrl && supabaseAnonKey) {
-      this.dbService.upsertRecord(supabaseUrl, supabaseAnonKey, updatedRecord)
-        .then(() => {
-          this.syncState = {
-            status: 'success',
-            lastSyncedAt: new Date().toLocaleTimeString()
-          };
-        })
-        .catch((err) => {
-          console.error('Failed to sync notes:', err);
-          this.syncState = {
-            status: 'error',
-            errorMessage: 'Failed to sync reflections.'
-          };
-        });
-    }
+    // Debounce background sync to avoid keystroke race conditions
+    this.queueSupabaseSync(date);
   }
 
   // Save Settings Modal

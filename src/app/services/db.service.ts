@@ -16,16 +16,18 @@ export class DbService {
 
   // Initialize and get the Supabase client
   getSupabaseClient(url: string, anonKey: string): SupabaseClient | null {
-    if (!url || !anonKey) return null;
+    const trimmedUrl = (url || '').trim();
+    const trimmedKey = (anonKey || '').trim();
+    if (!trimmedUrl || !trimmedKey) return null;
 
-    if (!this.supabaseInstance || this.currentSupabaseUrl !== url) {
+    if (!this.supabaseInstance || this.currentSupabaseUrl !== trimmedUrl) {
       try {
-        this.supabaseInstance = createClient(url, anonKey, {
+        this.supabaseInstance = createClient(trimmedUrl, trimmedKey, {
           auth: {
             persistSession: false
           }
         });
-        this.currentSupabaseUrl = url;
+        this.currentSupabaseUrl = trimmedUrl;
       } catch (e) {
         console.error('Failed to initialize Supabase client:', e);
         this.supabaseInstance = null;
@@ -44,7 +46,7 @@ export class DbService {
       const { error } = await client.from('tracker_records').select('date').limit(1);
       if (error) {
         if (error.code === 'PGRST116' || error.message.includes('does not exist')) {
-          return true; // Connection OK, table not set up yet
+          return true; 
         }
         console.error('Database connection test failed:', error);
         return false;

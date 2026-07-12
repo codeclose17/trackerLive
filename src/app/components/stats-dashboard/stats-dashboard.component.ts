@@ -69,7 +69,7 @@ interface Insight {
         </div>
       </div>
 
-      <!-- CARD 3: ADHD INSIGHTS -->
+      <!-- CARD 3: FOCUS INSIGHTS -->
       <div class="stats-card card insight-card" [ngClass]="insight.type">
         <div class="card-header-icon">
           <!-- Award SVG (Success) -->
@@ -86,7 +86,7 @@ interface Insight {
         </div>
         
         <div class="insight-footer">
-          * ADHD tip: Consistency is better than perfection. Just checking in daily strengthens visual memory.
+          * Focus Insight: Consistency is better than perfection. Just checking in daily strengthens cognitive routing and visual memory.
         </div>
       </div>
     </div>
@@ -166,7 +166,7 @@ export class StatsDashboardComponent implements OnChanges {
       return {
         type: 'warning',
         title: 'Prioritize Sleep',
-        message: `Your sleep is averaging ${sleepAvg}h. Sleep deprivation significantly reduces focus, especially for ADHD brains. Try setting a "wind down" alarm at 10 PM.`
+        message: `Your sleep is averaging ${sleepAvg}h. Sleep deprivation blocks dopamine receptor replenishment, drastically reducing attention span and impulse control. Try setting a "wind down" alarm at 10 PM.`
       };
     }
 
@@ -190,14 +190,14 @@ export class StatsDashboardComponent implements OnChanges {
       return {
         type: 'warning',
         title: 'Prevent Burnout',
-        message: `You are averaging ${workAvg}h/day on work. To keep your dopamine levels healthy, make sure to schedule small breaks and schedule 30 mins of physical activity.`
+        message: `You are averaging ${workAvg}h/day on work. Excessive hyperfocus blocks cognitive shifting, leading to mental fatigue and executive dysfunction. Make sure to schedule micro-breaks to reset your focus routing.`
       };
     }
 
     return {
       type: 'success',
       title: 'Healthy Rhythm',
-      message: 'You are maintaining a balanced breakdown. A steady division of labor, learning, and sleep is key to maintaining dopamine levels.'
+      message: 'You are maintaining a balanced breakdown. A steady division of labor, learning, and sleep stabilizes dopamine baseline levels, helping you prevent task paralysis.'
     };
   }
 }

@@ -24,6 +24,8 @@ import { Category, DayRecord } from '../../types';
               {{ i.toString().padStart(2, '0') }}
             </div>
           </div>
+          <!-- Right Spacer for Lock Button -->
+          <div style="width: 36px; flex-shrink: 0;"></div>
         </div>
 
         <div class="grid-rows-container">
@@ -60,6 +62,19 @@ import { Category, DayRecord } from '../../types';
                 [title]="getHourRangeText(hIdx) + ': ' + getCellName(catId) + ' (Shift + Drag or Double click to clear)'"
               ></div>
             </div>
+
+            <!-- Lock / Unlock Button -->
+            <button
+              class="row-lock-btn"
+              [class.locked]="isRowLocked(dateStr)"
+              (click)="toggleRowLock(dateStr, $event)"
+              [title]="isRowLocked(dateStr) ? 'Unlock row for editing' : 'Lock row to prevent changes'"
+            >
+              <!-- Locked Icon SVG -->
+              <svg *ngIf="isRowLocked(dateStr)" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+              <!-- Unlocked Icon SVG -->
+              <svg *ngIf="!isRowLocked(dateStr)" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 10V7a5 5 0 0 1 9.9-1"/></svg>
+            </button>
           </div>
         </div>
       </div>
@@ -122,7 +137,7 @@ import { Category, DayRecord } from '../../types';
           <div class="notes-tip">
             <!-- Sparkles SVG -->
             <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: var(--accent-color);"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275Z"/><path d="m5 3 1 2.5L8.5 6 6 7 5 9.5 4 7 1.5 6 4 5.5Z"/><path d="m19 17 1 2.5 2.5.5-2.5 1-1 2.5-1-2.5-2.5-1 2.5-1Z"/></svg>
-            <span>Reflecting on your hours helps combat ADHD distraction patterns.</span>
+            <span>Reflecting on your hours helps combat distraction and strengthens focus patterns.</span>
           </div>
         </div>
       </div>
@@ -141,6 +156,7 @@ export class TrackerGridComponent {
   @Output() updateNotes = new EventEmitter<{ date: string; notes: string }>();
 
   hoursArray = Array(24).fill(0);
+  lockedDates: Record<string, boolean> = {};
   private isMouseDown = false;
 
   @HostListener('window:mouseup')
@@ -197,7 +213,21 @@ export class TrackerGridComponent {
     return cat ? cat.name : 'Idle / Uncategorized';
   }
 
+  isRowLocked(dateStr: string): boolean {
+    if (this.lockedDates[dateStr] !== undefined) {
+      return this.lockedDates[dateStr];
+    }
+    // Default today to UNLOCKED, past/future dates to LOCKED
+    return !this.isToday(dateStr);
+  }
+
+  toggleRowLock(dateStr: string, event: Event): void {
+    event.stopPropagation(); // Prevent row selection trigger
+    this.lockedDates[dateStr] = !this.isRowLocked(dateStr);
+  }
+
   handleCellMouseDown(dateStr: string, hourIndex: number, event: MouseEvent): void {
+    if (this.isRowLocked(dateStr)) return;
     this.isMouseDown = true;
     this.selectDate.emit(dateStr);
     const paintColor = event.shiftKey ? 'idle' : this.activeCategoryId;
@@ -205,6 +235,7 @@ export class TrackerGridComponent {
   }
 
   handleCellMouseEnter(dateStr: string, hourIndex: number, event: MouseEvent): void {
+    if (this.isRowLocked(dateStr)) return;
     if (this.isMouseDown) {
       const paintColor = event.shiftKey ? 'idle' : this.activeCategoryId;
       this.paintCell.emit({ date: dateStr, hourIndex, categoryId: paintColor });
@@ -212,6 +243,7 @@ export class TrackerGridComponent {
   }
 
   handleCellDoubleClick(dateStr: string, hourIndex: number): void {
+    if (this.isRowLocked(dateStr)) return;
     this.paintCell.emit({ date: dateStr, hourIndex, categoryId: 'idle' });
   }
 

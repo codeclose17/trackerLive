@@ -1,37 +1,14 @@
 import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Category, SyncState } from '../../types';
-import { CategoryPickerComponent } from '../category-picker/category-picker.component';
+import { SyncState } from '../../types';
 
 @Component({
   selector: 'app-header',
   standalone: true,
-  imports: [CommonModule, CategoryPickerComponent],
+  imports: [CommonModule],
   template: `
     <header class="header-container">
-      <!-- 1. LOGO -->
-      <div class="header-logo">
-        <div class="logo-icon">⏳</div>
-        <div>
-          <h1>ChronoBox</h1>
-          <p class="subtitle">Your 14-Day 24-Hour Life Tracker</p>
-        </div>
-      </div>
-
-      <!-- 2. DYNAMIC COLOR PALETTE IN THE MIDDLE -->
-      <div class="header-palette">
-        <app-category-picker
-          [layout]="'inline'"
-          [categories]="categories"
-          [activeCategoryId]="activeCategoryId"
-          (selectCategory)="selectCategory.emit($event)"
-          (addCategory)="addCategory.emit($event)"
-          (updateCategory)="updateCategory.emit($event)"
-          (deleteCategory)="deleteCategory.emit($event)"
-        ></app-category-picker>
-      </div>
-
-      <!-- 3. ACTIONS & NAVIGATION -->
+      <!-- 1. ACTIONS & NAVIGATION (LEFT) -->
       <div class="header-controls">
         <div class="period-navigator">
           <button class="btn btn-secondary btn-icon" (click)="prevPeriod.emit()" title="Previous 14 Days">
@@ -81,6 +58,15 @@ import { CategoryPickerComponent } from '../category-picker/category-picker.comp
           <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.1a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>
         </button>
       </div>
+
+      <!-- 2. LOGO (RIGHT) -->
+      <div class="header-logo">
+        <div>
+          <h1>ChronoBox</h1>
+          <p class="subtitle">14-Day 24-Hour Life Tracker</p>
+        </div>
+        <div class="logo-icon">⏳</div>
+      </div>
     </header>
   `
 })
@@ -88,17 +74,9 @@ export class HeaderComponent {
   @Input() dateRangeText = '';
   @Input() syncState: SyncState = { status: 'idle' };
   @Input() isSyncEnabled = false;
-  
-  @Input() categories: Category[] = [];
-  @Input() activeCategoryId = '';
 
   @Output() prevPeriod = new EventEmitter<void>();
   @Output() nextPeriod = new EventEmitter<void>();
   @Output() resetPeriod = new EventEmitter<void>();
   @Output() openSettings = new EventEmitter<void>();
-
-  @Output() selectCategory = new EventEmitter<string>();
-  @Output() addCategory = new EventEmitter<Category>();
-  @Output() updateCategory = new EventEmitter<Category>();
-  @Output() deleteCategory = new EventEmitter<string>();
 }
