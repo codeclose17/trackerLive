@@ -38,6 +38,218 @@
   --color-idle: #27272a; /* Dark Gray */
 }
 
+/* Theme Styles & Mode Overrides */
+
+/* --- 0. COSMIC ECLIPSE (DEFAULT) --- */
+html[data-theme="cosmic"][data-dark-mode="false"] {
+  --bg-primary: #f6f8fa;
+  --bg-secondary: #ffffff;
+  --bg-tertiary: #edf2f7;
+  --border-color: #d2d6dc;
+  --border-hover: #b2b6bc;
+  --text-primary: #0f172a;
+  --text-secondary: #475569;
+  --text-tertiary: #64748b;
+  --text-muted: #94a3b8;
+  --shadow-sm: 0 2px 8px rgba(0,0,0,0.06);
+  --shadow-md: 0 10px 30px rgba(0,0,0,0.08);
+  --shadow-lg: 0 20px 50px rgba(0,0,0,0.12);
+  --accent-color: #a855f7;
+  --accent-glow: rgba(168, 85, 247, 0.1);
+}
+
+html[data-theme="cosmic"][data-dark-mode="true"] {
+  --bg-primary: #0b0b0d;
+  --bg-secondary: #131316;
+  --bg-tertiary: #1b1b1f;
+  --border-color: #242429;
+  --border-hover: #33333b;
+  --text-primary: #f5f5f7;
+  --text-secondary: #86868b;
+  --text-tertiary: #515154;
+  --text-muted: #3d3d40;
+  --shadow-sm: 0 2px 8px rgba(0,0,0,0.5);
+  --shadow-md: 0 10px 30px rgba(0,0,0,0.6);
+  --shadow-lg: 0 20px 50px rgba(0,0,0,0.8);
+  --accent-color: #a855f7;
+  --accent-glow: rgba(168, 85, 247, 0.15);
+}
+
+/* --- 1. COTTON CANDY SKIES --- */
+html[data-theme="cotton"][data-dark-mode="false"] {
+  --bg-primary: #fdf5f8;
+  --bg-secondary: #ffffff;
+  --bg-tertiary: #f4ebf7;
+  --border-color: #ebd3e0;
+  --border-hover: #d2a3c1;
+  --text-primary: #2d1826;
+  --text-secondary: #6e4e64;
+  --text-tertiary: #a07d95;
+  --text-muted: #caa6be;
+  --shadow-sm: 0 2px 8px rgba(220,160,195,0.08);
+  --shadow-md: 0 10px 30px rgba(220,160,195,0.1);
+  --shadow-lg: 0 20px 50px rgba(220,160,195,0.15);
+  --accent-color: #B298E7;
+  --accent-glow: rgba(178, 152, 231, 0.15);
+}
+
+html[data-theme="cotton"][data-dark-mode="true"] {
+  --bg-primary: #120e18;
+  --bg-secondary: #171220;
+  --bg-tertiary: #201a2d;
+  --border-color: #2b233a;
+  --border-hover: #3d3253;
+  --text-primary: #f1ebfa;
+  --text-secondary: #a698be;
+  --text-tertiary: #786b8f;
+  --text-muted: #534866;
+  --shadow-sm: 0 2px 8px rgba(0,0,0,0.5);
+  --shadow-md: 0 10px 30px rgba(0,0,0,0.6);
+  --shadow-lg: 0 20px 50px rgba(0,0,0,0.8);
+  --accent-color: #B298E7;
+  --accent-glow: rgba(178, 152, 231, 0.2);
+}
+
+/* --- 2. INK WASH --- */
+html[data-theme="ink"][data-dark-mode="false"] {
+  --bg-primary: #ffffe3;
+  --bg-secondary: #ffffff;
+  --bg-tertiary: #f4f4eb;
+  --border-color: #cbcbcb;
+  --border-hover: #a0a0a0;
+  --text-primary: #2d2d2d;
+  --text-secondary: #4a4a4a;
+  --text-tertiary: #787878;
+  --text-muted: #aaaaaa;
+  --shadow-sm: 0 2px 8px rgba(0,0,0,0.05);
+  --shadow-md: 0 10px 30px rgba(0,0,0,0.07);
+  --shadow-lg: 0 20px 50px rgba(0,0,0,0.1);
+  --accent-color: #6D8196;
+  --accent-glow: rgba(109, 129, 150, 0.15);
+}
+
+html[data-theme="ink"][data-dark-mode="true"] {
+  --bg-primary: #1c1d1f;
+  --bg-secondary: #242528;
+  --bg-tertiary: #2e3034;
+  --border-color: #3e4044;
+  --border-hover: #4e5056;
+  --text-primary: #f0f0f2;
+  --text-secondary: #cbcbcb;
+  --text-tertiary: #929396;
+  --text-muted: #5e5f62;
+  --shadow-sm: 0 2px 8px rgba(0,0,0,0.5);
+  --shadow-md: 0 10px 30px rgba(0,0,0,0.6);
+  --shadow-lg: 0 20px 50px rgba(0,0,0,0.8);
+  --accent-color: #6D8196;
+  --accent-glow: rgba(109, 129, 150, 0.25);
+}
+
+/* --- 3. SPICED CHAI --- */
+html[data-theme="chai"][data-dark-mode="false"] {
+  --bg-primary: #fdfbd4;
+  --bg-secondary: #ffffff;
+  --bg-tertiary: #f5edd0;
+  --border-color: #e6d3af;
+  --border-hover: #d2b588;
+  --text-primary: #3d230b;
+  --text-secondary: #6b4321;
+  --text-tertiary: #9c6c44;
+  --text-muted: #caa685;
+  --shadow-sm: 0 2px 8px rgba(139,90,43,0.06);
+  --shadow-md: 0 10px 30px rgba(139,90,43,0.08);
+  --shadow-lg: 0 20px 50px rgba(139,90,43,0.12);
+  --accent-color: #D47E30;
+  --accent-glow: rgba(212, 126, 48, 0.15);
+}
+
+html[data-theme="chai"][data-dark-mode="true"] {
+  --bg-primary: #150f09;
+  --bg-secondary: #1d160f;
+  --bg-tertiary: #2a1f16;
+  --border-color: #3f2f21;
+  --border-hover: #5e4632;
+  --text-primary: #f6efe9;
+  --text-secondary: #cbb8a7;
+  --text-tertiary: #9b8777;
+  --text-muted: #64564c;
+  --shadow-sm: 0 2px 8px rgba(0,0,0,0.5);
+  --shadow-md: 0 10px 30px rgba(0,0,0,0.6);
+  --shadow-lg: 0 20px 50px rgba(0,0,0,0.8);
+  --accent-color: #D47E30;
+  --accent-glow: rgba(212, 126, 48, 0.25);
+}
+
+/* --- 4. EMERALD ODYSSEY --- */
+html[data-theme="emerald"][data-dark-mode="false"] {
+  --bg-primary: #f2fbf7;
+  --bg-secondary: #ffffff;
+  --bg-tertiary: #e3f5ed;
+  --border-color: #c9ebd9;
+  --border-hover: #a1d7b9;
+  --text-primary: #003628;
+  --text-secondary: #005a45;
+  --text-tertiary: #3ebb9e;
+  --text-muted: #72cca6;
+  --shadow-sm: 0 2px 8px rgba(0,103,79,0.06);
+  --shadow-md: 0 10px 30px rgba(0,103,79,0.08);
+  --shadow-lg: 0 20px 50px rgba(0,103,79,0.12);
+  --accent-color: #00674F;
+  --accent-glow: rgba(0, 103, 79, 0.15);
+}
+
+html[data-theme="emerald"][data-dark-mode="true"] {
+  --bg-primary: #041411;
+  --bg-secondary: #081d19;
+  --bg-tertiary: #0e2a24;
+  --border-color: #173b33;
+  --border-hover: #23544a;
+  --text-primary: #f0fbf7;
+  --text-secondary: #73e6cb;
+  --text-tertiary: #3ebb9e;
+  --text-muted: #1c5244;
+  --shadow-sm: 0 2px 8px rgba(0,0,0,0.5);
+  --shadow-md: 0 10px 30px rgba(0,0,0,0.6);
+  --shadow-lg: 0 20px 50px rgba(0,0,0,0.8);
+  --accent-color: #73E6CB;
+  --accent-glow: rgba(115, 230, 203, 0.2);
+}
+
+/* --- 5. LOVE NOTES --- */
+html[data-theme="love"][data-dark-mode="false"] {
+  --bg-primary: #faf6f8;
+  --bg-secondary: #ffffff;
+  --bg-tertiary: #f2e7ef;
+  --border-color: #e5cedd;
+  --border-hover: #cb9ebe;
+  --text-primary: #380d22;
+  --text-secondary: #7c2452;
+  --text-tertiary: #b36b94;
+  --text-muted: #d99cbe;
+  --shadow-sm: 0 2px 8px rgba(241,114,161,0.06);
+  --shadow-md: 0 10px 30px rgba(241,114,161,0.08);
+  --shadow-lg: 0 20px 50px rgba(241,114,161,0.12);
+  --accent-color: #F172A1;
+  --accent-glow: rgba(241, 114, 161, 0.15);
+}
+
+html[data-theme="love"][data-dark-mode="true"] {
+  --bg-primary: #160c14;
+  --bg-secondary: #1e111d;
+  --bg-tertiary: #2b1929;
+  --border-color: #3e263d;
+  --border-hover: #583756;
+  --text-primary: #fef0f7;
+  --text-secondary: #f172a1;
+  --text-tertiary: #b39bc8;
+  --text-muted: #7c5f92;
+  --shadow-sm: 0 2px 8px rgba(0,0,0,0.5);
+  --shadow-md: 0 10px 30px rgba(0,0,0,0.6);
+  --shadow-lg: 0 20px 50px rgba(0,0,0,0.8);
+  --accent-color: #E64398;
+  --accent-glow: rgba(230, 67, 152, 0.2);
+}
+
 /* Reset & Core Styles */
 * {
   box-sizing: border-box;
@@ -1713,6 +1925,92 @@ app-tracker-grid, app-stats-dashboard, app-daily-glance {
 .reflection-text.empty {
   color: var(--text-tertiary);
   font-style: italic;
+}
+
+/* Theme Selector dropdown menu styles */
+.theme-selector-container {
+  position: relative;
+  display: inline-flex;
+}
+
+.theme-dropdown-menu {
+  position: absolute;
+  bottom: calc(100% + 12px); /* Opens upwards */
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 200;
+  width: 240px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  box-shadow: var(--shadow-lg);
+  padding: 1rem;
+  border-radius: var(--border-radius-lg);
+  animation: slideUp 0.15s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.theme-dropdown-menu h4 {
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-secondary);
+  margin-bottom: 0.75rem;
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 0.35rem;
+  font-weight: 600;
+}
+
+.theme-options-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.theme-option-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+  border-radius: var(--border-radius-md);
+  background: transparent;
+  border: 1px solid transparent;
+  color: var(--text-primary);
+  font-family: var(--font-sans);
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  text-align: left;
+}
+
+.theme-option-btn:hover {
+  background: var(--bg-tertiary);
+  border-color: var(--border-color);
+}
+
+.theme-option-btn.active {
+  background: var(--accent-glow);
+  border-color: var(--accent-color);
+}
+
+.theme-option-preview {
+  display: inline-flex;
+  gap: 2px;
+  background: rgba(0, 0, 0, 0.15);
+  padding: 2px;
+  border-radius: 4px;
+  border: 1px solid var(--border-color);
+}
+
+.preview-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.theme-option-name {
+  font-size: 0.8rem;
 }
 
 

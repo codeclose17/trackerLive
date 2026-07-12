@@ -60,6 +60,18 @@ const generateDateRange = (startDate: Date): string[] => {
 export class AppComponent implements OnInit, OnDestroy {
   startDate: Date = getStartOfWeekSunday(new Date());
   dates: string[] = generateDateRange(this.startDate);
+  currentTheme = 'cosmic';
+  isDarkMode = true;
+
+  themesList = [
+    { id: 'cosmic', name: 'Cosmic Eclipse', colors: ['#a855f7'] },
+    { id: 'cotton', name: 'Cotton Candy Skies', colors: ['#B298E7', '#B8E3E9', '#F5B8D5'] },
+    { id: 'ink', name: 'Ink Wash', colors: ['#4A4A4A', '#CBCBCB', '#FFFFE3', '#6D8196'] },
+    { id: 'chai', name: 'Spiced Chai', colors: ['#FDFBD4', '#D47E30', '#8D5A2B'] },
+    { id: 'emerald', name: 'Emerald Odyssey', colors: ['#00674F', '#73E6CB', '#3EBB9E'] },
+    { id: 'love', name: 'Love Notes', colors: ['#E64398', '#F172A1', '#B39BC8', '#A1C3D1'] }
+  ];
+
   records: Record<string, DayRecord> = {};
   
   settings: Settings = {
@@ -86,6 +98,13 @@ export class AppComponent implements OnInit, OnDestroy {
     this.settings = this.dbService.getLocalSettings(DEFAULT_CATEGORIES);
     this.records = this.dbService.getLocalRecords();
     
+    // Load theme settings
+    const savedTheme = localStorage.getItem('box_tracker_theme') || 'cosmic';
+    const savedDarkMode = localStorage.getItem('box_tracker_dark_mode') !== 'false';
+    this.currentTheme = savedTheme;
+    this.isDarkMode = savedDarkMode;
+    this.applyTheme();
+
     // Apply categories as CSS variables
     this.applyCssVariables();
 
@@ -103,6 +122,23 @@ export class AppComponent implements OnInit, OnDestroy {
     this.settings.categories.forEach((cat) => {
       document.documentElement.style.setProperty(`--color-${cat.id}`, cat.color);
     });
+  }
+
+  applyTheme(): void {
+    document.documentElement.setAttribute('data-theme', this.currentTheme);
+    document.documentElement.setAttribute('data-dark-mode', this.isDarkMode ? 'true' : 'false');
+    localStorage.setItem('box_tracker_theme', this.currentTheme);
+    localStorage.setItem('box_tracker_dark_mode', this.isDarkMode ? 'true' : 'false');
+  }
+
+  selectTheme(themeId: string): void {
+    this.currentTheme = themeId;
+    this.applyTheme();
+  }
+
+  toggleDarkMode(): void {
+    this.isDarkMode = !this.isDarkMode;
+    this.applyTheme();
   }
 
   private async initSync(): Promise<void> {
