@@ -76,7 +76,7 @@ import { Category, DayRecord } from '../../types';
             <div class="detail-binge-section">
               <h5>Binge Sessions</h5>
               <div class="detail-binge-value">
-                <span class="emoji">🔥</span>
+                <span class="emoji">⚠️</span>
                 <span class="value">{{ getBingeCount(selectedGlanceDate) }}</span>
                 <span class="lbl">{{ getBingeCount(selectedGlanceDate) === 1 ? 'session' : 'sessions' }} logged today</span>
               </div>
@@ -110,7 +110,7 @@ import { Category, DayRecord } from '../../types';
                   <span class="date-short">{{ getFormattedDate(dateStr) }}</span>
                 </div>
                 <div class="card-badges-container">
-                  <span *ngIf="getBingeCount(dateStr) > 0" class="binge-pill">🔥 {{ getBingeCount(dateStr) }}</span>
+                  <span *ngIf="getBingeCount(dateStr) > 0" class="binge-pill">⚠️ {{ getBingeCount(dateStr) }}</span>
                   <span *ngIf="isToday(dateStr)" class="today-badge">Today</span>
                 </div>
               </div>

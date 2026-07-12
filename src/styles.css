@@ -1139,8 +1139,8 @@ a:hover {
   font-weight: 600;
   min-width: 20px;
   text-align: center;
-  color: var(--accent-color);
-  text-shadow: 0 0 8px var(--accent-glow);
+  color: #f43f5e;
+  text-shadow: 0 0 8px rgba(244, 63, 94, 0.2);
 }
 
 /* 5. Metrics & Analysis Dashboard Grid */
@@ -2322,9 +2322,9 @@ app-tracker-grid, app-stats-dashboard, app-daily-glance {
 .binge-pill {
   font-size: 0.7rem;
   font-weight: 600;
-  color: var(--accent-color);
-  background: var(--accent-glow);
-  border: 1px solid rgba(168, 85, 247, 0.25);
+  color: #f43f5e;
+  background: rgba(244, 63, 94, 0.08);
+  border: 1px solid rgba(244, 63, 94, 0.25);
   padding: 2px 6px;
   border-radius: 4px;
   display: inline-flex;
@@ -2350,8 +2350,8 @@ app-tracker-grid, app-stats-dashboard, app-daily-glance {
 .detail-binge-value .value {
   font-size: 1.1rem;
   font-weight: 700;
-  color: var(--accent-color);
-  text-shadow: 0 0 8px var(--accent-glow);
+  color: #f43f5e;
+  text-shadow: 0 0 8px rgba(244, 63, 94, 0.2);
 }
 
 
