@@ -5,6 +5,7 @@ import { CategoryPickerComponent } from './components/category-picker/category-p
 import { TrackerGridComponent } from './components/tracker-grid/tracker-grid.component';
 import { StatsDashboardComponent } from './components/stats-dashboard/stats-dashboard.component';
 import { SettingsModalComponent } from './components/settings-modal/settings-modal.component';
+import { DailyGlanceComponent } from './components/daily-glance/daily-glance.component';
 import { Category, DayRecord, Settings, SyncState } from './types';
 import { DbService } from './services/db.service';
 
@@ -50,7 +51,8 @@ const generateDateRange = (startDate: Date): string[] => {
     CategoryPickerComponent,
     TrackerGridComponent,
     StatsDashboardComponent,
-    SettingsModalComponent
+    SettingsModalComponent,
+    DailyGlanceComponent
   ],
   templateUrl: './app.component.html',
   styleUrl: './app.component.css'
@@ -70,7 +72,7 @@ export class AppComponent implements OnInit, OnDestroy {
   activeCategoryId = 'work';
   selectedDate: string = getLocalDateString(new Date());
   
-  activeTab: 'grid' | 'stats' = 'grid';
+  activeTab: 'grid' | 'stats' | 'glance' = 'grid';
   isSettingsOpen = false;
   syncState: SyncState = { status: 'idle' };
 
@@ -458,5 +460,10 @@ export class AppComponent implements OnInit, OnDestroy {
     const endYear = end.getFullYear();
 
     return `${startStr} – ${endStr}, ${endYear}`;
+  }
+
+  handleSelectDateAndTab(event: { date: string; tab: 'grid' | 'stats' | 'glance' }): void {
+    this.selectedDate = event.date;
+    this.activeTab = event.tab;
   }
 }
