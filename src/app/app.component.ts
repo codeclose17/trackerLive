@@ -97,6 +97,12 @@ export class AppComponent implements OnInit, OnDestroy {
     // Load local settings & records
     this.settings = this.dbService.getLocalSettings(DEFAULT_CATEGORIES);
     this.records = this.dbService.getLocalRecords();
+
+    // Auto-enable sync if keys exist in localStorage but sync is disabled
+    if (this.settings.supabaseUrl && this.settings.supabaseAnonKey && !this.settings.syncEnabled) {
+      this.settings.syncEnabled = true;
+      this.dbService.saveLocalSettings(this.settings);
+    }
     
     // Load theme settings
     const savedTheme = localStorage.getItem('box_tracker_theme') || 'cosmic';
