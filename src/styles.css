@@ -670,7 +670,7 @@ a:hover {
 }
 
 .date-spacer {
-  width: 140px;
+  width: 178px;
   flex-shrink: 0;
   font-size: 0.75rem;
   font-weight: 600;
@@ -728,12 +728,13 @@ a:hover {
 }
 
 .row-date-label {
-  width: 130px;
+  width: 170px;
   display: flex;
   align-items: center;
   gap: 0.5rem;
   flex-shrink: 0;
   font-size: 0.9rem;
+  white-space: nowrap;
 }
 
 .day-name {
