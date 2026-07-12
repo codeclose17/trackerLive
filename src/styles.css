@@ -990,6 +990,9 @@ a:hover {
   border: 1px solid rgba(0,0,0,0.2);
   position: relative;
   user-select: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .hour-box:hover {
@@ -1000,6 +1003,16 @@ a:hover {
 
 .hour-box.filled {
   border: none;
+}
+
+.cell-hour-number {
+  font-size: 0.65rem;
+  font-weight: 500;
+  font-family: var(--font-sans);
+  pointer-events: none;
+  user-select: none;
+  color: var(--text-primary);
+  opacity: 0.12; /* Very lightly! */
 }
 
 /* Day Details Panel */

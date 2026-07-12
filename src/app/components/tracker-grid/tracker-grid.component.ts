@@ -60,7 +60,9 @@ import { Category, DayRecord } from '../../types';
                 (mouseenter)="handleCellMouseEnter(dateStr, hIdx, $event)"
                 (dblclick)="handleCellDoubleClick(dateStr, hIdx)"
                 [title]="getHourRangeText(hIdx) + ': ' + getCellName(catId) + ' (Shift + Drag or Double click to clear)'"
-              ></div>
+              >
+                <span class="cell-hour-number">{{ hIdx }}</span>
+              </div>
             </div>
 
             <!-- Lock / Unlock Button -->
