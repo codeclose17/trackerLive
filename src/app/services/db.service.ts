@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
-import { Category, DayRecord } from '../types';
+import { Category, DayRecord, SyncLog } from '../types';
 
 @Injectable({
   providedIn: 'root'
@@ -11,6 +11,8 @@ export class DbService {
 
   private readonly LOCAL_STORAGE_RECORDS_KEY = 'box_tracker_records';
   private readonly LOCAL_STORAGE_SETTINGS_KEY = 'box_tracker_settings';
+
+  public logCallback: (msg: string, type: 'info' | 'success' | 'error') => void = () => {};
 
   constructor() {}
 
@@ -39,20 +41,28 @@ export class DbService {
 
   // Test database connection
   async testConnection(url: string, anonKey: string): Promise<boolean> {
+    this.logCallback('Testing connection to Supabase...', 'info');
     const client = this.getSupabaseClient(url, anonKey);
-    if (!client) return false;
+    if (!client) {
+      this.logCallback('Supabase client failed to initialize during test', 'error');
+      return false;
+    }
 
     try {
       const { error } = await client.from('tracker_records').select('date').limit(1);
       if (error) {
         if (error.code === 'PGRST116' || error.message.includes('does not exist')) {
+          this.logCallback('Connection test successful (table empty/not found, but connected)', 'success');
           return true; 
         }
+        this.logCallback(`Connection test failed: ${error.message}`, 'error');
         console.error('Database connection test failed:', error);
         return false;
       }
+      this.logCallback('Connection test successful', 'success');
       return true;
-    } catch (e) {
+    } catch (e: any) {
+      this.logCallback(`Connection test threw error: ${e.message || e}`, 'error');
       console.error('Connection check threw error:', e);
       return false;
     }
@@ -60,8 +70,12 @@ export class DbService {
 
   // Fetch all records from Supabase
   async fetchRecords(url: string, anonKey: string): Promise<DayRecord[]> {
+    this.logCallback('Fetching records from Supabase...', 'info');
     const client = this.getSupabaseClient(url, anonKey);
-    if (!client) return [];
+    if (!client) {
+      this.logCallback('Supabase client not initialized for fetching records', 'error');
+      return [];
+    }
 
     const { data, error } = await client
       .from('tracker_records')
@@ -69,9 +83,11 @@ export class DbService {
       .order('date', { ascending: true });
 
     if (error) {
+      this.logCallback(`Fetch records failed: ${error.message}`, 'error');
       throw new Error(error.message);
     }
 
+    this.logCallback(`Successfully fetched ${(data || []).length} day records`, 'success');
     return (data || []).map(row => ({
       date: row.date,
       hours: row.hours,
@@ -82,8 +98,12 @@ export class DbService {
 
   // Upsert a record to Supabase
   async upsertRecord(url: string, anonKey: string, record: DayRecord): Promise<void> {
+    this.logCallback(`Upserting day record for ${record.date}...`, 'info');
     const client = this.getSupabaseClient(url, anonKey);
-    if (!client) return;
+    if (!client) {
+      this.logCallback('Supabase client not initialized for upserting record', 'error');
+      return;
+    }
 
     const { error } = await client
       .from('tracker_records')
@@ -95,8 +115,10 @@ export class DbService {
       });
 
     if (error) {
+      this.logCallback(`Upsert record for ${record.date} failed: ${error.message}`, 'error');
       throw new Error(error.message);
     }
+    this.logCallback(`Successfully upserted record for ${record.date}`, 'success');
   }
 
   // Subscribe to realtime updates
@@ -105,6 +127,7 @@ export class DbService {
     anonKey: string,
     onInsertOrUpdate: (record: DayRecord) => void
   ): () => void {
+    this.logCallback('Subscribing to realtime records changes...', 'info');
     const client = this.getSupabaseClient(url, anonKey);
     if (!client) return () => {};
 
@@ -118,8 +141,10 @@ export class DbService {
           table: 'tracker_records'
         },
         (payload) => {
+          this.logCallback(`Realtime records event: ${payload.eventType}`, 'info');
           if (payload.eventType === 'INSERT' || payload.eventType === 'UPDATE') {
             const newRow = payload.new;
+            this.logCallback(`Realtime record update received for date ${newRow['date']}`, 'success');
             onInsertOrUpdate({
               date: newRow['date'],
               hours: newRow['hours'],
@@ -129,17 +154,24 @@ export class DbService {
           }
         }
       )
-      .subscribe();
+      .subscribe((status) => {
+        this.logCallback(`Realtime records channel status: ${status}`, 'info');
+      });
 
     return () => {
+      this.logCallback('Unsubscribing from realtime records channel', 'info');
       client.removeChannel(channel);
     };
   }
 
   // Fetch all categories from Supabase
   async fetchCategories(url: string, anonKey: string): Promise<Category[]> {
+    this.logCallback('Fetching categories from Supabase...', 'info');
     const client = this.getSupabaseClient(url, anonKey);
-    if (!client) return [];
+    if (!client) {
+      this.logCallback('Supabase client not initialized for fetching categories', 'error');
+      return [];
+    }
 
     const { data, error } = await client
       .from('tracker_categories')
@@ -147,9 +179,11 @@ export class DbService {
       .order('id', { ascending: true });
 
     if (error) {
+      this.logCallback(`Fetch categories failed: ${error.message}`, 'error');
       throw new Error(error.message);
     }
 
+    this.logCallback(`Successfully fetched ${(data || []).length} categories`, 'success');
     return (data || []).map(row => ({
       id: row.id,
       name: row.name,
@@ -161,8 +195,12 @@ export class DbService {
 
   // Upsert a category to Supabase
   async upsertCategory(url: string, anonKey: string, category: Category): Promise<void> {
+    this.logCallback(`Upserting category: ${category.name} (${category.id})...`, 'info');
     const client = this.getSupabaseClient(url, anonKey);
-    if (!client) return;
+    if (!client) {
+      this.logCallback('Supabase client not initialized for upserting category', 'error');
+      return;
+    }
 
     const { error } = await client
       .from('tracker_categories')
@@ -175,14 +213,20 @@ export class DbService {
       });
 
     if (error) {
+      this.logCallback(`Upsert category ${category.name} failed: ${error.message}`, 'error');
       throw new Error(error.message);
     }
+    this.logCallback(`Successfully upserted category: ${category.name}`, 'success');
   }
 
   // Delete a category from Supabase
   async deleteCategory(url: string, anonKey: string, categoryId: string): Promise<void> {
+    this.logCallback(`Deleting category ID ${categoryId} from Supabase...`, 'info');
     const client = this.getSupabaseClient(url, anonKey);
-    if (!client) return;
+    if (!client) {
+      this.logCallback('Supabase client not initialized for deleting category', 'error');
+      return;
+    }
 
     const { error } = await client
       .from('tracker_categories')
@@ -190,8 +234,10 @@ export class DbService {
       .eq('id', categoryId);
 
     if (error) {
+      this.logCallback(`Delete category ID ${categoryId} failed: ${error.message}`, 'error');
       throw new Error(error.message);
     }
+    this.logCallback(`Successfully deleted category ID ${categoryId}`, 'success');
   }
 
   // Subscribe to realtime category updates
@@ -201,6 +247,7 @@ export class DbService {
     onInsertOrUpdate: (category: Category) => void,
     onDelete: (categoryId: string) => void
   ): () => void {
+    this.logCallback('Subscribing to realtime categories changes...', 'info');
     const client = this.getSupabaseClient(url, anonKey);
     if (!client) return () => {};
 
@@ -214,8 +261,10 @@ export class DbService {
           table: 'tracker_categories'
         },
         (payload) => {
+          this.logCallback(`Realtime categories event: ${payload.eventType}`, 'info');
           if (payload.eventType === 'INSERT' || payload.eventType === 'UPDATE') {
             const newRow = payload.new;
+            this.logCallback(`Realtime category update received: ${newRow['name']} (${newRow['id']})`, 'success');
             onInsertOrUpdate({
               id: newRow['id'],
               name: newRow['name'],
@@ -226,14 +275,18 @@ export class DbService {
           } else if (payload.eventType === 'DELETE') {
             const oldRow = payload.old;
             if (oldRow && oldRow['id']) {
+              this.logCallback(`Realtime category deletion received for ID ${oldRow['id']}`, 'success');
               onDelete(oldRow['id']);
             }
           }
         }
       )
-      .subscribe();
+      .subscribe((status) => {
+        this.logCallback(`Realtime categories channel status: ${status}`, 'info');
+      });
 
     return () => {
+      this.logCallback('Unsubscribing from realtime categories channel', 'info');
       client.removeChannel(channel);
     };
   }

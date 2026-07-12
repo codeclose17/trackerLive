@@ -27,3 +27,9 @@ export interface SyncState {
   lastSyncedAt?: string;
   errorMessage?: string;
 }
+
+export interface SyncLog {
+  timestamp: string;
+  message: string;
+  type: 'info' | 'success' | 'error';
+}
