@@ -33,6 +33,7 @@
           },
           "configurations": {
             "production": {
+              "baseHref": "/trackerLive/",
               "budgets": [
                 {
                   "type": "initial",
