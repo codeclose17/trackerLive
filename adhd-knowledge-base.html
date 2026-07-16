@@ -1,0 +1,1523 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="description" content="A 19-chapter structured knowledge base on ADHD: genetics, neuroanatomy, neurochemistry, endocrinology, comorbidity, pharmacology and targeted evidence-rated interventions for every symptom.">
+<meta name="color-scheme" content="light dark">
+<title>ADHD — The Complete Knowledge Base</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+  /* ================= TOKENS ================= */
+  :root {
+    --ground:#14121C; --surface:#1E1B2A; --surface-2:#262138; --raised:#2E2743;
+    --line:#372F4E; --ink:#ECE8F6; --ink-soft:#C8C1DC; --muted:#948CAE; --faint:#6E6688;
+    --hot-1:#FF3D8B; --hot-2:#FF7A5C; --hot-3:#FFB347; --cool:#54D8DE; --cool-deep:#2C99A0;
+    --good:#57D9A3; --warn:#FFC24B; --bad:#FF6B7A;
+    --grad-hot:linear-gradient(100deg,var(--hot-1),var(--hot-3));
+    --serif:Charter,"Iowan Old Style","Palatino Linotype",Palatino,Georgia,"Times New Roman",serif;
+    --sans:system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+    --mono:"SF Mono","JetBrains Mono","Fira Code",ui-monospace,Menlo,Consolas,monospace;
+    --nav-w:290px; --maxw:760px; --r:14px; --r-sm:9px;
+    --shadow:0 18px 44px -22px rgba(0,0,0,.7);
+  }
+  @media (prefers-color-scheme: light){
+    :root{
+      --ground:#F6F3FA; --surface:#FFFFFF; --surface-2:#F3EFF8; --raised:#FBF9FE;
+      --line:#E4DCF0; --ink:#1C1730; --ink-soft:#3B3357; --muted:#6E6688; --faint:#A79FBE;
+      --hot-1:#E01B6E; --hot-2:#E85A3C; --hot-3:#E08600; --cool:#1F97A0; --cool-deep:#147078;
+      --good:#199E6B; --warn:#C9860B; --bad:#D93B4C; --shadow:0 18px 44px -26px rgba(60,40,90,.35);
+    }
+  }
+  :root[data-theme="dark"]{
+    --ground:#14121C; --surface:#1E1B2A; --surface-2:#262138; --raised:#2E2743;
+    --line:#372F4E; --ink:#ECE8F6; --ink-soft:#C8C1DC; --muted:#948CAE; --faint:#6E6688;
+    --hot-1:#FF3D8B; --hot-2:#FF7A5C; --hot-3:#FFB347; --cool:#54D8DE; --cool-deep:#2C99A0;
+    --good:#57D9A3; --warn:#FFC24B; --bad:#FF6B7A; --shadow:0 18px 44px -22px rgba(0,0,0,.7);
+  }
+  :root[data-theme="light"]{
+    --ground:#F6F3FA; --surface:#FFFFFF; --surface-2:#F3EFF8; --raised:#FBF9FE;
+    --line:#E4DCF0; --ink:#1C1730; --ink-soft:#3B3357; --muted:#6E6688; --faint:#A79FBE;
+    --hot-1:#E01B6E; --hot-2:#E85A3C; --hot-3:#E08600; --cool:#1F97A0; --cool-deep:#147078;
+    --good:#199E6B; --warn:#C9860B; --bad:#D93B4C; --shadow:0 18px 44px -26px rgba(60,40,90,.35);
+  }
+
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  @media (prefers-reduced-motion: reduce){html{scroll-behavior:auto;}}
+  body{
+    margin:0; background:var(--ground); color:var(--ink);
+    font-family:var(--serif); font-size:17px; line-height:1.62;
+    -webkit-font-smoothing:antialiased; overflow-x:hidden;
+  }
+  ::selection{background:var(--hot-1); color:#fff;}
+  :focus-visible{outline:2px solid var(--cool); outline-offset:3px; border-radius:4px;}
+
+  /* progress + canvas */
+  #synapse{position:fixed; inset:0; z-index:0; opacity:.42; pointer-events:none;}
+  .progress{position:fixed; top:0; left:0; height:3px; width:0%; background:var(--grad-hot); z-index:60; box-shadow:0 0 14px var(--hot-1); transition:width .1s linear;}
+
+  /* ================= NAV SIDEBAR ================= */
+  .nav{
+    position:fixed; top:0; left:0; bottom:0; width:var(--nav-w); z-index:50;
+    background:color-mix(in srgb, var(--surface) 92%, transparent);
+    backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px);
+    border-right:1px solid var(--line); display:flex; flex-direction:column;
+    transform:translateX(0); transition:transform .3s ease;
+  }
+  .nav-head{padding:20px 22px 14px; border-bottom:1px solid var(--line);}
+  .nav-head .brand{font-family:var(--sans); font-weight:800; font-size:1.02rem; letter-spacing:-.01em; display:flex; align-items:center; gap:9px;}
+  .nav-head .brand .dot{width:10px; height:10px; border-radius:50%; background:var(--grad-hot); box-shadow:0 0 12px var(--hot-1); flex:none;}
+  .nav-head .tagline{font-family:var(--mono); font-size:10.5px; letter-spacing:.12em; text-transform:uppercase; color:var(--muted); margin-top:6px;}
+  .nav-search{padding:12px 16px 6px;}
+  .nav-search input{
+    width:100%; font-family:var(--sans); font-size:13px; color:var(--ink);
+    background:var(--surface-2); border:1px solid var(--line); border-radius:8px;
+    padding:8px 11px;
+  }
+  .nav-search input::placeholder{color:var(--faint);}
+  .nav-scroll{overflow-y:auto; padding:6px 10px 26px; flex:1;}
+  .nav-group{font-family:var(--mono); font-size:10px; letter-spacing:.15em; text-transform:uppercase; color:var(--faint); padding:14px 12px 5px;}
+  .nav a{
+    display:flex; gap:9px; align-items:baseline; text-decoration:none;
+    font-family:var(--sans); font-size:13.5px; color:var(--ink-soft);
+    padding:7px 12px; border-radius:8px; line-height:1.3; transition:all .18s;
+  }
+  .nav a .idx{font-family:var(--mono); font-size:10.5px; color:var(--faint); min-width:20px;}
+  .nav a:hover{background:var(--surface-2); color:var(--ink);}
+  .nav a.active{background:color-mix(in srgb,var(--hot-1) 14%, transparent); color:var(--ink);}
+  .nav a.active .idx{color:var(--hot-1);}
+  .nav a.hidden{display:none;}
+
+  .nav-foot{padding:12px 16px; border-top:1px solid var(--line); display:flex; gap:8px; align-items:center;}
+  .nav-foot button{
+    font-family:var(--sans); font-size:12px; font-weight:600; color:var(--ink-soft);
+    background:var(--surface-2); border:1px solid var(--line); border-radius:8px;
+    padding:7px 10px; cursor:pointer; flex:1;
+  }
+  .nav-foot button:hover{color:var(--ink); border-color:var(--hot-1);}
+
+  /* mobile nav */
+  .nav-toggle{
+    display:none; position:fixed; top:14px; left:14px; z-index:55;
+    font-family:var(--sans); font-weight:700; font-size:13px; color:var(--ink);
+    background:var(--surface); border:1px solid var(--line); border-radius:10px;
+    padding:9px 13px; cursor:pointer; align-items:center; gap:8px; box-shadow:var(--shadow);
+  }
+  .scrim{display:none; position:fixed; inset:0; background:rgba(0,0,0,.5); z-index:49;}
+
+  @media (max-width:1000px){
+    .nav{transform:translateX(-100%); box-shadow:var(--shadow);}
+    body.nav-open .nav{transform:translateX(0);}
+    body.nav-open .scrim{display:block;}
+    .nav-toggle{display:flex;}
+  }
+
+  /* ================= MAIN ================= */
+  .main{margin-left:var(--nav-w); position:relative; z-index:1;}
+  @media (max-width:1000px){ .main{margin-left:0;} }
+  .col{max-width:var(--maxw); margin:0 auto; padding:0 26px;}
+
+  /* theme handled in nav-foot */
+
+  /* type */
+  h1,h2,h3,h4{font-family:var(--sans); text-wrap:balance; line-height:1.12;}
+  a{color:var(--cool);}
+  .eyebrow{font-family:var(--mono); font-size:12px; letter-spacing:.18em; text-transform:uppercase; color:var(--hot-3); font-weight:500; display:inline-flex; align-items:center; gap:8px;}
+  .eyebrow::before{content:""; width:26px; height:2px; background:var(--grad-hot); border-radius:2px;}
+
+  /* hero */
+  .hero{min-height:88vh; display:flex; flex-direction:column; justify-content:center; padding:96px 0 56px;}
+  .hero .kicker{font-family:var(--mono); font-size:12px; letter-spacing:.2em; text-transform:uppercase; color:var(--cool); margin-bottom:24px;}
+  .hero h1{font-size:clamp(2.5rem,6.5vw,4.4rem); font-weight:800; letter-spacing:-.025em; margin:0;}
+  .hero h1 .flare{background:var(--grad-hot); -webkit-background-clip:text; background-clip:text; color:transparent;}
+  .hero .sub{font-size:clamp(1.1rem,2.6vw,1.4rem); color:var(--ink-soft); max-width:44ch; margin:22px 0 0; line-height:1.42;}
+  .hero .meta{display:flex; flex-wrap:wrap; gap:9px; margin-top:36px; font-family:var(--sans);}
+  .hero .meta span{font-size:12px; font-weight:600; color:var(--ink-soft); border:1px solid var(--line); border-radius:999px; padding:7px 13px; background:color-mix(in srgb,var(--surface) 70%,transparent);}
+  .stat-row{display:grid; grid-template-columns:repeat(auto-fit,minmax(130px,1fr)); gap:14px; margin-top:38px;}
+  .stat{background:var(--surface); border:1px solid var(--line); border-radius:var(--r); padding:16px 18px;}
+  .stat .big{font-family:var(--sans); font-weight:800; font-size:1.7rem; letter-spacing:-.02em; background:var(--grad-hot); -webkit-background-clip:text; background-clip:text; color:transparent;}
+  .stat .lab{font-family:var(--sans); font-size:12px; color:var(--muted); margin-top:2px; line-height:1.3;}
+
+  /* section */
+  section{padding:56px 0; scroll-margin-top:20px; position:relative;}
+  .sec-num{font-family:var(--mono); font-size:12.5px; color:var(--faint); letter-spacing:.1em;}
+  h2{font-size:clamp(1.7rem,4vw,2.5rem); font-weight:800; letter-spacing:-.02em; margin:10px 0 0;}
+  h2 .accent{color:var(--hot-1);}
+  .lede{font-size:1.16rem; color:var(--ink-soft); margin:16px 0 0;}
+  h3{font-size:1.28rem; font-weight:700; margin:38px 0 4px; letter-spacing:-.01em;}
+  h4.sub-h{font-size:1.05rem; font-weight:700; font-family:var(--sans); margin:26px 0 2px;}
+  p{margin:13px 0;}
+  strong{color:var(--ink); font-weight:700;}
+  .si{font-style:italic; color:var(--ink-soft);}
+  em{color:var(--ink-soft);}
+
+  /* tldr */
+  .tldr{background:color-mix(in srgb,var(--cool) 10%,var(--surface)); border:1px solid color-mix(in srgb,var(--cool) 35%,var(--line)); border-left:4px solid var(--cool); border-radius:var(--r); padding:17px 21px; margin:24px 0;}
+  .tldr .tag{font-family:var(--mono); font-size:11px; letter-spacing:.16em; text-transform:uppercase; color:var(--cool); font-weight:600;}
+  .tldr ul{margin:9px 0 0; padding-left:20px;}
+  .tldr li{margin:5px 0; font-size:.97rem; color:var(--ink-soft);}
+  .tldr li::marker{color:var(--cool);}
+
+  ul.rich{list-style:none; padding:0; margin:16px 0;}
+  ul.rich>li{position:relative; padding-left:28px; margin:11px 0;}
+  ul.rich>li::before{content:""; position:absolute; left:3px; top:.55em; width:9px; height:9px; border-radius:2px; background:var(--grad-hot); transform:rotate(45deg);}
+
+  ol.steps{padding-left:0; list-style:none; counter-reset:s; margin:16px 0;}
+  ol.steps>li{counter-increment:s; position:relative; padding-left:40px; margin:12px 0;}
+  ol.steps>li::before{content:counter(s); position:absolute; left:0; top:0; width:26px; height:26px; border-radius:50%; background:var(--surface-2); border:1px solid var(--line); color:var(--hot-3); font-family:var(--mono); font-size:12px; font-weight:700; display:grid; place-items:center;}
+
+  /* cards / grids */
+  .card{background:var(--surface); border:1px solid var(--line); border-radius:var(--r); padding:20px 22px; margin:18px 0; box-shadow:var(--shadow);}
+  .card h4{margin:0 0 6px; font-size:1.05rem;}
+  .card p{margin:6px 0; font-size:.95rem; color:var(--ink-soft);}
+  .grid{display:grid; gap:15px; margin:20px 0;}
+  @media (min-width:640px){ .grid.two{grid-template-columns:1fr 1fr;} .grid.three{grid-template-columns:1fr 1fr;} }
+  @media (min-width:900px){ .grid.three{grid-template-columns:repeat(3,1fr);} }
+
+  .region{background:var(--surface); border:1px solid var(--line); border-radius:var(--r); padding:17px 19px;}
+  .region h4{font-size:1.02rem; margin:0 0 6px; display:flex; align-items:center; gap:9px;}
+  .region h4 .pin{width:10px; height:10px; border-radius:50%; flex:none;}
+  .region p{margin:4px 0 0; font-size:.93rem; color:var(--muted);}
+
+  /* table */
+  .table-wrap{overflow-x:auto; margin:20px 0; border:1px solid var(--line); border-radius:var(--r);}
+  table{border-collapse:collapse; width:100%; font-size:.9rem; font-family:var(--sans); min-width:520px;}
+  th,td{text-align:left; padding:11px 14px; border-bottom:1px solid var(--line); vertical-align:top;}
+  th{font-size:11px; letter-spacing:.06em; text-transform:uppercase; color:var(--muted); font-weight:700; background:var(--surface-2);}
+  td{color:var(--ink-soft);}
+  td strong{color:var(--ink);}
+  tr:last-child td{border-bottom:0;}
+  td.num{font-family:var(--mono); font-variant-numeric:tabular-nums; color:var(--hot-3);}
+
+  /* meters */
+  .meter{margin:18px 0;}
+  .meter .row{display:flex; justify-content:space-between; align-items:baseline; font-family:var(--sans);}
+  .meter .name{font-weight:600; font-size:.94rem;}
+  .meter .val{font-family:var(--mono); font-size:12px; color:var(--muted);}
+  .meter .bar{height:9px; border-radius:999px; background:var(--surface-2); margin-top:6px; overflow:hidden; border:1px solid var(--line);}
+  .meter .fill{height:100%; border-radius:999px; background:var(--grad-hot); width:0; transition:width 1.1s cubic-bezier(.2,.8,.2,1);}
+
+  .figure{background:var(--surface); border:1px solid var(--line); border-radius:var(--r); padding:20px; margin:22px 0;}
+  .figure .cap{font-family:var(--sans); font-size:.83rem; color:var(--muted); margin-top:12px; text-align:center;}
+  .figure svg{width:100%; height:auto; display:block;}
+
+  /* neurotransmitter chips */
+  .nt-grid{display:grid; gap:14px; margin:20px 0;}
+  @media(min-width:600px){ .nt-grid{grid-template-columns:1fr 1fr;} }
+  .nt{border:1px solid var(--line); border-radius:var(--r); padding:17px 19px; background:var(--surface); position:relative; overflow:hidden;}
+  .nt::before{content:""; position:absolute; top:0; left:0; width:100%; height:3px; background:var(--grad-hot);}
+  .nt.cool::before{background:linear-gradient(90deg,var(--cool),var(--cool-deep));}
+  .nt h4{font-size:1.08rem; margin:4px 0 2px;}
+  .nt .role{font-family:var(--mono); font-size:10.5px; letter-spacing:.08em; text-transform:uppercase; color:var(--muted);}
+  .nt p{font-size:.9rem; margin:9px 0 0; color:var(--ink-soft);}
+
+  /* loop */
+  .loop{display:grid; gap:11px; margin:22px 0;}
+  .loop .step{display:flex; gap:13px; align-items:flex-start; background:var(--surface); border:1px solid var(--line); border-radius:var(--r-sm); padding:13px 15px;}
+  .loop .n{font-family:var(--mono); font-weight:700; font-size:12px; color:var(--ground); background:var(--grad-hot); width:25px; height:25px; border-radius:50%; flex:none; display:grid; place-items:center;}
+  .loop .step p{margin:0; font-size:.93rem;}
+  .loop .step strong{display:block; font-family:var(--sans); font-size:.8rem; letter-spacing:.04em; text-transform:uppercase; color:var(--hot-3); margin-bottom:2px;}
+
+  /* cheatcodes */
+  .cheat{background:var(--surface); border:1px solid var(--line); border-radius:var(--r); padding:19px 21px; margin:15px 0; box-shadow:var(--shadow);}
+  .cheat .head{display:flex; align-items:center; gap:12px; flex-wrap:wrap;}
+  .cheat .combo{font-family:var(--mono); font-size:12px; font-weight:600; color:var(--ink); background:var(--surface-2); border:1px solid var(--line); border-bottom-width:3px; border-radius:7px; padding:5px 10px; white-space:nowrap;}
+  .cheat h4{font-size:1.12rem; margin:0; flex:1; min-width:170px;}
+  .cheat .body{margin-top:11px; font-size:.95rem; color:var(--ink-soft);}
+  .cheat .body p{margin:8px 0;}
+  .cheat .mech{font-family:var(--mono); font-size:.8rem; color:var(--cool); background:color-mix(in srgb,var(--cool) 8%,transparent); border-radius:7px; padding:8px 11px; margin-top:10px; border:1px solid color-mix(in srgb,var(--cool) 22%,var(--line));}
+  .cheat .mech b{color:var(--cool);}
+  .dose{display:flex; flex-wrap:wrap; gap:7px; margin-top:11px;}
+  .dose span{font-family:var(--sans); font-size:11.5px; font-weight:600; color:var(--ink-soft); border:1px solid var(--line); border-radius:999px; padding:4px 11px;}
+  .dose span b{color:var(--hot-3); font-weight:700;}
+
+  .evidence{display:inline-flex; align-items:center; gap:6px; font-family:var(--sans); font-size:11px; font-weight:600; letter-spacing:.03em; text-transform:uppercase; color:var(--muted);}
+  .ev-dots{display:inline-flex; gap:3px;}
+  .ev-dots i{width:8px; height:8px; border-radius:50%; background:var(--line); display:inline-block;}
+  .ev-dots i.on{background:var(--good);}
+
+  /* ===== problem → fix cards ===== */
+  .fix{border:1px solid var(--line); border-radius:var(--r); background:var(--surface); overflow:hidden; margin:16px 0; box-shadow:var(--shadow);}
+  .fix .problem{padding:14px 18px 13px; background:color-mix(in srgb,var(--bad) 9%,var(--surface)); border-bottom:1px solid var(--line);}
+  .fix .problem .lbl{font-family:var(--mono); font-size:10px; letter-spacing:.14em; text-transform:uppercase; color:var(--bad); font-weight:600;}
+  .fix .problem h4{font-size:1.1rem; margin:5px 0 0; font-family:var(--sans);}
+  .fix .why{padding:12px 18px; font-size:.88rem; color:var(--muted); border-bottom:1px dashed var(--line); font-family:var(--sans); line-height:1.5;}
+  .fix .why b{color:var(--hot-3); font-weight:700;}
+  .fix .fixes{padding:13px 18px 16px;}
+  .fix .fixes .lbl{font-family:var(--mono); font-size:10px; letter-spacing:.14em; text-transform:uppercase; color:var(--good); font-weight:600; margin-bottom:9px; display:block;}
+  .fix ul{list-style:none; padding:0; margin:0; display:grid; gap:11px;}
+  .fix ul li{display:flex; gap:11px; align-items:flex-start; font-size:.93rem; color:var(--ink-soft); line-height:1.5;}
+  .fix ul li .tick{color:var(--good); font-weight:700; flex:none; font-family:var(--mono); font-size:.85rem; margin-top:2px;}
+  .fix ul li b{color:var(--ink); font-weight:700;}
+  .fix ul li .ev-dots{margin-left:4px; transform:translateY(-1px);}
+  .fix .rx{margin-top:12px; padding:9px 12px; border-radius:7px; font-family:var(--mono); font-size:.78rem; color:var(--cool); background:color-mix(in srgb,var(--cool) 8%,transparent); border:1px solid color-mix(in srgb,var(--cool) 22%,var(--line)); line-height:1.5;}
+  .fix .rx b{color:var(--cool);}
+
+  /* myth-fact */
+  .mf{display:grid; gap:13px; margin:20px 0;}
+  @media(min-width:640px){ .mf{grid-template-columns:1fr 1fr;} }
+  .myth,.fact{border-radius:var(--r); padding:15px 17px; border:1px solid var(--line);}
+  .myth{background:color-mix(in srgb,var(--bad) 9%,var(--surface)); border-color:color-mix(in srgb,var(--bad) 30%,var(--line));}
+  .fact{background:color-mix(in srgb,var(--good) 9%,var(--surface)); border-color:color-mix(in srgb,var(--good) 30%,var(--line));}
+  .myth .lbl,.fact .lbl{font-family:var(--mono); font-size:11px; letter-spacing:.13em; text-transform:uppercase; font-weight:600; display:flex; align-items:center; gap:6px;}
+  .myth .lbl{color:var(--bad);} .fact .lbl{color:var(--good);}
+  .myth p,.fact p{margin:8px 0 0; font-size:.93rem; color:var(--ink-soft);}
+
+  /* squirrel deep-dive */
+  .squirrel{border:1px dashed color-mix(in srgb,var(--hot-3) 45%,var(--line)); background:color-mix(in srgb,var(--hot-3) 7%,transparent); border-radius:var(--r); padding:15px 19px; margin:20px 0;}
+  .squirrel .tag{font-family:var(--mono); font-size:11px; letter-spacing:.12em; text-transform:uppercase; color:var(--hot-3); font-weight:600;}
+  .squirrel p{margin:8px 0 0; font-size:.92rem; color:var(--ink-soft);}
+
+  /* glossary */
+  .gloss{display:grid; gap:0; margin:18px 0; border:1px solid var(--line); border-radius:var(--r); overflow:hidden;}
+  .gloss dt{font-family:var(--sans); font-weight:700; font-size:.95rem; color:var(--ink); padding:14px 18px 2px; background:var(--surface);}
+  .gloss dd{margin:0; padding:0 18px 14px; font-size:.9rem; color:var(--ink-soft); background:var(--surface); border-bottom:1px solid var(--line);}
+  .gloss dd:last-child{border-bottom:0;}
+
+  .rule{height:1px; background:linear-gradient(90deg,transparent,var(--line),transparent); margin:6px 0; border:0;}
+  .anchor-h{display:flex; align-items:baseline; gap:12px; flex-wrap:wrap;}
+
+  footer{padding:54px 0 90px; border-top:1px solid var(--line); margin-top:36px;}
+  footer h3{margin-top:0;}
+  .refs{list-style:none; padding:0; margin:14px 0 0;}
+  .refs li{font-size:.83rem; color:var(--muted); margin:8px 0; padding-left:16px; text-indent:-16px; line-height:1.45;}
+  .disclaimer{font-size:.86rem; color:var(--ink-soft); background:var(--surface); border:1px solid var(--line); border-left:4px solid var(--warn); border-radius:var(--r); padding:16px 20px; margin:24px 0;}
+
+  .reveal{opacity:0; transform:translateY(16px); transition:opacity .55s ease, transform .55s ease;}
+  .reveal.in{opacity:1; transform:none;}
+  @media (prefers-reduced-motion: reduce){ .reveal{opacity:1; transform:none; transition:none;} .fill{transition:none;} }
+
+  .to-top{position:fixed; bottom:20px; right:20px; z-index:45; width:44px; height:44px; border-radius:50%; background:var(--surface); border:1px solid var(--line); color:var(--ink); font-size:18px; cursor:pointer; box-shadow:var(--shadow); opacity:0; pointer-events:none; transition:opacity .25s;}
+  .to-top.show{opacity:1; pointer-events:auto;}
+  .to-top:hover{border-color:var(--hot-1);}
+</style>
+</head>
+<body>
+
+
+<canvas id="synapse" aria-hidden="true"></canvas>
+<div class="progress" id="progress"></div>
+<button class="nav-toggle" id="navToggle" aria-label="Open contents">☰ Contents</button>
+<div class="scrim" id="scrim"></div>
+
+<!-- ================= NAV ================= -->
+<nav class="nav" id="nav" aria-label="Table of contents">
+  <div class="nav-head">
+    <div class="brand"><span class="dot"></span> ADHD Knowledge Base</div>
+    <div class="tagline">Neuroscience · Endocrinology · Interventions</div>
+  </div>
+  <div class="nav-search"><input id="navSearch" type="search" placeholder="Filter sections…" aria-label="Filter sections"></div>
+  <div class="nav-scroll" id="navScroll">
+    <div class="nav-group">Foundations</div>
+    <a href="#definition"><span class="idx">01</span><span>What ADHD is &amp; how it's defined</span></a>
+    <a href="#epidemiology"><span class="idx">02</span><span>Epidemiology &amp; prevalence</span></a>
+    <a href="#genetics"><span class="idx">03</span><span>Genetics &amp; heritability</span></a>
+    <div class="nav-group">The physical &amp; chemical brain</div>
+    <a href="#neuroanatomy"><span class="idx">04</span><span>Neuroanatomy &amp; structure</span></a>
+    <a href="#networks"><span class="idx">05</span><span>Brain networks &amp; connectivity</span></a>
+    <a href="#neurochemistry"><span class="idx">06</span><span>Neurotransmitter systems</span></a>
+    <a href="#executive"><span class="idx">07</span><span>Executive function models</span></a>
+    <div class="nav-group">The hormonal brain</div>
+    <a href="#hormones"><span class="idx">08</span><span>Hormones &amp; endocrine axes</span></a>
+    <a href="#sex-lifespan"><span class="idx">09</span><span>Sex differences &amp; lifespan</span></a>
+    <div class="nav-group">Context &amp; comorbidity</div>
+    <a href="#comorbidity"><span class="idx">10</span><span>Comorbidities &amp; overlap</span></a>
+    <a href="#modern"><span class="idx">11</span><span>The modern digital trap</span></a>
+    <div class="nav-group">Interventions</div>
+    <a href="#pharmacology"><span class="idx">12</span><span>Pharmacology in depth</span></a>
+    <a href="#behavioural"><span class="idx">13</span><span>Behavioural &amp; psychosocial</span></a>
+    <a href="#cheatcodes"><span class="idx">14</span><span>Science-backed cheatcodes</span></a>
+    <a href="#targeted"><span class="idx">15</span><span>Targeted fixes: symptom by symptom</span></a>
+    <a href="#comorbid-fixes"><span class="idx">16</span><span>Targeted fixes: comorbidities</span></a>
+    <div class="nav-group">Reference</div>
+    <a href="#myths"><span class="idx">17</span><span>Myths vs facts</span></a>
+    <a href="#glossary"><span class="idx">18</span><span>Glossary</span></a>
+    <a href="#references"><span class="idx">19</span><span>References &amp; caveats</span></a>
+  </div>
+  <div class="nav-foot">
+    <button id="themeBtn">◐ <span id="themeLabel">Theme</span></button>
+    <button id="expandBtn">Reveal all</button>
+  </div>
+</nav>
+
+<!-- ================= MAIN ================= -->
+<main class="main">
+<div class="col">
+
+  <!-- HERO -->
+  <header class="hero" id="top">
+    <div class="kicker">A complete, structured reference on the disorder</div>
+    <h1>The ADHD brain, <span class="flare">fully mapped.</span></h1>
+    <p class="sub">Seventeen chapters spanning the genetics, neuroanatomy, chemistry, endocrinology, and evidence-based treatment of ADHD — written to be both a rigorous knowledge base and an easy read.</p>
+    <div class="meta">
+      <span>⚡ ADHD-friendly formatting</span>
+      <span>🧬 High-science depth</span>
+      <span>🗂 17 navigable chapters</span>
+      <span>📚 Fully referenced</span>
+    </div>
+    <div class="stat-row">
+      <div class="stat"><div class="big">~74%</div><div class="lab">heritability — among the highest in psychiatry</div></div>
+      <div class="stat"><div class="big">5–7%</div><div class="lab">of children meet criteria worldwide</div></div>
+      <div class="stat"><div class="big">~2.5%</div><div class="lab">of adults — it doesn't just vanish</div></div>
+      <div class="stat"><div class="big">27+</div><div class="lab">genome-wide risk loci identified</div></div>
+    </div>
+  </header>
+
+  <!-- 01 DEFINITION -->
+  <section id="definition" class="reveal">
+    <div class="anchor-h"><span class="sec-num">CHAPTER 01</span></div>
+    <div class="eyebrow">Foundations</div>
+    <h2>What ADHD <span class="accent">is</span> — and how it's defined.</h2>
+    <div class="tldr">
+      <div class="tag">⚡ 30-second version</div>
+      <ul>
+        <li>ADHD is a <strong>neurodevelopmental disorder</strong> of self-regulation — attention, impulse, and activity — not a character flaw.</li>
+        <li>Diagnosis is <strong>clinical</strong> (DSM-5-TR / ICD-11): a pattern of symptoms present early, across settings, causing real impairment.</li>
+        <li>Three presentations: <strong>inattentive, hyperactive-impulsive, and combined</strong>.</li>
+      </ul>
+    </div>
+
+    <p><strong>Attention-Deficit/Hyperactivity Disorder</strong> is a neurodevelopmental condition characterised by a persistent pattern of inattention and/or hyperactivity-impulsivity that is <em>more frequent and severe</em> than expected for a person's developmental level, and that interferes with functioning. The name is a historical misnomer: it is less a <em>deficit</em> of attention than a <strong>dysregulation</strong> of attention and self-control — the ability to deploy attention where and when it's needed.</p>
+
+    <h3>The DSM-5-TR criteria (the diagnostic backbone)</h3>
+    <p>The American Psychiatric Association's DSM-5-TR defines ADHD across two symptom domains. A person needs <strong>≥6 symptoms</strong> (≥5 for those 17+) from a domain, persisting ≥6 months.</p>
+
+    <div class="grid two">
+      <div class="region">
+        <h4><span class="pin" style="background:var(--cool)"></span>Inattention (9 symptoms)</h4>
+        <p>Careless mistakes · trouble sustaining attention · not seeming to listen · failing to finish tasks · disorganisation · avoiding sustained mental effort · losing things · easy distractibility · forgetfulness in daily activities.</p>
+      </div>
+      <div class="region">
+        <h4><span class="pin" style="background:var(--hot-1)"></span>Hyperactivity-Impulsivity (9)</h4>
+        <p>Fidgeting · leaving seat · restlessness ("driven by a motor") · trouble being quiet · talking excessively · blurting answers · trouble waiting turn · interrupting · being "on the go".</p>
+      </div>
+    </div>
+
+    <h4 class="sub-h">The five gatekeeping rules</h4>
+    <ol class="steps">
+      <li><strong>Onset:</strong> several symptoms present before age <strong>12</strong>.</li>
+      <li><strong>Pervasiveness:</strong> symptoms in <strong>≥2 settings</strong> (e.g. home <em>and</em> work/school).</li>
+      <li><strong>Impairment:</strong> clear evidence symptoms interfere with functioning or quality of life.</li>
+      <li><strong>Not better explained</strong> by another mental disorder.</li>
+      <li><strong>Specify severity</strong> (mild / moderate / severe) and presentation.</li>
+    </ol>
+
+    <h3>The three presentations</h3>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Presentation</th><th>Dominant features</th><th>Notes</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Predominantly Inattentive</strong></td><td>Distractibility, forgetfulness, disorganisation, "spacey"</td><td>Historically under-diagnosed; more common in girls/women; formerly "ADD".</td></tr>
+          <tr><td><strong>Predominantly Hyperactive-Impulsive</strong></td><td>Restlessness, impulsivity, interrupting</td><td>Most visible in young children; least common in adults.</td></tr>
+          <tr><td><strong>Combined</strong></td><td>Both domains meet threshold</td><td>The most common presentation overall.</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>Presentations are <strong>not fixed subtypes</strong> — they can shift across a lifetime as hyperactivity often internalises into restlessness with age.</p>
+
+    <div class="squirrel">
+      <div class="tag">🐿 ICD-11 note</div>
+      <p>The WHO's ICD-11 uses the near-equivalent term "Attention Deficit Hyperactivity Disorder" (6A05) with comparable domains. The DSM and ICD have converged substantially, though ICD-11 places less emphasis on rigid symptom counts and more on the overall clinical pattern.</p>
+    </div>
+  </section>
+
+  <hr class="rule">
+
+  <!-- 02 EPIDEMIOLOGY -->
+  <section id="epidemiology" class="reveal">
+    <span class="sec-num">CHAPTER 02</span>
+    <div class="eyebrow">Foundations</div>
+    <h2>How <span class="accent">common</span> it is — and who gets diagnosed.</h2>
+    <div class="tldr">
+      <div class="tag">⚡ 30-second version</div>
+      <ul>
+        <li>~5–7% of children and ~2.5% of adults worldwide — a genuinely common condition.</li>
+        <li>Diagnosed far more in boys, but the <strong>true sex gap is much smaller</strong> than the diagnosis gap.</li>
+        <li>It <strong>persists</strong>: roughly half to two-thirds of childhood cases carry meaningful symptoms into adulthood.</li>
+      </ul>
+    </div>
+
+    <div class="grid three">
+      <div class="stat"><div class="big">5–7%</div><div class="lab">Global childhood prevalence (meta-analyses)</div></div>
+      <div class="stat"><div class="big">2–3:1</div><div class="lab">Male:female <em>diagnosis</em> ratio in childhood</div></div>
+      <div class="stat"><div class="big">~50–65%</div><div class="lab">Persist with impairment into adulthood</div></div>
+    </div>
+
+    <p>Prevalence estimates have been remarkably stable across cultures once diagnostic method is held constant — arguing against the "modern invention" narrative. Apparent national differences are driven mostly by <strong>diagnostic thresholds and awareness</strong>, not real biology. The rise in diagnoses over recent decades reflects <strong>better recognition</strong> (especially of inattentive presentations, adults, and girls) rather than an epidemic.</p>
+
+    <h3>The diagnosis gap vs the prevalence gap</h3>
+    <p>Boys are diagnosed 2–3× more often, but community screening studies find the real ratio closer to <strong>~1.5–2:1</strong>. The difference is a <strong>referral and recognition bias</strong>: boys more often show disruptive, externalising hyperactivity that gets flagged; girls more often show quiet inattention that gets missed or mislabelled as anxiety, daydreaming, or "not trying".</p>
+
+    <h3>The persistence question</h3>
+    <p>Longitudinal cohorts (e.g. the Multimodal Treatment Study, MTA) show that while the <em>full</em> childhood syndrome remits in a substantial fraction, most retain <strong>impairing residual symptoms</strong> — particularly inattention and executive dysfunction — well into adulthood. Recent work also describes a <strong>fluctuating course</strong>: symptoms can wax and wane with life demands rather than following a single trajectory.</p>
+  </section>
+
+  <hr class="rule">
+
+  <!-- 03 GENETICS -->
+  <section id="genetics" class="reveal">
+    <span class="sec-num">CHAPTER 03</span>
+    <div class="eyebrow">Foundations</div>
+    <h2>The <span class="accent">genetics</span>: one of psychiatry's most heritable traits.</h2>
+    <div class="tldr">
+      <div class="tag">⚡ 30-second version</div>
+      <ul>
+        <li>Twin studies put heritability at <strong>~74–80%</strong> — comparable to height.</li>
+        <li>It's <strong>polygenic</strong>: hundreds to thousands of common variants each add a tiny nudge, plus rarer large-effect variants.</li>
+        <li>Genes converge on <strong>dopamine, neurodevelopment, and synaptic signalling</strong>.</li>
+      </ul>
+    </div>
+
+    <p>ADHD is strongly familial. Twin and adoption studies converge on a heritability of roughly <strong>74–80%</strong>, meaning most of the population variation in ADHD traits is explained by genetic differences. First-degree relatives of someone with ADHD are several times more likely to have it themselves. This does not make it "genetically determined" — genes set a liability that environment modulates.</p>
+
+    <div class="meter">
+      <div class="row"><span class="name">Approximate heritability (twin-study estimate)</span><span class="val">~74%</span></div>
+      <div class="bar"><div class="fill" data-w="74%"></div></div>
+    </div>
+
+    <h3>Polygenic architecture</h3>
+    <p>ADHD is not a single-gene condition. The 2019 (and expanded 2023) genome-wide association studies by Demontis, Børglum and colleagues identified <strong>a dozen and then 27+ genome-wide significant loci</strong>, with a polygenic score built from thousands of common variants. On top of this common-variant load sit rarer <strong>copy-number variants (CNVs)</strong> and de novo mutations with larger individual effects. Genetic risk overlaps substantially with autism, depression, and other conditions — evidence of shared neurodevelopmental pathways.</p>
+
+    <h3>The candidate genes (and what they touch)</h3>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Gene</th><th>Product / role</th><th>Relevance</th></tr></thead>
+        <tbody>
+          <tr><td><strong>DAT1 / SLC6A3</strong></td><td>Dopamine transporter</td><td>Clears dopamine from the synapse; the direct target of methylphenidate.</td></tr>
+          <tr><td><strong>DRD4</strong> (esp. 7-repeat)</td><td>D4 dopamine receptor</td><td>The most-replicated association; the 7R allele linked to novelty-seeking.</td></tr>
+          <tr><td><strong>DRD5</strong></td><td>D5 dopamine receptor</td><td>Associated in meta-analyses.</td></tr>
+          <tr><td><strong>DBH</strong></td><td>Dopamine β-hydroxylase</td><td>Converts dopamine → norepinephrine.</td></tr>
+          <tr><td><strong>SNAP-25</strong></td><td>Synaptic vesicle protein</td><td>Neurotransmitter release machinery.</td></tr>
+          <tr><td><strong>ADGRL3 / LPHN3</strong></td><td>Latrophilin-3 adhesion receptor</td><td>Neurodevelopmental wiring; replicated across populations.</td></tr>
+          <tr><td><strong>5-HTT / HTR1B</strong></td><td>Serotonin transporter / receptor</td><td>Modulatory role, impulsivity.</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="si">Each of these individually explains only a sliver of risk. Their value is conceptual: they point unmistakably at dopamine signalling and synaptic/neurodevelopmental machinery.</p>
+
+    <h3>Gene × environment</h3>
+    <p>Genetic liability interacts with prenatal and perinatal factors that raise risk: <strong>maternal smoking and alcohol, extreme prematurity, very low birth weight, prenatal stress, and lead exposure</strong>. These are risk modifiers, not standalone causes — and their statistical association is partly confounded by shared genetics (a parent with ADHD is more likely to smoke <em>and</em> to pass on risk alleles).</p>
+  </section>
+
+  <hr class="rule">
+
+  <!-- 04 NEUROANATOMY -->
+  <section id="neuroanatomy" class="reveal">
+    <span class="sec-num">CHAPTER 04</span>
+    <div class="eyebrow">The physical brain</div>
+    <h2>The <span class="accent">hardware</span>: structure, maturation, and wiring.</h2>
+    <div class="tldr">
+      <div class="tag">⚡ 30-second version</div>
+      <ul>
+        <li>Differences are <strong>subtle, statistical, and average-level</strong> — you cannot diagnose ADHD from a scan.</li>
+        <li>The ADHD cortex matures on a <strong>~2–3 year delay</strong> — "delayed, not deviant."</li>
+        <li>Key nodes: <strong>prefrontal cortex, striatum, cerebellum</strong>, and the tracts connecting them.</li>
+      </ul>
+    </div>
+
+    <p>The largest structural study, <span class="si">ENIGMA-ADHD</span> (Hoogman et al., 2017; 3,200+ participants), found slightly smaller volumes in several subcortical structures — most consistently the <strong>amygdala, accumbens, caudate, putamen, and hippocampus</strong>, plus reduced total brain and cortical surface area. Effect sizes were <strong>small</strong> (Cohen's d ~0.1–0.2) and largest in children, shrinking with age — consistent with a maturational lag rather than permanent damage.</p>
+
+    <h3>The regions and what they do</h3>
+    <div class="grid two">
+      <div class="region"><h4><span class="pin" style="background:var(--hot-1)"></span>Prefrontal cortex (PFC)</h4><p>The executive "CEO" — planning, working memory, inhibition, self-monitoring. Under-activated in ADHD (<em>hypofrontality</em>), especially dorsolateral and ventrolateral PFC.</p></div>
+      <div class="region"><h4><span class="pin" style="background:var(--hot-3)"></span>Striatum / basal ganglia</h4><p>Caudate, putamen, nucleus accumbens — the reward and go/no-go gate. Central to motivation, habit, and delay of gratification.</p></div>
+      <div class="region"><h4><span class="pin" style="background:var(--cool)"></span>Cerebellum</h4><p>Beyond motor control, it times and coordinates cognition. Reduced vermis volume links to timing deficits and "time blindness."</p></div>
+      <div class="region"><h4><span class="pin" style="background:var(--hot-2)"></span>Anterior cingulate cortex</h4><p>Error detection, conflict monitoring, effort allocation. Hypoactive during attention tasks in ADHD.</p></div>
+      <div class="region"><h4><span class="pin" style="background:var(--good)"></span>Frontostriatal &amp; frontoparietal tracts</h4><p>The white-matter "cables." Diffusion MRI shows lower fractional anisotropy — noisier, higher-latency signalling.</p></div>
+      <div class="region"><h4><span class="pin" style="background:var(--warn)"></span>Amygdala</h4><p>Emotional salience. Its altered coupling with PFC underlies the <strong>emotional dysregulation</strong> that DSM omits but clinicians see constantly.</p></div>
+    </div>
+
+    <h3>"Delayed, not deviant" — the maturation lag</h3>
+    <p>Shaw et al. (2007, PNAS) tracked cortical thickness longitudinally and found the ADHD cortex reached peak thickness at a median of <strong>~10.5 years vs ~7.5 years</strong> in controls — a ~3-year delay, greatest in prefrontal regions governing attention and executive control. The <em>shape</em> of the developmental curve was normal; the <strong>timing</strong> was shifted. This is one of the most hopeful findings in the field: it reframes ADHD as a difference in developmental tempo.</p>
+
+    <div class="meter">
+      <div class="row"><span class="val">Typical brain — peak cortical thickness ~7.5 yrs</span></div>
+      <div class="bar"><div class="fill" data-w="60%"></div></div>
+      <div class="row" style="margin-top:12px"><span class="val">ADHD brain — peak ~10.5 yrs</span></div>
+      <div class="bar"><div class="fill" data-w="84%"></div></div>
+    </div>
+  </section>
+
+  <hr class="rule">
+
+  <!-- 05 NETWORKS -->
+  <section id="networks" class="reveal">
+    <span class="sec-num">CHAPTER 05</span>
+    <div class="eyebrow">The physical brain</div>
+    <h2>The real headline: <span class="accent">networks that won't take turns.</span></h2>
+    <div class="tldr">
+      <div class="tag">⚡ 30-second version</div>
+      <ul>
+        <li>Modern models focus on <strong>network dynamics</strong>, not just single regions.</li>
+        <li>The <strong>Default Mode Network</strong> (daydreaming) intrudes on focused work — the "Default Mode Interference Hypothesis."</li>
+        <li>Attention lapses can be predicted in the data <strong>seconds before</strong> they happen.</li>
+      </ul>
+    </div>
+
+    <p>The brain runs several large-scale networks that should coordinate like an orchestra taking turns:</p>
+    <ul class="rich">
+      <li><strong>Default Mode Network (DMN):</strong> medial PFC, posterior cingulate, angular gyrus — active during rest, mind-wandering, self-reference.</li>
+      <li><strong>Central Executive / Frontoparietal Network:</strong> switches on for goal-directed, effortful focus.</li>
+      <li><strong>Salience Network</strong> (anterior insula, dorsal ACC): the <em>switchboard</em> that decides which of the above should be in charge right now.</li>
+      <li><strong>Dorsal &amp; ventral attention networks:</strong> orient and re-orient attention to relevant stimuli.</li>
+    </ul>
+
+    <p>In neurotypical brains, DMN and executive networks are <strong>anti-correlated</strong>: when you focus outward, the daydreaming network quiets down. In ADHD, this reciprocity is weakened — the <strong>DMN keeps intruding</strong> during tasks. Sonuga-Barke and Castellanos formalised this as the <strong>Default Mode Interference Hypothesis</strong>: spontaneous low-frequency DMN activity "breaks through" into task-focused states, producing the periodic attention lapses that define the disorder. A faulty <strong>salience network</strong> that mis-assigns what deserves attention is increasingly implicated as the switch that fails.</p>
+
+    <div class="squirrel">
+      <div class="tag">🐿 Deep-dive</div>
+      <p>Resting-state fMRI shows both hypo- and hyper-connectivity patterns in ADHD depending on network and age. The picture isn't "less connected" but "differently orchestrated" — with weaker segregation between networks that should stay distinct. This is why focus feels effortful: you're manually holding networks apart that normally separate on their own.</p>
+    </div>
+  </section>
+
+  <hr class="rule">
+
+  <!-- 06 NEUROCHEMISTRY -->
+  <section id="neurochemistry" class="reveal">
+    <span class="sec-num">CHAPTER 06</span>
+    <div class="eyebrow">The chemistry</div>
+    <h2>It's not "low dopamine." It's <span class="accent">bad signal-to-noise.</span></h2>
+    <div class="tldr">
+      <div class="tag">⚡ 30-second version</div>
+      <ul>
+        <li>Two catecholamines run the show: <strong>dopamine</strong> (drive/reward) and <strong>norepinephrine</strong> (focus/alertness).</li>
+        <li>The problem is <strong>weak, mistimed signalling</strong> — poor signal-to-noise — not simply "too little."</li>
+        <li>The prefrontal cortex needs a <strong>Goldilocks amount</strong>: too little or too much both wreck focus (the inverted-U).</li>
+      </ul>
+    </div>
+
+    <h3>The neurotransmitters involved</h3>
+    <div class="nt-grid">
+      <div class="nt"><div class="role">Primary · "the wanting molecule"</div><h4>Dopamine (DA)</h4><p>Codes <em>motivation, anticipation, reward-prediction</em> — not pleasure itself. Low, noisy DA signalling makes future rewards feel faint and boring tasks unbearable.</p></div>
+      <div class="nt"><div class="role">Primary · "the alertness dial"</div><h4>Norepinephrine (NE)</h4><p>Sets cortical arousal and signal-to-noise. Enough NE and the important signal stands out from background chatter.</p></div>
+      <div class="nt cool"><div class="role">Modulatory</div><h4>Serotonin (5-HT)</h4><p>Tunes impulsivity, mood, and emotional regulation. Implicated in the impulsive and emotional-dysregulation facets.</p></div>
+      <div class="nt cool"><div class="role">Excitatory / inhibitory balance</div><h4>Glutamate &amp; GABA</h4><p>The brain's accelerator and brake. Altered glutamate/GABA balance in frontostriatal circuits is an active research frontier.</p></div>
+      <div class="nt cool"><div class="role">Emerging</div><h4>Acetylcholine</h4><p>Supports attention and cortical arousal; a target of some investigational compounds.</p></div>
+    </div>
+
+    <h3>Reward-prediction error &amp; delay discounting</h3>
+    <p>Dopamine neurons fire not for reward itself but for <strong>surprise</strong> — the gap between expected and received reward (Schultz's <span class="si">reward-prediction error</span>). In ADHD this signal is blunted and steeply <strong>time-discounted</strong>: a reward 20 minutes away barely registers while an immediate one screams. This <strong>delay aversion</strong> is the neural root of "I know it matters, I just can't make myself start." It also explains why ADHD is a disorder of <em>performance</em> (doing what you know) more than <em>knowledge</em> (knowing what to do).</p>
+
+    <div class="card">
+      <h4>🔬 Tonic vs phasic dopamine</h4>
+      <p>Dopamine operates on two timescales: a steady <strong>tonic</strong> background level and sharp <strong>phasic</strong> bursts for salient events (Grace's model). ADHD is linked to dysregulation of this balance — a low, unstable tonic baseline against which phasic bursts are hard to read. The brain is straining to hear a whisper over static.</p>
+    </div>
+
+    <h3>The dopamine transporter &amp; how stimulants work</h3>
+    <p>After dopamine acts, the <strong>dopamine transporter (DAT)</strong> reuptakes it. Many people with ADHD carry DAT/receptor variants that clear it too quickly. Stimulants correct this at the source:</p>
+    <ul class="rich">
+      <li><strong>Methylphenidate</strong> blocks the DAT and norepinephrine transporter (NET) — <em>reuptake inhibition</em>, leaving more transmitter in the synapse.</li>
+      <li><strong>Amphetamines</strong> block reuptake <em>and</em> reverse the transporters to actively pump dopamine out, plus promote release from vesicles.</li>
+    </ul>
+    <p>The net effect: the signal lasts long enough to be heard. This is why stimulants <em>calm</em> rather than excite someone with ADHD — they raise the under-aroused brain toward the optimal band.</p>
+
+    <h3>The inverted-U (this one explains everything)</h3>
+    <p>Amy Arnsten's work shows prefrontal performance follows an <strong>inverted-U</strong> against catecholamine levels. Too little → understimulated, distractible, bored. Too much (e.g. acute stress dumping NE/DA) → frazzled, overwhelmed, frozen. Optimal signalling engages postsynaptic <strong>α2A and D1 receptors</strong> in a narrow band. ADHD tends to sit on the <strong>left, under-aroused slope</strong> — which is why both understimulation and high stress tank focus.</p>
+
+    <div class="figure">
+      <svg viewBox="0 0 520 260" role="img" aria-label="Inverted-U curve of prefrontal performance versus catecholamine level">
+        <defs><linearGradient id="uline" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0" stop-color="var(--cool)"/><stop offset=".5" stop-color="var(--hot-3)"/><stop offset="1" stop-color="var(--bad)"/>
+        </linearGradient></defs>
+        <line x1="52" y1="20" x2="52" y2="212" stroke="var(--line)" stroke-width="1.5"/>
+        <line x1="52" y1="212" x2="500" y2="212" stroke="var(--line)" stroke-width="1.5"/>
+        <path d="M62,205 Q276,-30 490,205" fill="none" stroke="url(#uline)" stroke-width="4" stroke-linecap="round"/>
+        <circle cx="118" cy="150" r="6" fill="var(--cool)"/><circle cx="276" cy="52" r="6" fill="var(--hot-3)"/><circle cx="434" cy="150" r="6" fill="var(--bad)"/>
+        <text x="118" y="176" fill="var(--cool)" font-family="ui-monospace, Menlo, monospace" font-size="11" text-anchor="middle">under-aroused</text>
+        <text x="118" y="190" fill="var(--muted)" font-family="ui-monospace, Menlo, monospace" font-size="10" text-anchor="middle">bored · distracted</text>
+        <text x="276" y="40" fill="var(--hot-3)" font-family="ui-monospace, Menlo, monospace" font-size="11" text-anchor="middle">optimal focus</text>
+        <text x="434" y="176" fill="var(--bad)" font-family="ui-monospace, Menlo, monospace" font-size="11" text-anchor="middle">over-aroused</text>
+        <text x="434" y="190" fill="var(--muted)" font-family="ui-monospace, Menlo, monospace" font-size="10" text-anchor="middle">stressed · frozen</text>
+        <text x="92" y="140" fill="var(--ink)" font-family="system-ui, sans-serif" font-size="10" font-weight="700" text-anchor="middle">◄ ADHD default</text>
+        <text x="270" y="238" fill="var(--muted)" font-family="system-ui, sans-serif" font-size="11" text-anchor="middle">Dopamine / norepinephrine level →</text>
+      </svg>
+      <div class="cap">The inverted-U (Arnsten). Focus lives in a narrow middle band; ADHD starts low, so the fix is nudging <em>up</em> toward the peak — not blasting past it.</div>
+    </div>
+  </section>
+
+  <hr class="rule">
+
+  <!-- 07 EXECUTIVE -->
+  <section id="executive" class="reveal">
+    <span class="sec-num">CHAPTER 07</span>
+    <div class="eyebrow">The cognitive model</div>
+    <h2>Executive function: the <span class="accent">theory</span> that ties it together.</h2>
+    <div class="tldr">
+      <div class="tag">⚡ 30-second version</div>
+      <ul>
+        <li>ADHD is best understood as impaired <strong>self-regulation / executive function</strong>.</li>
+        <li>Barkley's model puts <strong>response inhibition</strong> at the centre — everything else fails downstream.</li>
+        <li>It's a disorder of <strong>using</strong> what you know, at the <strong>point of performance</strong> — not of knowing.</li>
+      </ul>
+    </div>
+
+    <p><strong>Executive functions</strong> are the brain's self-management system — the mental tools that let you pursue goals over time. The core set:</p>
+    <div class="grid two">
+      <div class="region"><h4>Response inhibition</h4><p>Stopping the automatic or impulsive response so a considered one can occur. Barkley's proposed keystone.</p></div>
+      <div class="region"><h4>Working memory</h4><p>Holding information "online" to act on it — including holding the future goal in mind against present temptation.</p></div>
+      <div class="region"><h4>Emotional self-regulation</h4><p>Modulating emotional reactions so they don't hijack behaviour — a core, under-recognised ADHD deficit.</p></div>
+      <div class="region"><h4>Self-directed motivation</h4><p>Generating drive for tasks with no immediate reward — the dopamine problem, felt from the inside.</p></div>
+      <div class="region"><h4>Planning / problem-solving</h4><p>Sequencing steps toward a goal and adjusting when things change.</p></div>
+      <div class="region"><h4>Cognitive flexibility &amp; sense of time</h4><p>Shifting set when needed; perceiving and using time — "time blindness" is a hallmark.</p></div>
+    </div>
+
+    <h3>Barkley's model: inhibition first</h3>
+    <p>Russell Barkley argues ADHD is fundamentally a deficit of <strong>behavioural inhibition</strong>. Without the pause that inhibition creates, the other executive functions never get their window to operate. The consequence is a disorder of <strong>time and the future</strong>: behaviour is captured by the immediate context because the internally-represented future can't compete. His famous framing — ADHD is <span class="si">"not a disorder of knowing what to do, but of doing what you know"</span> — is why pure information or willpower approaches fail, and why interventions must act at the <strong>point of performance</strong>.</p>
+
+    <h3>Complementary models</h3>
+    <ul class="rich">
+      <li><strong>Brown's model:</strong> ADHD as impaired coordination of six executive clusters (activation, focus, effort, emotion, memory, action) — emphasising it's a <em>management</em> problem, not an attention switch.</li>
+      <li><strong>Dual-pathway model (Sonuga-Barke):</strong> two partly independent routes — a <em>cognitive/executive</em> deficit and a <em>motivational</em> delay-aversion deficit — explaining why not everyone with ADHD has the same profile.</li>
+      <li><strong>Sluggish Cognitive Tempo / Cognitive Disengagement Syndrome:</strong> a proposed related-but-distinct profile of dreaminess, slow processing, and hypoactivity, overlapping with inattentive ADHD.</li>
+    </ul>
+  </section>
+
+  <hr class="rule">
+
+  <!-- 08 HORMONES -->
+  <section id="hormones" class="reveal">
+    <span class="sec-num">CHAPTER 08</span>
+    <div class="eyebrow">The hormonal brain</div>
+    <h2>Why symptoms <span class="accent">rise and fall</span> — the endocrine axes.</h2>
+    <div class="tldr">
+      <div class="tag">⚡ 30-second version</div>
+      <ul>
+        <li><strong>Cortisol</strong> (stress) impairs the prefrontal cortex — chronic stress amplifies every symptom.</li>
+        <li><strong>Estrogen boosts dopamine</strong>, so symptoms swing with the menstrual cycle and spike in perimenopause.</li>
+        <li>A <strong>delayed body clock</strong> (late melatonin) drags sleep and next-day focus out of alignment.</li>
+      </ul>
+    </div>
+
+    <h3>Cortisol &amp; the HPA axis — the focus-killer</h3>
+    <p>Under stress, the hypothalamic-pituitary-adrenal (HPA) axis releases <strong>cortisol</strong> alongside a norepinephrine surge. Acutely, this pushes you up and over the inverted-U into the frozen zone. Chronically, elevated cortisol <strong>impairs and remodels the prefrontal cortex</strong> (dendritic retraction) while strengthening the reactive amygdala — the precise opposite of what an ADHD brain needs. Many people with ADHD also show a <strong>blunted or dysregulated cortisol awakening response</strong>, part of why routine, novelty, and pressure affect them unusually.</p>
+
+    <h3>Estrogen &amp; the dopamine connection</h3>
+    <p>Estrogen is a <strong>dopamine amplifier</strong> — it boosts synthesis, increases receptor density, and modulates the transporter. So dopamine-dependent functions ride the hormonal tide:</p>
+    <ul class="rich">
+      <li><strong>Menstrual cycle:</strong> focus and mood often dip in the <em>late-luteal / premenstrual</em> phase as estrogen falls; some experience a premenstrual worsening of ADHD symptoms.</li>
+      <li><strong>Perimenopause:</strong> declining estrogen commonly <strong>unmasks or worsens</strong> ADHD — a major driver of late-in-life diagnosis in women.</li>
+      <li><strong>Postpartum:</strong> the sharp estrogen drop after birth can trigger a symptom flare.</li>
+      <li><strong>Puberty:</strong> rising and fluctuating sex hormones reshape symptom presentation in adolescence.</li>
+    </ul>
+
+    <h3>Melatonin &amp; the shifted body clock</h3>
+    <p>ADHD is strongly associated with <strong>delayed sleep phase</strong>: dim-light melatonin onset runs roughly <strong>1–1.5 hours late</strong>, so the brain isn't "sleepy" at a conventional bedtime. Late sleep → short sleep → a next-day prefrontal cortex on fumes → worse symptoms → later revenge-scrolling. It's self-reinforcing, and one of the highest-leverage things to fix.</p>
+
+    <h3>Thyroid, insulin &amp; the supporting cast</h3>
+    <div class="grid two">
+      <div class="region"><h4><span class="pin" style="background:var(--hot-2)"></span>Thyroid hormone</h4><p>Sets metabolic tempo. Hypothyroidism mimics and worsens inattention; rare thyroid-resistance syndromes are strongly linked to ADHD-like symptoms. Always worth ruling out.</p></div>
+      <div class="region"><h4><span class="pin" style="background:var(--good)"></span>Insulin / blood glucose</h4><p>Blood-sugar crashes trigger adrenaline and cortisol, mimicking and worsening irritability and inattention — the mechanism behind the "protein breakfast" cheatcode.</p></div>
+      <div class="region"><h4><span class="pin" style="background:var(--cool)"></span>Testosterone</h4><p>Prenatal androgen exposure is one hypothesis for the male skew; its role in adult symptoms is less clear.</p></div>
+      <div class="region"><h4><span class="pin" style="background:var(--hot-1)"></span>Adrenaline (epinephrine)</h4><p>The acute-stress partner to cortisol; drives the "deadline adrenaline" that paradoxically helps some people focus (a natural push up the inverted-U).</p></div>
+    </div>
+
+    <div class="squirrel">
+      <div class="tag">🐿 Why this matters historically</div>
+      <p>For most of the 20th century, ADHD research was done on hyperactive boys. The hormonal picture is a major reason the inattentive, internalising presentation — more common in girls and women — was missed for generations. The chemistry was on a schedule nobody was measuring.</p>
+    </div>
+  </section>
+
+  <hr class="rule">
+
+  <!-- 09 SEX & LIFESPAN -->
+  <section id="sex-lifespan" class="reveal">
+    <span class="sec-num">CHAPTER 09</span>
+    <div class="eyebrow">Across people &amp; time</div>
+    <h2>Sex differences &amp; the <span class="accent">lifespan</span> trajectory.</h2>
+    <div class="tldr">
+      <div class="tag">⚡ 30-second version</div>
+      <ul>
+        <li>ADHD looks different by <strong>sex</strong> and changes shape across the <strong>lifespan</strong>.</li>
+        <li>Girls/women are under-diagnosed because inattentive symptoms are quieter and often masked.</li>
+        <li>Hyperactivity fades; <strong>inattention and executive challenges persist</strong> into adulthood.</li>
+      </ul>
+    </div>
+
+    <h3>How presentation shifts with age</h3>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Life stage</th><th>Typical presentation</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Preschool</strong></td><td>Overt hyperactivity, impulsivity, difficult temperament; hard to distinguish from normal exuberance.</td></tr>
+          <tr><td><strong>School age</strong></td><td>Classic combined picture; academic and behavioural problems surface as demands rise.</td></tr>
+          <tr><td><strong>Adolescence</strong></td><td>Hyperactivity internalises to restlessness; risk-taking, emotional dysregulation, and executive demands peak.</td></tr>
+          <tr><td><strong>Adulthood</strong></td><td>Inattention, disorganisation, procrastination, time-management and relationship difficulties dominate; overt hyperactivity often gone.</td></tr>
+          <tr><td><strong>Older adulthood</strong></td><td>Under-researched; symptoms persist and can be masked by or confused with age-related cognitive change.</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>Why women are diagnosed decades late</h3>
+    <ul class="rich">
+      <li><strong>Presentation:</strong> more inattentive, less disruptive — so less likely to be referred.</li>
+      <li><strong>Masking &amp; compensation:</strong> social pressure drives coping strategies that hide symptoms until demands (career, motherhood, perimenopause) overwhelm them.</li>
+      <li><strong>Hormonal fluctuation</strong> (see Chapter 08) modulates symptom severity in ways male-derived diagnostic norms never captured.</li>
+      <li><strong>Misdiagnosis</strong> as anxiety or depression, which are often <em>secondary</em> to unmanaged ADHD.</li>
+    </ul>
+
+    <h3>The strengths side</h3>
+    <p>Rigorous framing matters: the traits are context-dependent, not uniformly negative. Under the right conditions, features associated with ADHD include <strong>hyperfocus on high-interest tasks, divergent/creative thinking, resilience, and high energy for novel challenges</strong>. The disorder is defined by <em>impairment</em> in a mismatched environment — which is exactly why environmental design (Chapters 11 &amp; 14) is so powerful.</p>
+  </section>
+
+  <hr class="rule">
+
+  <!-- 10 COMORBIDITY -->
+  <section id="comorbidity" class="reveal">
+    <span class="sec-num">CHAPTER 10</span>
+    <div class="eyebrow">Context</div>
+    <h2>It rarely travels <span class="accent">alone</span>.</h2>
+    <div class="tldr">
+      <div class="tag">⚡ 30-second version</div>
+      <ul>
+        <li>Most people with ADHD have <strong>at least one co-occurring condition</strong>.</li>
+        <li>Common companions: anxiety, depression, learning disorders, sleep problems, and substance use.</li>
+        <li>Comorbidity is why diagnosis is nuanced — symptoms overlap and mask one another.</li>
+      </ul>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Condition</th><th>Approx. co-occurrence</th><th>Relationship</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Anxiety disorders</strong></td><td class="num">~25–40%</td><td>Often secondary to years of underperformance; can also mask ADHD.</td></tr>
+          <tr><td><strong>Depression</strong></td><td class="num">~20–30%</td><td>Elevated risk; demoralisation vs true mood disorder must be teased apart.</td></tr>
+          <tr><td><strong>Oppositional defiant / conduct</strong></td><td class="num">~40–50% (children)</td><td>Frequent in combined-type childhood ADHD.</td></tr>
+          <tr><td><strong>Specific learning disorders</strong></td><td class="num">~20–40%</td><td>Dyslexia, dyscalculia; distinct but frequently paired.</td></tr>
+          <tr><td><strong>Autism spectrum</strong></td><td class="num">~20–50%</td><td>Shared genetics; now permitted as a dual diagnosis since DSM-5.</td></tr>
+          <tr><td><strong>Sleep disorders</strong></td><td class="num">majority</td><td>Delayed phase, insomnia, restless legs — both cause and consequence.</td></tr>
+          <tr><td><strong>Substance use</strong></td><td class="num">elevated</td><td>Higher risk untreated; notably, appropriate stimulant treatment <em>reduces</em> later SUD risk.</td></tr>
+          <tr><td><strong>Emotional dysregulation / RSD</strong></td><td class="num">very common</td><td>"Rejection-sensitive dysphoria" is a clinical description, not a formal diagnosis.</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>Because these conditions overlap and compound, best-practice assessment screens broadly and treats the whole picture — not ADHD in isolation.</p>
+  </section>
+
+  <hr class="rule">
+
+  <!-- 11 MODERN -->
+  <section id="modern" class="reveal">
+    <span class="sec-num">CHAPTER 11</span>
+    <div class="eyebrow">The modern trap</div>
+    <h2>Social media is a <span class="accent">slot machine</span> built for your weak spot.</h2>
+    <div class="tldr">
+      <div class="tag">⚡ 30-second version</div>
+      <ul>
+        <li>Phones don't <em>cause</em> ADHD — but they're engineered to exploit its exact wiring.</li>
+        <li><strong>Unpredictable rewards</strong> (the "maybe" of a refresh) are the most compulsive schedule known to science.</li>
+        <li>After each spike comes a <strong>dip below baseline</strong> — making real life feel flat by comparison.</li>
+      </ul>
+    </div>
+
+    <p>An ADHD brain is hungry for salient, immediate, novel dopamine. A feed delivers exactly that, on the one schedule the brain can't resist:</p>
+    <div class="loop">
+      <div class="step"><span class="n">1</span><p><strong>Variable-ratio reward</strong>The next swipe <em>might</em> be amazing. Skinner proved unpredictable rewards drive far more compulsive behaviour than reliable ones — a slot machine in your pocket, aimed at an already trigger-happy reward system.</p></div>
+      <div class="step"><span class="n">2</span><p><strong>Supernormal stimuli</strong>Feeds are faster, more novel, and more intense than anything in nature. They raise your reward set-point, so a book, a spreadsheet, or a conversation feels <em>under-stimulating by comparison.</em></p></div>
+      <div class="step"><span class="n">3</span><p><strong>The dopamine dip</strong>Every spike is followed by a compensatory drop below baseline (the pleasure-pain balance). Chase enough spikes and your resting state becomes restlessness. The scroll doesn't cure the itch — it <em>is</em> the itch.</p></div>
+      <div class="step"><span class="n">4</span><p><strong>No stopping cues</strong>Infinite scroll and autoplay strip out the natural "you're done" signal — and a prefrontal cortex already bad at stopping never gets the cue.</p></div>
+      <div class="step"><span class="n">5</span><p><strong>The sleep tax</strong>Bright screens at night suppress already-late melatonin, pushing sleep later, degrading tomorrow's focus, driving more scrolling. The loop closes.</p></div>
+    </div>
+
+    <p>The research here is largely <strong>correlational</strong>: heavy digital-media use is <em>associated</em> with more ADHD-type symptoms in adolescents (e.g. Ra et al., JAMA 2018), and clearly worsens the phenotype, but it is <strong>not proven to create the disorder</strong>. The honest takeaway: the attention economy is fine-tuned to press exactly the buttons your brain struggles to un-press — which makes environmental design (Chapter 14) non-optional for you.</p>
+  </section>
+
+  <hr class="rule">
+
+  <!-- 12 PHARMACOLOGY -->
+  <section id="pharmacology" class="reveal">
+    <span class="sec-num">CHAPTER 12</span>
+    <div class="eyebrow">Interventions</div>
+    <h2>Pharmacology, <span class="accent">in depth.</span></h2>
+    <div class="tldr">
+      <div class="tag">⚡ 30-second version</div>
+      <ul>
+        <li>ADHD medications are among the <strong>most effective, best-evidenced treatments in psychiatry</strong> (effect sizes ~0.7–1.0 for stimulants).</li>
+        <li>Two families: <strong>stimulants</strong> (first-line) and <strong>non-stimulants</strong>.</li>
+        <li>They work by restoring <strong>dopamine/norepinephrine signalling</strong> toward the optimal band.</li>
+      </ul>
+    </div>
+
+    <h3>Stimulants — first-line</h3>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Class</th><th>Examples</th><th>Mechanism</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Methylphenidate</strong></td><td>Ritalin, Concerta, Medikinet, Equasym</td><td>Blocks DAT &amp; NET (reuptake inhibition) → more DA/NE in synapse.</td></tr>
+          <tr><td><strong>Amphetamines</strong></td><td>Adderall, Vyvanse (lisdexamfetamine), Elvanse, dexamfetamine</td><td>Reuptake block <em>plus</em> transporter reversal &amp; increased release.</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>Stimulants come in <strong>immediate- and extended-release</strong> forms; lisdexamfetamine is a prodrug (inactive until metabolised), giving a smooth curve and lower abuse potential. Roughly <strong>70–80%</strong> of people respond to a given stimulant, and many non-responders to one class respond to the other. Common side effects: reduced appetite, sleep disruption, transient increased heart rate/blood pressure, and (in children) a small, largely catch-up growth effect. Contrary to old fears, <strong>appropriate stimulant treatment lowers</strong> the long-term risk of substance use disorder.</p>
+
+    <h3>Non-stimulants</h3>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Drug</th><th>Type</th><th>Mechanism &amp; use</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Atomoxetine</strong></td><td>NET inhibitor</td><td>Selectively raises norepinephrine (and dopamine in PFC). Non-controlled; takes weeks to work. Good where stimulants aren't tolerated or SUD is a concern.</td></tr>
+          <tr><td><strong>Guanfacine XR</strong></td><td>α2A-adrenergic agonist</td><td>Directly strengthens prefrontal α2A signalling (Arnsten's mechanism). Helps with impulsivity, emotional regulation, tics, sleep.</td></tr>
+          <tr><td><strong>Clonidine XR</strong></td><td>α2-adrenergic agonist</td><td>Similar; more sedating; useful adjunct especially for sleep and hyperarousal.</td></tr>
+          <tr><td><strong>Viloxazine XR</strong></td><td>SNRI-like</td><td>Newer non-stimulant option, approved for children and adults.</td></tr>
+          <tr><td><strong>Bupropion</strong> (off-label)</td><td>DA/NE reuptake inhibitor</td><td>Sometimes used, especially with comorbid depression.</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>The evidence &amp; the honest framing</h3>
+    <p>Medication is <strong>not "cheating"</strong> and not a moral question. It corrects a signalling problem the same way glasses correct a focusing problem. The landmark <strong>MTA study</strong> found well-managed medication superior to behavioural therapy alone for core symptoms, with <strong>combined treatment</strong> best for overall functioning. Medication doesn't teach skills — it opens the window in which skills (Chapters 13–14) can finally be learned. Any medication decision belongs with a qualified clinician; this chapter is education, not a prescription.</p>
+  </section>
+
+  <hr class="rule">
+
+  <!-- 13 BEHAVIOURAL -->
+  <section id="behavioural" class="reveal">
+    <span class="sec-num">CHAPTER 13</span>
+    <div class="eyebrow">Interventions</div>
+    <h2>Behavioural &amp; <span class="accent">psychosocial</span> treatment.</h2>
+    <div class="tldr">
+      <div class="tag">⚡ 30-second version</div>
+      <ul>
+        <li>Skills and structure work best <em>alongside</em> (not instead of) medication for moderate-severe ADHD.</li>
+        <li>The gold standards: <strong>CBT for adults, behavioural parent training for children, coaching, and structure</strong>.</li>
+        <li>All share one principle: act at the <strong>point of performance</strong>, externally.</li>
+      </ul>
+    </div>
+
+    <div class="grid two">
+      <div class="card"><h4>CBT adapted for ADHD</h4><p>Targets the practical fallout — procrastination, time management, organisation, and the negative self-talk built up over years. Strong evidence in adults, especially combined with medication.</p></div>
+      <div class="card"><h4>Behavioural parent training</h4><p>First-line for young children. Teaches consistent routines, clear commands, and reward systems that externalise motivation and structure.</p></div>
+      <div class="card"><h4>ADHD coaching</h4><p>Ongoing, action-oriented support for building and maintaining systems — accountability that offloads executive load onto a relationship.</p></div>
+      <div class="card"><h4>School / workplace accommodations</h4><p>Environmental redesign: extended time, quiet spaces, written instructions, deadline scaffolding — changing the environment, not the person.</p></div>
+      <div class="card"><h4>Psychoeducation</h4><p>Understanding the mechanism (this whole document) reduces shame and enables self-advocacy — a genuine active ingredient.</p></div>
+      <div class="card"><h4>Emerging &amp; adjunct</h4><p>Mindfulness training, some digital therapeutics (e.g. FDA-cleared game-based tools), and exercise programmes as evidence-supported adjuncts.</p></div>
+    </div>
+
+    <div class="squirrel">
+      <div class="tag">🐿 What doesn't hold up</div>
+      <p>Elimination/restriction diets show only small effects in specific subgroups; "brain-training" apps rarely transfer beyond the trained task; neurofeedback has mixed, mostly modest evidence. Be skeptical of anything marketed as a drug-free "cure." The robust levers are medication, behavioural skills, sleep, and exercise.</p>
+    </div>
+  </section>
+
+  <hr class="rule">
+
+  <!-- 14 CHEATCODES -->
+  <section id="cheatcodes" class="reveal">
+    <span class="sec-num">CHAPTER 14</span>
+    <div class="eyebrow">Interventions</div>
+    <h2>Science-backed <span class="accent">cheatcodes.</span></h2>
+    <p class="lede">Each has a mechanism, a rough dose, and an honest evidence rating. Green dots = strength of evidence. Steal the ones that fit.</p>
+
+    <div class="squirrel" style="border-style:solid; border-color:var(--line); background:var(--surface)">
+      <div class="tag">🎮 How to read the ratings</div>
+      <p><span class="evidence"><span class="ev-dots"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i></span>&nbsp;strong &amp; replicated</span> · <span class="evidence"><span class="ev-dots"><i class="on"></i><i class="on"></i><i class="on"></i><i></i></span>&nbsp;good</span> · <span class="evidence"><span class="ev-dots"><i class="on"></i><i class="on"></i><i></i><i></i></span>&nbsp;promising</span> · <span class="evidence"><span class="ev-dots"><i class="on"></i><i></i><i></i><i></i></span>&nbsp;early / caveats</span></p>
+    </div>
+
+    <div class="cheat"><div class="head"><span class="combo">↑ ↑ MOVE</span><h4>01 · Exercise — the natural stimulant</h4><span class="evidence"><span class="ev-dots"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i></span></span></div>
+      <div class="body"><p>A single aerobic bout acutely raises <strong>dopamine and norepinephrine</strong> for an hour or two — the same direction as a small stimulant dose. Long-term it raises <strong>BDNF</strong>, a fertiliser for prefrontal neurons.</p>
+      <div class="mech"><b>Mechanism:</b> acute catecholamine release + chronic BDNF-driven prefrontal plasticity → better executive control (multiple meta-analyses).</div>
+      <div class="dose"><span><b>20–30 min</b> moderate aerobic</span><span>Timing: <b>before</b> focus work</span><span><b>Most days</b></span></div></div></div>
+
+    <div class="cheat"><div class="head"><span class="combo">HOLD · SLEEP</span><h4>02 · Anchor your body clock</h4><span class="evidence"><span class="ev-dots"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i></span></span></div>
+      <div class="body"><p>Because ADHD melatonin runs late, fix the <strong>wake end</strong>, not bedtime. A fixed wake time + morning light drags the delayed clock earlier. Sleep is when the PFC and dopamine receptors reset.</p>
+      <div class="mech"><b>Mechanism:</b> stable wake time + light re-entrains circadian rhythm → earlier melatonin → restored PFC function.</div>
+      <div class="dose"><span>Same <b>wake time</b> daily</span><span>Dim screens <b>60–90 min</b> pre-bed</span><span>Target <b>7–9 h</b></span></div></div></div>
+
+    <div class="cheat"><div class="head"><span class="combo">☀ EARLY LIGHT</span><h4>03 · Morning sunlight</h4><span class="evidence"><span class="ev-dots"><i class="on"></i><i class="on"></i><i class="on"></i><i></i></span></span></div>
+      <div class="body"><p>Bright outdoor light early sets a clean circadian anchor, triggers a healthy <strong>cortisol awakening pulse</strong> (alertness, not stress), and supports daytime dopamine tone. Cheap, fast, zero side effects.</p>
+      <div class="mech"><b>Mechanism:</b> light → suprachiasmatic nucleus → tighter circadian timing + dopaminergic tone.</div>
+      <div class="dose"><span><b>5–15 min</b> outdoors</span><span>Within <b>~1 h</b> of waking</span><span>Even if cloudy</span></div></div></div>
+
+    <div class="cheat"><div class="head"><span class="combo">IF → THEN</span><h4>04 · Implementation intentions</h4><span class="evidence"><span class="ev-dots"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i></span></span></div>
+      <div class="body"><p>The ADHD brain is bad at initiating from a vague goal. Gollwitzer's fix: pre-decide the trigger — <em>"If it's 9am, then I open the doc and write one sentence."</em> This offloads the decision from your unreliable executive to an automatic cue → response.</p>
+      <div class="mech"><b>Mechanism:</b> converts effortful top-down initiation into automatic cue-driven action → bypasses the weak "start" circuit.</div>
+      <div class="dose"><span>Format: <b>"If X, then Y"</b></span><span>Attach to an <b>existing cue</b></span><span>One tiny first step</span></div></div></div>
+
+    <div class="cheat"><div class="head"><span class="combo">± FRICTION</span><h4>05 · Design the environment, not the willpower</h4><span class="evidence"><span class="ev-dots"><i class="on"></i><i class="on"></i><i class="on"></i><i></i></span></span></div>
+      <div class="body"><p>Willpower is the failing circuit — don't build a plan that depends on it. Add <strong>friction</strong> to distractions (log out, phone in another room, greyscale) and remove it from targets (gym clothes out, doc already open).</p>
+      <div class="mech"><b>Mechanism:</b> choice-architecture removes the cue and inserts a pause the PFC can't reliably supply.</div>
+      <div class="dose"><span>Distraction: <b>+friction</b></span><span>Target: <b>−friction</b></span><span>Phone <b>out of room</b></span></div></div></div>
+
+    <div class="cheat"><div class="head"><span class="combo">SAVE · EXTERNAL</span><h4>06 · Externalise time &amp; memory</h4><span class="evidence"><span class="ev-dots"><i class="on"></i><i class="on"></i><i class="on"></i><i></i></span></span></div>
+      <div class="body"><p>ADHD working memory and time-sense are unreliable — so put them <strong>outside your head</strong>. Visible timers make invisible time visible (fighting "time blindness"); lists, alarms, whiteboards, and <em>body-doubling</em> move executive load onto the stable world.</p>
+      <div class="mech"><b>Mechanism:</b> offloads working memory &amp; time-estimation from an impaired internal system to reliable external cues.</div>
+      <div class="dose"><span><b>Visible timer</b></span><span>One <b>capture</b> inbox</span><span>Try <b>body-doubling</b></span></div></div></div>
+
+    <div class="cheat"><div class="head"><span class="combo">COMBO ×</span><h4>07 · Gamify &amp; temptation-bundle</h4><span class="evidence"><span class="ev-dots"><i class="on"></i><i class="on"></i><i></i><i></i></span></span></div>
+      <div class="body"><p>Boring tasks generate no dopamine, so inject it: add novelty, urgency (a short timer creates a norepinephrine deadline-buzz), challenge, or bundle the task with something you love — only during the task.</p>
+      <div class="mech"><b>Mechanism:</b> novelty/urgency/reward-pairing manufactures the phasic dopamine the task fails to produce.</div>
+      <div class="dose"><span>Race a <b>25-min timer</b></span><span>Bundle a <b>treat</b></span><span>Make it <b>novel</b></span></div></div></div>
+
+    <div class="cheat"><div class="head"><span class="combo">FUEL</span><h4>08 · Protein, tyrosine &amp; omega-3</h4><span class="evidence"><span class="ev-dots"><i class="on"></i><i class="on"></i><i></i><i></i></span></span></div>
+      <div class="body"><p>Dopamine and NE are built from the amino acid <strong>tyrosine</strong>, so a protein-forward breakfast supplies raw material and blunts blood-sugar crashes that spike cortisol. <strong>Omega-3 (EPA/DHA)</strong> has a small-but-real effect (meta-analytic ~0.3) on attention.</p>
+      <div class="mech"><b>Mechanism:</b> tyrosine = catecholamine precursor; omega-3 supports membrane &amp; dopaminergic function. Supportive, not curative.</div>
+      <div class="dose"><span><b>Protein</b>-first breakfast</span><span>Omega-3 <b>EPA-heavy</b></span><span>Steady <b>blood sugar</b></span></div></div></div>
+
+    <div class="cheat"><div class="head"><span class="combo">FOCUS · TRAIN</span><h4>09 · Meditation as attention reps</h4><span class="evidence"><span class="ev-dots"><i class="on"></i><i class="on"></i><i></i><i></i></span></span></div>
+      <div class="body"><p>Every time you notice a wandering mind and drag it back, that's one rep for the exact network that misfires in ADHD. Mindfulness shows modest gains in attention and, crucially, in <strong>regulating the Default Mode Network</strong>.</p>
+      <div class="mech"><b>Mechanism:</b> trains executive-attention &amp; DMN suppression via repeated notice-and-return cycles.</div>
+      <div class="dose"><span>Start <b>5 min</b></span><span>Wandering = the rep, not failure</span><span>Daily beats long</span></div></div></div>
+
+    <div class="cheat"><div class="head"><span class="combo">☕ TIMED</span><h4>10 · Caffeine, timed well</h4><span class="evidence"><span class="ev-dots"><i class="on"></i><i class="on"></i><i></i><i></i></span></span></div>
+      <div class="body"><p>A mild adenosine-blocker that indirectly nudges dopamine and lifts you up the inverted-U. Delay the first cup <strong>~90 min after waking</strong> to avoid an afternoon crash, and cut off <strong>~8–10 h before bed</strong> to protect sleep.</p>
+      <div class="mech"><b>Mechanism:</b> adenosine antagonism → alertness + indirect dopaminergic tone. Half-life ~5–6 h, hence the cut-off.</div>
+      <div class="dose"><span>Delay <b>~90 min</b></span><span>Cut off <b>early afternoon</b></span><span>Watch anxiety</span></div></div></div>
+
+    <div class="cheat"><div class="head"><span class="combo">▼ LOWER CORTISOL</span><h4>11 · Protect the PFC from stress</h4><span class="evidence"><span class="ev-dots"><i class="on"></i><i class="on"></i><i class="on"></i><i></i></span></span></div>
+      <div class="body"><p>Acute stress dumps NE and cortisol, shoving you off the focus peak; chronic stress corrodes the PFC. Down-regulating the stress response (slow exhales, walks, boundaries, offloading to systems 04–06) keeps your best circuitry online.</p>
+      <div class="mech"><b>Mechanism:</b> lowering cortisol/NE keeps you in the optimal band of the inverted-U and prevents chronic prefrontal impairment.</div>
+      <div class="dose"><span>Longer <b>exhale</b> than inhale</span><span>Daylight walks</span><span>Shrink the to-do surface</span></div></div></div>
+
+    <div class="cheat"><div class="head"><span class="combo">❄ COLD</span><h4>12 · Cold exposure</h4><span class="evidence"><span class="ev-dots"><i class="on"></i><i></i><i></i><i></i></span></span></div>
+      <div class="body"><p>Cold-water immersion produced a large, <strong>sustained ~250% dopamine rise</strong> in one small study — a clean, drug-free spike some find sharpens focus for hours. Evidence is thin and individual; treat it as an experiment, and skip it with heart conditions.</p>
+      <div class="mech"><b>Mechanism:</b> cold stress → prolonged catecholamine release. Data limited &amp; preliminary.</div>
+      <div class="dose"><span>Cold-shower finish <b>30–90 s</b></span><span>Build up slowly</span><span>Health caveats apply</span></div></div></div>
+
+    <div class="cheat"><div class="head"><span class="combo">RX · SEE A PRO</span><h4>13 · Medication (the honest note)</h4><span class="evidence"><span class="ev-dots"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i></span></span></div>
+      <div class="body"><p>Not a moral question and not "cheating." Stimulant and non-stimulant medications are among the most effective, best-evidenced treatments in all of psychiatry (Chapter 12). The cheatcodes above amplify medication or help without it — but if symptoms are wrecking your life, a proper assessment is the highest-leverage move.</p>
+      <div class="mech"><b>Mechanism:</b> restores catecholamine signalling to the optimal band. Decided with a qualified clinician.</div>
+      <div class="dose"><span>Get a <b>real assessment</b></span><span>Meds <b>+</b> behaviour beats either alone</span></div></div></div>
+  </section>
+
+  <hr class="rule">
+
+  <hr class="rule">
+
+  <!-- 15 TARGETED FIXES: SYMPTOMS -->
+  <section id="targeted" class="reveal">
+    <span class="sec-num">CHAPTER 15</span>
+    <div class="eyebrow">Interventions</div>
+    <h2>Targeted fixes: a cheatcode for <span class="accent">every symptom.</span></h2>
+    <p class="lede">Chapter 14 covered the broad levers. This is the surgical version — one specific negative at a time, with the mechanism that causes it and the interventions that actually move it.</p>
+
+    <div class="tldr">
+      <div class="tag">⚡ The meta-principle</div>
+      <ul>
+        <li>Every fix below follows one rule: <strong>act at the point of performance, externally.</strong></li>
+        <li>If a strategy requires the broken circuit to fix the broken circuit, it will fail. Put the solution <em>in the world</em>, not in your head.</li>
+      </ul>
+    </div>
+
+    <!-- task initiation -->
+    <div class="fix">
+      <div class="problem"><span class="lbl">✕ The negative</span><h4>Task initiation failure — "the wall of awful"</h4></div>
+      <div class="why">You know exactly what to do and physically cannot start. <b>Why:</b> starting a low-reward task requires the mesocortical dopamine signal to bridge the gap to a delayed payoff — and that signal is blunted and steeply time-discounted. It's a <b>motivation-circuit failure, not a knowledge failure.</b></div>
+      <div class="fixes"><span class="lbl">✓ The cheatcodes</span>
+        <ul>
+          <li><span class="tick">▸</span><span><b>Implementation intentions.</b> "If it's 9am, then I open the doc and write one sentence." Pre-deciding the trigger converts effortful initiation into automatic cue→response. Among the largest effect sizes in behavioural science. <span class="ev-dots"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i></span></span></li>
+          <li><span class="tick">▸</span><span><b>Shrink the first step to absurdity.</b> Not "write the report" — "open the file." Effort is discounted nonlinearly, so a trivially small step falls below the activation threshold. <span class="ev-dots"><i class="on"></i><i class="on"></i><i class="on"></i><i></i></span></span></li>
+          <li><span class="tick">▸</span><span><b>The 5-minute rule + Zeigarnik effect.</b> Commit to 5 minutes only. Started-but-unfinished tasks generate intrusive tension that pulls you back — you'll usually continue. <span class="ev-dots"><i class="on"></i><i class="on"></i><i></i><i></i></span></span></li>
+          <li><span class="tick">▸</span><span><b>Body-doubling.</b> Work alongside someone (in person or on a call). Social presence supplies external accountability and arousal the internal system won't. <span class="ev-dots"><i class="on"></i><i class="on"></i><i></i><i></i></span></span></li>
+          <li><span class="tick">▸</span><span><b>Temptation bundling.</b> Pair the task with something you want (a specific playlist, a good coffee) available <em>only</em> during it. <span class="ev-dots"><i class="on"></i><i class="on"></i><i></i><i></i></span></span></li>
+        </ul>
+        <div class="rx"><b>Why it works:</b> each one manufactures an immediate, proximal reward or removes the need for the initiation signal entirely.</div>
+      </div>
+    </div>
+
+    <!-- time blindness -->
+    <div class="fix">
+      <div class="problem"><span class="lbl">✕ The negative</span><h4>Time blindness</h4></div>
+      <div class="why">Time is either "now" or "not now." Hours vanish; deadlines arrive from nowhere. <b>Why:</b> impaired internal time representation, linked to cerebellar timing circuits and the working-memory deficit that makes the future hard to <em>hold</em> and therefore hard to feel.</div>
+      <div class="fixes"><span class="lbl">✓ The cheatcodes</span>
+        <ul>
+          <li><span class="tick">▸</span><span><b>Make time physically visible.</b> An analog countdown timer that shows the shrinking block (Time Timer-style) converts an abstract quantity into a perceptual one your brain can actually track. <span class="ev-dots"><i class="on"></i><i class="on"></i><i class="on"></i><i></i></span></span></li>
+          <li><span class="tick">▸</span><span><b>Time-estimation logging.</b> Guess how long a task will take, then record the real number. Weeks of this calibrates a genuinely miscalibrated internal model. <span class="ev-dots"><i class="on"></i><i class="on"></i><i></i><i></i></span></span></li>
+          <li><span class="tick">▸</span><span><b>Alarms as external anchors.</b> Not one alarm at the deadline — alarms at the <em>transitions</em>. The deadline isn't your problem; the invisible runway before it is. <span class="ev-dots"><i class="on"></i><i class="on"></i><i class="on"></i><i></i></span></span></li>
+          <li><span class="tick">▸</span><span><b>Shrink the horizon.</b> Break multi-week projects into daily-visible units. If the future can't be felt, only build plans that live inside today. <span class="ev-dots"><i class="on"></i><i class="on"></i><i></i><i></i></span></span></li>
+        </ul>
+        <div class="rx"><b>Barkley's principle:</b> you cannot fix a broken internal clock — you can only put a working one outside your body.</div>
+      </div>
+    </div>
+
+    <!-- working memory -->
+    <div class="fix">
+      <div class="problem"><span class="lbl">✕ The negative</span><h4>Working-memory failure &amp; forgetfulness</h4></div>
+      <div class="why">You walk into a room and lose the reason. The thought evaporates mid-sentence. <b>Why:</b> working memory depends on sustained prefrontal firing held by D1/α2A receptor signalling — precisely the system that's under-tuned. Under-supported PFC networks can't hold a representation online against interference.</div>
+      <div class="fixes"><span class="lbl">✓ The cheatcodes</span>
+        <ul>
+          <li><span class="tick">▸</span><span><b>One capture inbox.</b> A single, always-available place for every thought (one app, one notebook — not five). Capture at the instant of thought; the thought will not survive the walk to the desk. <span class="ev-dots"><i class="on"></i><i class="on"></i><i class="on"></i><i></i></span></span></li>
+          <li><span class="tick">▸</span><span><b>Checklists.</b> Aviation and surgery both cut catastrophic error with them precisely because expert memory is unreliable under load. Yours is unreliable at baseline. <span class="ev-dots"><i class="on"></i><i class="on"></i><i class="on"></i><i></i></span></span></li>
+          <li><span class="tick">▸</span><span><b>Single-task ruthlessly.</b> Every concurrent stream consumes the same limited buffer. Multitasking isn't inefficient for you — it's destructive. <span class="ev-dots"><i class="on"></i><i class="on"></i><i class="on"></i><i></i></span></span></li>
+          <li><span class="tick">▸</span><span><b>Say it out loud.</b> Verbalising recruits the phonological loop, a separate buffer from the visuospatial one — free extra capacity. <span class="ev-dots"><i class="on"></i><i class="on"></i><i></i><i></i></span></span></li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- emotional dysregulation -->
+    <div class="fix">
+      <div class="problem"><span class="lbl">✕ The negative</span><h4>Emotional dysregulation &amp; rejection sensitivity (RSD)</h4></div>
+      <div class="why">Emotions arrive at full volume with no dimmer switch; mild criticism lands like catastrophe. <b>Why:</b> weak prefrontal top-down control over a reactive amygdala. The emotion isn't bigger — the <b>brake is weaker.</b> DSM omits this; clinicians see it constantly.</div>
+      <div class="fixes"><span class="lbl">✓ The cheatcodes</span>
+        <ul>
+          <li><span class="tick">▸</span><span><b>Affect labelling — "name it to tame it."</b> Putting the feeling into words measurably reduces amygdala activity and recruits ventrolateral PFC (Lieberman et al.). Literally: say "this is rejection sensitivity firing." <span class="ev-dots"><i class="on"></i><i class="on"></i><i class="on"></i><i></i></span></span></li>
+          <li><span class="tick">▸</span><span><b>Cognitive reappraisal.</b> Reframing the meaning of an event before the response is one of the best-validated regulation strategies in psychology (Gross). <span class="ev-dots"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i></span></span></li>
+          <li><span class="tick">▸</span><span><b>The physiological sigh.</b> Two inhales through the nose, one long exhale. Extended exhales raise vagal tone and cut arousal faster than most techniques (Balban et al., 2023). <span class="ev-dots"><i class="on"></i><i class="on"></i><i class="on"></i><i></i></span></span></li>
+          <li><span class="tick">▸</span><span><b>The 24-hour send rule.</b> Never respond to a perceived slight the same day. A hard external rule outperforms in-the-moment judgment — because in the moment, judgment is the thing that's offline. <span class="ev-dots"><i class="on"></i><i class="on"></i><i></i><i></i></span></span></li>
+          <li><span class="tick">▸</span><span><b>Ask about guanfacine.</b> The α2A agonist directly strengthens the prefrontal signalling that regulates emotion — often more helpful for this facet than stimulants. Clinician conversation. <span class="ev-dots"><i class="on"></i><i class="on"></i><i class="on"></i><i></i></span></span></li>
+        </ul>
+        <div class="rx"><b>Note:</b> "RSD" is a useful clinical description, not a formal DSM diagnosis. The underlying emotional dysregulation is very real and well documented.</div>
+      </div>
+    </div>
+
+    <!-- impulsivity -->
+    <div class="fix">
+      <div class="problem"><span class="lbl">✕ The negative</span><h4>Impulsivity — blurting, spending, quitting, sending</h4></div>
+      <div class="why">The action happens before the decision does. <b>Why:</b> deficient <em>response inhibition</em> — Barkley's proposed keystone. Without the pause inhibition creates, no other executive function gets its window to run.</div>
+      <div class="fixes"><span class="lbl">✓ The cheatcodes</span>
+        <ul>
+          <li><span class="tick">▸</span><span><b>Pre-commitment devices.</b> Bind your future self in advance: delete saved cards, use a separate account for spending money, put the drafts in a folder that sends at 8am. Ulysses had himself tied to the mast — he didn't rely on resolve. <span class="ev-dots"><i class="on"></i><i class="on"></i><i class="on"></i><i></i></span></span></li>
+          <li><span class="tick">▸</span><span><b>Inhibitory if-thens.</b> "If I want to buy something over ₹5,000, then it goes on a list for 48 hours." Implementation intentions work for <em>stopping</em>, not just starting. <span class="ev-dots"><i class="on"></i><i class="on"></i><i class="on"></i><i></i></span></span></li>
+          <li><span class="tick">▸</span><span><b>Insert physical friction.</b> Every second between impulse and action is a second the slow system might arrive. Logged out, another room, a different device. <span class="ev-dots"><i class="on"></i><i class="on"></i><i class="on"></i><i></i></span></span></li>
+          <li><span class="tick">▸</span><span><b>Occupy the channel.</b> In meetings, write the thought down instead of saying it. The urge to blurt is discharged by the writing; the idea survives for the right moment. <span class="ev-dots"><i class="on"></i><i class="on"></i><i></i><i></i></span></span></li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- boredom / understimulation -->
+    <div class="fix">
+      <div class="problem"><span class="lbl">✕ The negative</span><h4>Boredom intolerance &amp; understimulation</h4></div>
+      <div class="why">Low-stimulation tasks feel physically painful — not merely dull. <b>Why:</b> you sit on the <b>left, under-aroused slope of the inverted-U</b>. A task that generates no dopamine leaves the PFC below its operating threshold. Boredom is a genuine physiological state for you, not a character flaw.</div>
+      <div class="fixes"><span class="lbl">✓ The cheatcodes</span>
+        <ul>
+          <li><span class="tick">▸</span><span><b>Add noise — literally.</b> The Moderate Brain Arousal model (Söderlund et al.) found white noise <em>improves</em> performance in ADHD while degrading it in controls — <b>stochastic resonance</b>: added noise lifts a weak signal over threshold. This is one of the most counterintuitive, best-mechanised findings in the field. <span class="ev-dots"><i class="on"></i><i class="on"></i><i class="on"></i><i></i></span></span></li>
+          <li><span class="tick">▸</span><span><b>Rotate the environment.</b> New café, new room, new desk. Novelty is a phasic dopamine trigger — and it's free. <span class="ev-dots"><i class="on"></i><i class="on"></i><i></i><i></i></span></span></li>
+          <li><span class="tick">▸</span><span><b>Manufacture urgency.</b> A visible 25-minute countdown creates a norepinephrine deadline-buzz that raises arousal into the usable band. <span class="ev-dots"><i class="on"></i><i class="on"></i><i></i><i></i></span></span></li>
+          <li><span class="tick">▸</span><span><b>Gamify the metric.</b> Compete against your own last score. Turning an unrewarded task into a scored one gives the reward system something to predict. <span class="ev-dots"><i class="on"></i><i class="on"></i><i></i><i></i></span></span></li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- restlessness -->
+    <div class="fix">
+      <div class="problem"><span class="lbl">✕ The negative</span><h4>Physical restlessness &amp; fidgeting</h4></div>
+      <div class="why">You can't sit still, and being forced to makes thinking worse. <b>Why:</b> here's the twist — Rapport and Sarver's work found that gross motor activity in ADHD <b>increases specifically during working-memory demand and correlates with better performance.</b> The fidgeting isn't the symptom interfering with the work. It's <b>compensatory self-arousal</b> — the brain manufacturing the stimulation it needs to think.</div>
+      <div class="fixes"><span class="lbl">✓ The cheatcodes</span>
+        <ul>
+          <li><span class="tick">▸</span><span><b>Stop suppressing it.</b> Forcing stillness spends executive resources on sitting still — the exact resource you needed for the task. Let the leg bounce. <span class="ev-dots"><i class="on"></i><i class="on"></i><i class="on"></i><i></i></span></span></li>
+          <li><span class="tick">▸</span><span><b>Build movement into the work.</b> Standing desk, walking meetings, pacing while on calls, reading while on a treadmill. <span class="ev-dots"><i class="on"></i><i class="on"></i><i></i><i></i></span></span></li>
+          <li><span class="tick">▸</span><span><b>Exercise before focus blocks.</b> Front-load the arousal so the fidgeting has less work to do (see Cheatcode 01). <span class="ev-dots"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i></span></span></li>
+        </ul>
+        <div class="rx"><b>Reframe:</b> a century of "sit still and concentrate" had the causality backwards for this population.</div>
+      </div>
+    </div>
+
+    <!-- hyperfocus -->
+    <div class="fix">
+      <div class="problem"><span class="lbl">✕ The negative</span><h4>Hyperfocus &amp; the inability to switch</h4></div>
+      <div class="why">Six hours gone, meals skipped, the actual priority untouched. <b>Why:</b> the flip side of poor attentional control — the <b>salience network</b> fails to switch you <em>out</em> just as it fails to switch you <em>in</em>. Attention isn't deficient; it's badly governed in both directions.</div>
+      <div class="fixes"><span class="lbl">✓ The cheatcodes</span>
+        <ul>
+          <li><span class="tick">▸</span><span><b>External interrupts you can't dismiss.</b> An alarm across the room, a calendar block with a hard stop, a person expecting you. Internal "I'll stop at 6" has no force. <span class="ev-dots"><i class="on"></i><i class="on"></i><i class="on"></i><i></i></span></span></li>
+          <li><span class="tick">▸</span><span><b>Transition rituals.</b> A fixed short sequence (stand, water, three breaths) that acts as an external switch signal between contexts. <span class="ev-dots"><i class="on"></i><i class="on"></i><i></i><i></i></span></span></li>
+          <li><span class="tick">▸</span><span><b>Aim it, don't kill it.</b> Hyperfocus is a genuine asset when pointed at the right target. The intervention is <em>selection</em>, not suppression — decide before you start what deserves it. <span class="ev-dots"><i class="on"></i><i class="on"></i><i></i><i></i></span></span></li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- disorganisation -->
+    <div class="fix">
+      <div class="problem"><span class="lbl">✕ The negative</span><h4>Disorganisation &amp; "object permanence" loss</h4></div>
+      <div class="why">Out of sight is genuinely out of mind — the food rots in the opaque container; the file in the folder ceases to exist. <b>Why:</b> a working-memory system that can't hold unseen items online. If it isn't perceptually present, it isn't represented.</div>
+      <div class="fixes"><span class="lbl">✓ The cheatcodes</span>
+        <ul>
+          <li><span class="tick">▸</span><span><b>Transparent &amp; open storage.</b> Clear containers, open shelves, pegboards. Design for a brain that only knows what it can see. <span class="ev-dots"><i class="on"></i><i class="on"></i><i></i><i></i></span></span></li>
+          <li><span class="tick">▸</span><span><b>Own fewer things.</b> Organisation load scales with object count. Reduction beats any system. <span class="ev-dots"><i class="on"></i><i class="on"></i><i></i><i></i></span></span></li>
+          <li><span class="tick">▸</span><span><b>One home per object, zero decisions.</b> Keys live in exactly one place, forever. The goal is removing the micro-decision, not being tidy. <span class="ev-dots"><i class="on"></i><i class="on"></i><i class="on"></i><i></i></span></span></li>
+          <li><span class="tick">▸</span><span><b>Launch pad.</b> One spot by the door holding everything that leaves with you. Externalises the entire morning checklist into a location. <span class="ev-dots"><i class="on"></i><i class="on"></i><i></i><i></i></span></span></li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- overwhelm -->
+    <div class="fix">
+      <div class="problem"><span class="lbl">✕ The negative</span><h4>Overwhelm, shutdown &amp; decision paralysis</h4></div>
+      <div class="why">Too many options or too big a pile, and the system freezes entirely. <b>Why:</b> a limited executive buffer flooded past capacity, plus the stress response pushing you over the <b>right side of the inverted-U</b> into the frozen zone. Shutdown is an overload state, not laziness.</div>
+      <div class="fixes"><span class="lbl">✓ The cheatcodes</span>
+        <ul>
+          <li><span class="tick">▸</span><span><b>Brain dump first, always.</b> Everything onto paper before deciding anything. You cannot sort a list you're simultaneously trying to hold. <span class="ev-dots"><i class="on"></i><i class="on"></i><i class="on"></i><i></i></span></span></li>
+          <li><span class="tick">▸</span><span><b>Reduce to the next physical action.</b> Not "sort out taxes" but "find the folder." GTD's core insight is an executive-function prosthetic. <span class="ev-dots"><i class="on"></i><i class="on"></i><i class="on"></i><i></i></span></span></li>
+          <li><span class="tick">▸</span><span><b>Satisfice, don't maximise.</b> Schwartz's research: maximisers make marginally better choices and are reliably more miserable and slower. Pick the first option that clears the bar. <span class="ev-dots"><i class="on"></i><i class="on"></i><i></i><i></i></span></span></li>
+          <li><span class="tick">▸</span><span><b>Pre-set defaults.</b> Same breakfast, same gym days, a uniform. Every decision you delete is executive budget returned to the work that matters. <span class="ev-dots"><i class="on"></i><i class="on"></i><i></i><i></i></span></span></li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- revenge bedtime -->
+    <div class="fix">
+      <div class="problem"><span class="lbl">✕ The negative</span><h4>Revenge bedtime procrastination</h4></div>
+      <div class="why">2am, exhausted, still scrolling — reclaiming the only unclaimed hours of the day. <b>Why:</b> a <b>double hit</b>. Delayed melatonin (Ch. 08) means you're not biologically sleepy yet, and depleted daytime inhibition means the impulse to keep the "me time" wins. Then the sleep debt degrades tomorrow's PFC and the loop tightens.</div>
+      <div class="fixes"><span class="lbl">✓ The cheatcodes</span>
+        <ul>
+          <li><span class="tick">▸</span><span><b>Attack the wake end, not bedtime.</b> Fixed wake time + morning light pulls the whole delayed clock earlier. Willing yourself to sleep earlier fails; re-timing the clock works. <span class="ev-dots"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i></span></span></li>
+          <li><span class="tick">▸</span><span><b>Schedule the "me time" in daylight.</b> The behaviour is compensatory — if the day contains no unclaimed hours, the night will take them. Fix the cause. <span class="ev-dots"><i class="on"></i><i class="on"></i><i></i><i></i></span></span></li>
+          <li><span class="tick">▸</span><span><b>Wind-down alarm, not a bedtime.</b> An alarm at the <em>start</em> of the wind-down, because you will not notice time passing (see: time blindness). <span class="ev-dots"><i class="on"></i><i class="on"></i><i></i><i></i></span></span></li>
+          <li><span class="tick">▸</span><span><b>Charge the phone in another room.</b> The single highest-yield friction intervention available. <span class="ev-dots"><i class="on"></i><i class="on"></i><i class="on"></i><i></i></span></span></li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <hr class="rule">
+
+  <!-- 16 TARGETED FIXES: COMORBIDITIES -->
+  <section id="comorbid-fixes" class="reveal">
+    <span class="sec-num">CHAPTER 16</span>
+    <div class="eyebrow">Interventions</div>
+    <h2>Targeted fixes: the <span class="accent">comorbidities.</span></h2>
+    <p class="lede">Chapter 10 listed what travels with ADHD. This is what to actually do about each one — including the sequencing question, which is usually the whole ballgame.</p>
+
+    <div class="tldr">
+      <div class="tag">⚡ The sequencing rule</div>
+      <ul>
+        <li>Much of ADHD's comorbidity is <strong>secondary</strong> — anxiety and depression built on years of unexplained underperformance.</li>
+        <li>Treating the ADHD often <strong>shrinks the comorbidity</strong>. Treating only the anxiety while ADHD runs unmanaged tends to fail.</li>
+        <li>The exception: <strong>severe depression or active substance use is stabilised first.</strong> This ordering is a clinician's call, not a self-diagnosis.</li>
+      </ul>
+    </div>
+
+    <!-- anxiety -->
+    <div class="fix">
+      <div class="problem"><span class="lbl">✕ Comorbidity · ~25–40%</span><h4>Anxiety disorders</h4></div>
+      <div class="why"><b>The relationship:</b> often <em>secondary</em> — a lifetime of missed deadlines and unpredictable performance is a rational anxiety generator. Anxiety also mimics ADHD (both fragment attention), and it can <em>mask</em> it: anxiety-driven hypervigilance can look like functioning right up until it collapses.</div>
+      <div class="fixes"><span class="lbl">✓ The cheatcodes</span>
+        <ul>
+          <li><span class="tick">▸</span><span><b>Treat the ADHD and re-measure.</b> When the chaos generating the anxiety subsides, a lot of the anxiety goes with it. Assess after, not before. <span class="ev-dots"><i class="on"></i><i class="on"></i><i class="on"></i><i></i></span></span></li>
+          <li><span class="tick">▸</span><span><b>CBT.</b> Gold standard for anxiety, and it stacks well with ADHD-adapted CBT. <span class="ev-dots"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i></span></span></li>
+          <li><span class="tick">▸</span><span><b>Exercise.</b> One of the most robust non-drug anxiolytics known — and it's already Cheatcode 01. A rare two-for-one. <span class="ev-dots"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i></span></span></li>
+          <li><span class="tick">▸</span><span><b>Know the medication nuance.</b> Stimulants can worsen anxiety in some people — <b>guanfacine or atomoxetine</b> are common alternatives when they do, since they raise focus without the same jitter. Clinician territory. <span class="ev-dots"><i class="on"></i><i class="on"></i><i class="on"></i><i></i></span></span></li>
+        </ul>
+        <div class="rx"><b>Mechanism note:</b> anxiety pushes you up the <b>right</b> side of the inverted-U. If you're anxious <em>and</em> ADHD, you can be over-aroused and under-focused simultaneously — which is why "just calm down" and "just try harder" both fail.</div>
+      </div>
+    </div>
+
+    <!-- depression -->
+    <div class="fix">
+      <div class="problem"><span class="lbl">✕ Comorbidity · ~20–30%</span><h4>Depression &amp; demoralisation</h4></div>
+      <div class="why"><b>The relationship:</b> critical distinction — <em>demoralisation</em> (a reasonable response to repeated failure, lifts when function improves) vs a <em>primary mood disorder</em> (autonomous, needs its own treatment). ADHD also carries genuinely elevated MDD risk. Both share dopaminergic reward-circuit involvement.</div>
+      <div class="fixes"><span class="lbl">✓ The cheatcodes</span>
+        <ul>
+          <li><span class="tick">▸</span><span><b>Behavioural activation.</b> Act first, motivation second — schedule rewarding activity rather than waiting to feel like it. Strong evidence, and it's mechanistically perfect for ADHD, which also can't wait for motivation. <span class="ev-dots"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i></span></span></li>
+          <li><span class="tick">▸</span><span><b>Exercise.</b> Comparable to antidepressants for mild-moderate depression in several meta-analyses, with the ADHD benefits stacked on top. <span class="ev-dots"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i></span></span></li>
+          <li><span class="tick">▸</span><span><b>Psychoeducation as an intervention.</b> Reframing 30 years of "lazy" as a dopamine-signalling difference is not a consolation prize — shame reduction measurably shifts mood and self-efficacy. <span class="ev-dots"><i class="on"></i><i class="on"></i><i></i><i></i></span></span></li>
+          <li><span class="tick">▸</span><span><b>Get the sequencing right.</b> Severe depression is stabilised first — a depressed brain can't build ADHD systems. Mild demoralisation often lifts once ADHD is treated. <span class="ev-dots"><i class="on"></i><i class="on"></i><i class="on"></i><i></i></span></span></li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- sleep -->
+    <div class="fix">
+      <div class="problem"><span class="lbl">✕ Comorbidity · the majority</span><h4>Insomnia &amp; delayed sleep phase</h4></div>
+      <div class="why"><b>The relationship:</b> bidirectional and vicious. ADHD delays the clock (late melatonin onset); the resulting sleep loss degrades the PFC, which worsens ADHD, which delays sleep further. <b>Sleep deprivation alone produces an ADHD-like phenotype in anyone</b> — so untreated sleep problems are actively inflating your symptoms.</div>
+      <div class="fixes"><span class="lbl">✓ The cheatcodes</span>
+        <ul>
+          <li><span class="tick">▸</span><span><b>CBT-I.</b> Cognitive behavioural therapy for insomnia is the gold-standard first-line treatment — more effective than sleeping pills, and durable. Widely available as structured programmes. <span class="ev-dots"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i></span></span></li>
+          <li><span class="tick">▸</span><span><b>Low-dose timed melatonin.</b> Not a sedative — a <em>clock signal</em>. Small doses (~0.5–1mg) taken several hours before target sleep shift the phase; large doses at bedtime mostly don't. RCT evidence specifically in ADHD (Van der Heijden et al.). Discuss with a clinician. <span class="ev-dots"><i class="on"></i><i class="on"></i><i class="on"></i><i></i></span></span></li>
+          <li><span class="tick">▸</span><span><b>Morning light + fixed wake time.</b> The other half of the phase-shift lever (Cheatcodes 02–03). <span class="ev-dots"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i></span></span></li>
+          <li><span class="tick">▸</span><span><b>Screen for the other culprits.</b> Restless legs and sleep apnoea are both over-represented and both fully treatable. Worth ruling out before assuming it's "just ADHD." <span class="ev-dots"><i class="on"></i><i class="on"></i><i class="on"></i><i></i></span></span></li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- substance use -->
+    <div class="fix">
+      <div class="problem"><span class="lbl">✕ Comorbidity · elevated risk</span><h4>Substance use</h4></div>
+      <div class="why"><b>The relationship:</b> substantially elevated risk, and much of it is <b>self-medication</b> — nicotine, caffeine, cocaine and alcohol all touch the catecholamine system an ADHD brain is short on. Add impulsivity and reward-seeking and the risk compounds.</div>
+      <div class="fixes"><span class="lbl">✓ The cheatcodes</span>
+        <ul>
+          <li><span class="tick">▸</span><span><b>Treat the ADHD — it lowers the risk.</b> This reverses the intuition and it's important: large registry studies (Chang et al.) find appropriate stimulant treatment is associated with <b>reduced</b> subsequent substance-use risk. Untreated ADHD is the risk factor. <span class="ev-dots"><i class="on"></i><i class="on"></i><i class="on"></i><i></i></span></span></li>
+          <li><span class="tick">▸</span><span><b>Use abuse-deterrent formulations.</b> Prodrugs (lisdexamfetamine) and long-acting forms have smooth curves and much lower misuse liability than immediate-release. <span class="ev-dots"><i class="on"></i><i class="on"></i><i class="on"></i><i></i></span></span></li>
+          <li><span class="tick">▸</span><span><b>Non-stimulant options exist.</b> Atomoxetine and guanfacine aren't controlled substances — a genuine path when misuse is a live concern. <span class="ev-dots"><i class="on"></i><i class="on"></i><i class="on"></i><i></i></span></span></li>
+          <li><span class="tick">▸</span><span><b>Integrated treatment.</b> Treating SUD and ADHD together beats treating either alone; active severe SUD is usually stabilised first. <span class="ev-dots"><i class="on"></i><i class="on"></i><i class="on"></i><i></i></span></span></li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- binge eating -->
+    <div class="fix">
+      <div class="problem"><span class="lbl">✕ Comorbidity · strongly linked</span><h4>Binge eating &amp; disordered eating</h4></div>
+      <div class="why"><b>The relationship:</b> ADHD is strongly associated with binge-eating disorder — same impulsivity plus the same reward-deficiency driving food-seeking for stimulation. Interoception is often poor too: hunger goes unnoticed until it's desperate, and stimulants suppress appetite, producing a skip-then-binge pattern.</div>
+      <div class="fixes"><span class="lbl">✓ The cheatcodes</span>
+        <ul>
+          <li><span class="tick">▸</span><span><b>Know the pharmacology overlap.</b> <b>Lisdexamfetamine is FDA-approved for binge-eating disorder</b> — the same drug, the same impulse-control mechanism, two labels. A striking confirmation the circuits are shared. <span class="ev-dots"><i class="on"></i><i class="on"></i><i class="on"></i><i></i></span></span></li>
+          <li><span class="tick">▸</span><span><b>Eat on a schedule, not on hunger.</b> If interoception is unreliable, don't route decisions through it. Timed meals prevent the deficit that triggers the binge. <span class="ev-dots"><i class="on"></i><i class="on"></i><i></i><i></i></span></span></li>
+          <li><span class="tick">▸</span><span><b>Protect breakfast on stimulants.</b> Appetite suppression peaks mid-day — eat before the dose lands. <span class="ev-dots"><i class="on"></i><i class="on"></i><i></i><i></i></span></span></li>
+          <li><span class="tick">▸</span><span><b>Environment over willpower, again.</b> Binge foods not in the house is a stronger intervention than any resolve at 11pm. <span class="ev-dots"><i class="on"></i><i class="on"></i><i class="on"></i><i></i></span></span></li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- ODD / conduct -->
+    <div class="fix">
+      <div class="problem"><span class="lbl">✕ Comorbidity · ~40–50% of children</span><h4>Oppositional defiant &amp; conduct problems</h4></div>
+      <div class="why"><b>The relationship:</b> very common alongside childhood combined-type ADHD, and heavily shaped by the coercive cycle — an impulsive child and an exhausted parent train each other into escalation.</div>
+      <div class="fixes"><span class="lbl">✓ The cheatcodes</span>
+        <ul>
+          <li><span class="tick">▸</span><span><b>Behavioural parent training.</b> First-line, strongest evidence for this combination. It changes the environment and the interaction pattern rather than trying to change the child directly. <span class="ev-dots"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i></span></span></li>
+          <li><span class="tick">▸</span><span><b>Treat the underlying ADHD.</b> Much oppositionality is impulsivity plus frustration plus demand overload. Reduce those and the defiance often drops with them. <span class="ev-dots"><i class="on"></i><i class="on"></i><i class="on"></i><i></i></span></span></li>
+          <li><span class="tick">▸</span><span><b>Immediate, frequent, specific consequences.</b> Delayed rewards don't reach an ADHD brain (delay discounting again) — the reinforcement must be far more immediate than it would be for a neurotypical child. <span class="ev-dots"><i class="on"></i><i class="on"></i><i class="on"></i><i></i></span></span></li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- learning disorders -->
+    <div class="fix">
+      <div class="problem"><span class="lbl">✕ Comorbidity · ~20–40%</span><h4>Specific learning disorders (dyslexia, dyscalculia)</h4></div>
+      <div class="why"><b>The relationship:</b> distinct conditions that frequently co-travel. Crucially — <b>ADHD medication does not treat dyslexia.</b> It may let a child attend to reading instruction, but it doesn't build the phonological skill. Conflating the two wastes years.</div>
+      <div class="fixes"><span class="lbl">✓ The cheatcodes</span>
+        <ul>
+          <li><span class="tick">▸</span><span><b>Assess separately, treat separately.</b> Two problems, two interventions. Persistent reading failure on well-managed ADHD means the reading disorder was never addressed. <span class="ev-dots"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i></span></span></li>
+          <li><span class="tick">▸</span><span><b>Structured literacy instruction.</b> Explicit, systematic phonics-based remediation — the evidence base here is deep and unambiguous. <span class="ev-dots"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i></span></span></li>
+          <li><span class="tick">▸</span><span><b>Assistive tech as a bypass.</b> Text-to-speech, speech-to-text, audiobooks. Remediate the skill <em>and</em> route around it so learning doesn't stall meanwhile. <span class="ev-dots"><i class="on"></i><i class="on"></i><i class="on"></i><i></i></span></span></li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- autism -->
+    <div class="fix">
+      <div class="problem"><span class="lbl">✕ Comorbidity · ~20–50%</span><h4>Co-occurring autism (AuDHD)</h4></div>
+      <div class="why"><b>The relationship:</b> shared genetic architecture, and dual diagnosis has only been permitted since DSM-5 (2013) — so a lot of people were forced into one box. The combination creates genuine internal conflict: an autistic need for routine and sameness against an ADHD need for novelty and stimulation.</div>
+      <div class="fixes"><span class="lbl">✓ The cheatcodes</span>
+        <ul>
+          <li><span class="tick">▸</span><span><b>Design for the sensory profile first.</b> Sensory overload consumes the same executive budget you need for everything else. Noise-cancelling headphones, lighting control, and predictable environments are load-reduction, not indulgence. <span class="ev-dots"><i class="on"></i><i class="on"></i><i></i><i></i></span></span></li>
+          <li><span class="tick">▸</span><span><b>Routine as the frame, novelty inside it.</b> Resolve the conflict structurally: keep the scaffolding fixed and predictable, vary the content within it. <span class="ev-dots"><i class="on"></i><i class="on"></i><i></i><i></i></span></span></li>
+          <li><span class="tick">▸</span><span><b>Expect medication nuance.</b> Response can differ and side-effect sensitivity is often higher — "start low, go slow" is the usual clinical posture. <span class="ev-dots"><i class="on"></i><i class="on"></i><i></i><i></i></span></span></li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- shame -->
+    <div class="fix">
+      <div class="problem"><span class="lbl">✕ Near-universal, rarely coded</span><h4>Shame, low self-esteem &amp; the "lazy" narrative</h4></div>
+      <div class="why"><b>The relationship:</b> not in any diagnostic manual, and arguably the most damaging thing ADHD carries. Children with ADHD receive an estimated <b>20,000 more corrective or negative messages</b> by age 12 than their peers. That's not a side-effect — it's a formative input.</div>
+      <div class="fixes"><span class="lbl">✓ The cheatcodes</span>
+        <ul>
+          <li><span class="tick">▸</span><span><b>Understand the mechanism.</b> This entire document is the intervention. "My dopamine signalling makes delayed rewards faint" is actionable; "I'm lazy" is not. <span class="ev-dots"><i class="on"></i><i class="on"></i><i class="on"></i><i></i></span></span></li>
+          <li><span class="tick">▸</span><span><b>Self-compassion, specifically.</b> Neff's research finds it outperforms self-esteem work for resilience — and unlike self-esteem, it doesn't require you to be succeeding first. <span class="ev-dots"><i class="on"></i><i class="on"></i><i></i><i></i></span></span></li>
+          <li><span class="tick">▸</span><span><b>ADHD-adapted CBT.</b> Explicitly targets the accumulated negative self-talk alongside the practical systems. Strong adult evidence. <span class="ev-dots"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i></span></span></li>
+          <li><span class="tick">▸</span><span><b>Community.</b> Peer contact with other ADHD adults reliably reduces the isolation of thinking you're uniquely broken. <span class="ev-dots"><i class="on"></i><i class="on"></i><i></i><i></i></span></span></li>
+        </ul>
+        <div class="rx"><b>The reframe:</b> you have failed at neurotypical strategies. That is exactly what should have happened. The strategies were built for different hardware.</div>
+      </div>
+    </div>
+  </section>
+
+  <hr class="rule">
+
+  <!-- 17 MYTHS -->
+  <section id="myths" class="reveal">
+    <span class="sec-num">CHAPTER 17</span>
+    <div class="eyebrow">Set the record straight</div>
+    <h2>Myths that <span class="accent">aren't true.</span></h2>
+    <div class="mf">
+      <div class="myth"><div class="lbl">✕ Myth</div><p>"ADHD is just a lack of willpower / discipline."</p></div>
+      <div class="fact"><div class="lbl">✓ Fact</div><p>It's a measurable difference in brain development, network switching, and catecholamine signalling. Willpower runs on the exact circuit that's under-powered.</p></div>
+    </div>
+    <div class="mf">
+      <div class="myth"><div class="lbl">✕ Myth</div><p>"You can't have ADHD — you focus for hours on games/art."</p></div>
+      <div class="fact"><div class="lbl">✓ Fact</div><p>ADHD is dysregulated attention, not absent attention. High-dopamine, novel tasks flood the weak signal — that's why <em>hyperfocus</em> coexists with distractibility.</p></div>
+    </div>
+    <div class="mf">
+      <div class="myth"><div class="lbl">✕ Myth</div><p>"Sugar and screens cause ADHD."</p></div>
+      <div class="fact"><div class="lbl">✓ Fact</div><p>ADHD is ~74–80% heritable. Sugar doesn't cause it; screens don't cause it — but the modern attention economy clearly <em>worsens the phenotype.</em></p></div>
+    </div>
+    <div class="mf">
+      <div class="myth"><div class="lbl">✕ Myth</div><p>"Kids grow out of it."</p></div>
+      <div class="fact"><div class="lbl">✓ Fact</div><p>Hyperactivity often fades; the executive-function and attention differences frequently persist into adulthood in a quieter disguise.</p></div>
+    </div>
+    <div class="mf">
+      <div class="myth"><div class="lbl">✕ Myth</div><p>"Stimulant meds are just legal speed / change your personality."</p></div>
+      <div class="fact"><div class="lbl">✓ Fact</div><p>At therapeutic doses they normalise a quiet signalling channel. Done right, people describe feeling <em>more themselves</em>, not less — and treatment lowers later substance-use risk.</p></div>
+    </div>
+    <div class="mf">
+      <div class="myth"><div class="lbl">✕ Myth</div><p>"It's over-diagnosed and basically made up."</p></div>
+      <div class="fact"><div class="lbl">✓ Fact</div><p>Prevalence is stable across cultures; it's one of the most validated, most heritable conditions in psychiatry. Under-diagnosis (esp. girls, women, adults) is the bigger real-world problem.</p></div>
+    </div>
+  </section>
+
+  <hr class="rule">
+
+  <!-- 18 GLOSSARY -->
+  <section id="glossary" class="reveal">
+    <span class="sec-num">CHAPTER 18</span>
+    <div class="eyebrow">Reference</div>
+    <h2>The <span class="accent">glossary.</span></h2>
+    <p class="lede">Every key term in one place — a lookup index for the whole document.</p>
+    <dl class="gloss">
+      <dt>Catecholamines</dt><dd>The neurotransmitter family including dopamine and norepinephrine — central to ADHD signalling.</dd>
+      <dt>Dopamine transporter (DAT / SLC6A3)</dt><dd>Protein that reuptakes dopamine from the synapse; the direct target of methylphenidate.</dd>
+      <dt>Reward-prediction error</dt><dd>The dopamine signal encoding the gap between expected and received reward; blunted in ADHD.</dd>
+      <dt>Delay discounting / delay aversion</dt><dd>The steep devaluation of delayed rewards — why "later" barely registers.</dd>
+      <dt>Tonic vs phasic dopamine</dt><dd>Steady background level vs sharp event-driven bursts; their balance is dysregulated in ADHD.</dd>
+      <dt>Default Mode Network (DMN)</dt><dd>Rest/daydreaming network that intrudes on focus in ADHD (Default Mode Interference Hypothesis).</dd>
+      <dt>Salience network</dt><dd>The switchboard (insula + dorsal ACC) that decides which network should be in charge.</dd>
+      <dt>Hypofrontality</dt><dd>Under-activation of the prefrontal cortex seen during attention tasks in ADHD.</dd>
+      <dt>Inverted-U (Arnsten)</dt><dd>The relationship where prefrontal performance peaks at a moderate catecholamine level.</dd>
+      <dt>Executive function</dt><dd>The brain's self-management system: inhibition, working memory, planning, emotional regulation.</dd>
+      <dt>HPA axis</dt><dd>Hypothalamic-pituitary-adrenal stress system that releases cortisol.</dd>
+      <dt>Delayed sleep phase</dt><dd>Circadian delay (late melatonin onset) strongly associated with ADHD.</dd>
+      <dt>BDNF</dt><dd>Brain-derived neurotrophic factor — a growth factor for neurons, raised by exercise.</dd>
+      <dt>ENIGMA-ADHD</dt><dd>The largest consortium neuroimaging study of ADHD brain structure.</dd>
+      <dt>Comorbidity</dt><dd>A co-occurring condition (anxiety, depression, learning disorder, etc.).</dd>
+      <dt>Prodrug</dt><dd>An inactive compound (e.g. lisdexamfetamine) metabolised into the active drug for a smoother curve.</dd>
+      <dt>Implementation intention</dt><dd>A pre-decided "if X, then Y" plan that converts effortful initiation into an automatic cue-response.</dd>
+      <dt>Stochastic resonance</dt><dd>The counterintuitive effect where added noise lifts a weak signal above threshold — the basis for white noise helping ADHD attention.</dd>
+      <dt>Moderate Brain Arousal model</dt><dd>Söderlund/Sikström's account of why external noise improves performance in ADHD but degrades it in controls.</dd>
+      <dt>Affect labelling</dt><dd>Naming an emotion in words, which measurably reduces amygdala activity and recruits regulatory prefrontal cortex.</dd>
+      <dt>Behavioural activation</dt><dd>Depression treatment that schedules rewarding action first and lets motivation follow — well matched to ADHD.</dd>
+      <dt>CBT-I</dt><dd>Cognitive behavioural therapy for insomnia; first-line, outperforms sleeping pills, durable.</dd>
+      <dt>Point of performance</dt><dd>Barkley's term for the moment and place where behaviour actually happens — where interventions must be delivered to work.</dd>
+      <dt>Coercive cycle</dt><dd>The escalating parent-child pattern that trains oppositional behaviour; the target of behavioural parent training.</dd>
+      <dt>Demoralisation</dt><dd>A reasonable despondency from repeated failure — distinct from primary depression; often lifts when ADHD is treated.</dd>
+    </dl>
+  </section>
+
+  <!-- FOOTER / REFERENCES -->
+  <footer id="references">
+    <div class="eyebrow">The fine print</div>
+    <h3>References &amp; honest caveats</h3>
+    <p style="color:var(--ink-soft)">Everything here is an <strong>average-level, statistical</strong> picture. ADHD is deeply heterogeneous — no two brains, no two people, present the same. Mechanisms are simplified for clarity; the science is genuinely still moving.</p>
+
+    <div class="disclaimer">⚠️ <strong>This is education, not medical advice.</strong> Nothing here diagnoses, treats, or replaces a qualified clinician. If ADHD is affecting your life, seek a proper assessment — especially before starting, stopping, or changing any medication or supplement.</div>
+
+    <h3 style="font-size:1.05rem">Key science referenced</h3>
+    <ul class="refs">
+      <li>American Psychiatric Association (2022) — <em>DSM-5-TR</em>, ADHD diagnostic criteria.</li>
+      <li>Faraone et al. (2021) — World Federation of ADHD International Consensus Statement (208 evidence-based conclusions).</li>
+      <li>Hoogman et al. (2017 &amp; 2019), <em>Lancet Psychiatry</em> — ENIGMA-ADHD subcortical &amp; cortical structure.</li>
+      <li>Shaw et al. (2007), <em>PNAS</em> — delayed cortical maturation ("delayed, not deviant").</li>
+      <li>Demontis, Børglum et al. (2019, 2023), <em>Nature Genetics</em> — GWAS risk loci for ADHD.</li>
+      <li>Sonuga-Barke &amp; Castellanos (2007) — Default Mode Interference Hypothesis; dual-pathway model.</li>
+      <li>Schultz (1998, 2016) — dopamine reward-prediction error.</li>
+      <li>Grace (1991) — tonic vs phasic dopamine signalling.</li>
+      <li>Arnsten (2009, 2011), <em>Nature Reviews Neuroscience</em> — catecholamines &amp; the prefrontal inverted-U.</li>
+      <li>Barkley (1997, 2012) — behavioural inhibition &amp; executive-function model of ADHD.</li>
+      <li>The MTA Cooperative Group (1999, follow-ups) — Multimodal Treatment Study of ADHD.</li>
+      <li>Cortese et al. (2018), <em>Lancet Psychiatry</em> — comparative efficacy/tolerability of ADHD medications (network meta-analysis).</li>
+      <li>Bloch &amp; Qawasmi (2011) — omega-3 supplementation meta-analysis.</li>
+      <li>Gollwitzer &amp; Sheeran (2006) — implementation intentions meta-analysis.</li>
+      <li>Söderlund, Sikström &amp; Smart (2007) — white noise improves cognition in ADHD; Moderate Brain Arousal / stochastic resonance model.</li>
+      <li>Rapport, Sarver et al. (2009, 2015) — gross motor activity increases with working-memory demand and predicts <em>better</em> performance in ADHD.</li>
+      <li>Lieberman et al. (2007), <em>Psychological Science</em> — affect labelling disrupts amygdala response.</li>
+      <li>Gross (1998, 2002) — process model of emotion regulation; cognitive reappraisal.</li>
+      <li>Balban et al. (2023), <em>Cell Reports Medicine</em> — cyclic sighing vs mindfulness for mood and arousal.</li>
+      <li>Chang et al. (2014), <em>J. Child Psychol. Psychiatry</em> — stimulant treatment and reduced substance-use risk (Swedish registry).</li>
+      <li>Van der Heijden et al. (2007) — melatonin RCT for sleep-onset insomnia in children with ADHD.</li>
+      <li>Safren et al. (2010), <em>JAMA</em> — CBT for adults with ADHD on medication.</li>
+      <li>Schwartz (2004) &amp; Iyengar — maximising vs satisficing and choice overload.</li>
+      <li>Neff (2003, 2011) — self-compassion research.</li>
+      <li>Jensen (2005) / Barkley — the estimate of ~20,000 additional corrective messages by age 12.</li>
+      <li>Van der Heijden / Coogan et al. — delayed melatonin onset &amp; circadian disruption in ADHD.</li>
+      <li>Šrámek et al. (2000), <em>Eur. J. Appl. Physiol.</em> — cold-water immersion &amp; catecholamines (small sample).</li>
+      <li>Ra et al. (2018), <em>JAMA</em> — digital media use &amp; ADHD symptoms in adolescents (correlational).</li>
+    </ul>
+    <p style="color:var(--faint); font-size:.82rem; margin-top:26px">Built to be skimmed, searched, re-read, and shared. Your brain isn't broken — it's running a different OS.</p>
+  </footer>
+
+</div>
+</main>
+
+<button class="to-top" id="toTop" aria-label="Back to top">↑</button>
+
+<script>
+(function(){
+  var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var root = document.documentElement;
+
+  /* theme */
+  var btn=document.getElementById('themeBtn'), lbl=document.getElementById('themeLabel');
+  function sysDark(){ return window.matchMedia('(prefers-color-scheme: dark)').matches; }
+  function setLbl(){ var d=root.getAttribute('data-theme')?root.getAttribute('data-theme')==='dark':sysDark(); lbl.textContent=d?'Light':'Dark'; }
+  setLbl();
+  btn.addEventListener('click',function(){ var cur=root.getAttribute('data-theme')||(sysDark()?'dark':'light'); root.setAttribute('data-theme',cur==='dark'?'light':'dark'); setLbl(); });
+
+  /* progress + to-top */
+  var prog=document.getElementById('progress'), toTop=document.getElementById('toTop');
+  function onScroll(){
+    var h=document.documentElement, max=h.scrollHeight-h.clientHeight;
+    var pct = max>0?(h.scrollTop/max*100):0;
+    prog.style.width=pct+'%';
+    toTop.classList.toggle('show', h.scrollTop>600);
+  }
+  window.addEventListener('scroll',onScroll,{passive:true}); onScroll();
+  toTop.addEventListener('click',function(){ window.scrollTo({top:0,behavior:reduce?'auto':'smooth'}); });
+
+  /* mobile nav */
+  var nav=document.getElementById('nav'), toggle=document.getElementById('navToggle'), scrim=document.getElementById('scrim');
+  function closeNav(){ document.body.classList.remove('nav-open'); }
+  toggle.addEventListener('click',function(){ document.body.classList.toggle('nav-open'); });
+  scrim.addEventListener('click',closeNav);
+
+  /* nav links: active state + close on mobile */
+  var links=Array.prototype.slice.call(document.querySelectorAll('.nav a[href^="#"]'));
+  var sections=links.map(function(a){ return document.querySelector(a.getAttribute('href')); });
+  links.forEach(function(a){ a.addEventListener('click',function(){ if(window.innerWidth<=1000) closeNav(); }); });
+  function spy(){
+    var y=window.scrollY+window.innerHeight*0.28, idx=-1;
+    for(var i=0;i<sections.length;i++){ if(sections[i] && sections[i].offsetTop<=y) idx=i; }
+    links.forEach(function(a,i){ a.classList.toggle('active', i===idx); });
+  }
+  window.addEventListener('scroll',spy,{passive:true}); spy();
+
+  /* nav search filter */
+  var search=document.getElementById('navSearch');
+  search.addEventListener('input',function(){
+    var q=this.value.trim().toLowerCase();
+    links.forEach(function(a){ a.classList.toggle('hidden', q && a.textContent.toLowerCase().indexOf(q)===-1); });
+    document.querySelectorAll('.nav-group').forEach(function(g){ g.style.display = q?'none':''; });
+  });
+
+  /* reveal + meters */
+  var io=new IntersectionObserver(function(entries){
+    entries.forEach(function(e){
+      if(e.isIntersecting){
+        e.target.classList.add('in');
+        e.target.querySelectorAll('.fill').forEach(function(f){ f.style.width=f.getAttribute('data-w'); });
+        io.unobserve(e.target);
+      }
+    });
+  },{threshold:0.1});
+  document.querySelectorAll('.reveal').forEach(function(el){ io.observe(el); });
+  if(reduce){ document.querySelectorAll('.fill').forEach(function(f){ f.style.width=f.getAttribute('data-w'); }); }
+
+  /* reveal-all button */
+  var expandBtn=document.getElementById('expandBtn');
+  expandBtn.addEventListener('click',function(){
+    document.querySelectorAll('.reveal').forEach(function(el){ el.classList.add('in'); });
+    document.querySelectorAll('.fill').forEach(function(f){ f.style.width=f.getAttribute('data-w'); });
+    this.textContent='Revealed';
+  });
+
+  /* synapse canvas */
+  var c=document.getElementById('synapse'), ctx=c.getContext('2d');
+  var nodes=[], W,H, DPR=Math.min(window.devicePixelRatio||1,2);
+  function accent(){ return getComputedStyle(root).getPropertyValue('--hot-1').trim()||'#FF3D8B'; }
+  function resize(){
+    W=c.width=innerWidth*DPR; H=c.height=innerHeight*DPR;
+    c.style.width=innerWidth+'px'; c.style.height=innerHeight+'px';
+    var count=Math.min(64,Math.floor(innerWidth/24)); nodes=[];
+    for(var i=0;i<count;i++){ nodes.push({x:Math.random()*W,y:Math.random()*H,vx:(Math.random()-.5)*0.22*DPR,vy:(Math.random()-.5)*0.22*DPR}); }
+  }
+  function hex2rgb(h){ h=h.replace('#',''); if(h.length===3)h=h.split('').map(function(x){return x+x;}).join(''); var n=parseInt(h,16); return [(n>>16)&255,(n>>8)&255,n&255]; }
+  function draw(){
+    ctx.clearRect(0,0,W,H);
+    var col=hex2rgb(accent()), maxd=125*DPR;
+    for(var i=0;i<nodes.length;i++){
+      var n=nodes[i]; n.x+=n.vx; n.y+=n.vy;
+      if(n.x<0||n.x>W)n.vx*=-1; if(n.y<0||n.y>H)n.vy*=-1;
+      ctx.beginPath(); ctx.arc(n.x,n.y,1.5*DPR,0,6.28);
+      ctx.fillStyle='rgba('+col[0]+','+col[1]+','+col[2]+',0.65)'; ctx.fill();
+      for(var j=i+1;j<nodes.length;j++){
+        var m=nodes[j], dx=n.x-m.x, dy=n.y-m.y, d=Math.sqrt(dx*dx+dy*dy);
+        if(d<maxd){ ctx.beginPath(); ctx.moveTo(n.x,n.y); ctx.lineTo(m.x,m.y);
+          ctx.strokeStyle='rgba('+col[0]+','+col[1]+','+col[2]+','+(0.16*(1-d/maxd))+')';
+          ctx.lineWidth=DPR*0.6; ctx.stroke(); }
+      }
+    }
+    if(!reduce) requestAnimationFrame(draw);
+  }
+  resize(); draw();
+  window.addEventListener('resize',function(){ resize(); if(reduce) draw(); });
+})();
+</script>
+
+</body>
+</html>
