@@ -1,27 +1,57 @@
-# Trackerlive
+# Cadence — ADHD Time & Focus Tracker
 
-This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 18.2.21.
+A 14-day × 24-hour pixel-painting time tracker, rebuilt with a cohesive ADHD-helper identity. Paint hours by category (Sleep/Work/Learn/Social/Exercise), add daily reflections, track binge sessions, and learn from a built-in knowledge base.
 
-## Development server
+**Live:** https://codeclose17.github.io/trackerLive/
 
-Run `ng serve` for a dev server. Navigate to `http://localhost:4200/`. The application will automatically reload if you change any of the source files.
+## Features
 
-## Code scaffolding
+- **Time Grid:** Paint 24-hour days across 14 days with click-and-drag
+- **Daily Notes:** Reflections and insights for each day
+- **Binge Counter:** Track distraction/impulse sessions
+- **Stats & Insights:** ADHD-aware metrics with actionable feedback
+- **Learn Tab:** 19-chapter ADHD knowledge base (genetics, neurochemistry, interventions)
+- **Light/Dark Mode:** Single cohesive identity in both themes
+- **Cloud Sync:** Optional Supabase real-time sync
+- **Backup/Import:** Export and restore your data
 
-Run `ng generate component component-name` to generate a new component. You can also use `ng generate directive|pipe|service|class|guard|interface|enum|module`.
+## Development
 
-## Build
+```bash
+# Install dependencies
+npm install
 
-Run `ng build` to build the project. The build artifacts will be stored in the `dist/` directory.
+# Dev server (auto-reload)
+ng serve --port 4200
 
-## Running unit tests
+# Production build
+npm run build
 
-Run `ng test` to execute the unit tests via [Karma](https://karma-runner.github.io).
+# Deploy to GitHub Pages
+npx angular-cli-ghpages --dir=dist/trackerlive/browser
+```
 
-## Running end-to-end tests
+## Deployment
 
-Run `ng e2e` to execute the end-to-end tests via a platform of your choice. To use this command, you need to first add a package that implements end-to-end testing capabilities.
+The app is deployed to GitHub Pages via `gh-pages` branch. After building, use:
 
-## Further help
+```bash
+npx angular-cli-ghpages --dir=dist/trackerlive/browser
+```
 
-To get more help on the Angular CLI use `ng help` or go check out the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+This creates a commit on the `gh-pages` branch and pushes it. GitHub Pages then serves https://codeclose17.github.io/trackerLive/.
+
+## Tech Stack
+
+- **Angular 18** (standalone components)
+- **Supabase** (optional real-time sync)
+- **TypeScript**
+- **CSS** (design tokens, light/dark)
+
+## ADHD-First Design
+
+The app centers ADHD neurobiology:
+- Executive function tracking (categorize time to build self-awareness)
+- Dopamine-aware insights (binge frequency, sleep quality, focus patterns)
+- Low-friction UI (keyboard shortcuts, minimal clicks)
+- Embedded knowledge base (understand the "why" behind recommendations)
