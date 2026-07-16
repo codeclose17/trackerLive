@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, HostListener, NgZone } from '@angular/core';
+import { Component, OnInit, OnDestroy, HostListener, NgZone, ViewChild, ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { HeaderComponent } from './components/header/header.component';
 import { CategoryPickerComponent } from './components/category-picker/category-picker.component';
@@ -10,13 +10,26 @@ import { Category, DayRecord, Settings, SyncState } from './types';
 import { DbService } from './services/db.service';
 
 const DEFAULT_CATEGORIES: Category[] = [
-  { id: 'sleep', name: 'Sleep', color: '#6366f1' },
-  { id: 'work', name: 'Work', color: '#3b82f6' },
-  { id: 'learn', name: 'Learn', color: '#10b981' },
-  { id: 'social', name: 'Social Media', color: '#f43f5e' },
-  { id: 'exercise', name: 'Exercise', color: '#f59e0b' },
-  { id: 'idle', name: 'Idle / Uncategorized', color: '#27272a' }
+  { id: 'sleep', name: 'Sleep', color: '#7C6BF0' },
+  { id: 'work', name: 'Work', color: '#4EA8DE' },
+  { id: 'learn', name: 'Learn', color: '#57D9A3' },
+  { id: 'social', name: 'Social Media', color: '#FF6B9D' },
+  { id: 'exercise', name: 'Exercise', color: '#FFB347' },
+  { id: 'idle', name: 'Idle / Uncategorized', color: '#2A2438' }
 ];
+
+// One-time recolor of the built-in categories to the Cadence identity palette.
+// Runs once per device (flag below). Only touches a category still holding its
+// original default color — user-customized colors are left untouched.
+const CATEGORY_COLOR_MIGRATION: Record<string, { from: string; to: string }> = {
+  sleep: { from: '#6366f1', to: '#7C6BF0' },
+  work: { from: '#3b82f6', to: '#4EA8DE' },
+  learn: { from: '#10b981', to: '#57D9A3' },
+  social: { from: '#f43f5e', to: '#FF6B9D' },
+  exercise: { from: '#f59e0b', to: '#FFB347' },
+  idle: { from: '#27272a', to: '#2A2438' }
+};
+const COLOR_MIGRATION_FLAG = 'box_tracker_color_migration_v1';
 
 const getLocalDateString = (date: Date): string => {
   const year = date.getFullYear();
@@ -60,17 +73,9 @@ const generateDateRange = (startDate: Date): string[] => {
 export class AppComponent implements OnInit, OnDestroy {
   startDate: Date = getStartOfWeekSunday(new Date());
   dates: string[] = generateDateRange(this.startDate);
-  currentTheme = 'cosmic';
   isDarkMode = true;
 
-  themesList = [
-    { id: 'cosmic', name: 'Cosmic Eclipse', colors: ['#a855f7'] },
-    { id: 'cotton', name: 'Cotton Candy Skies', colors: ['#B298E7', '#B8E3E9', '#F5B8D5'] },
-    { id: 'ink', name: 'Ink Wash', colors: ['#4A4A4A', '#CBCBCB', '#FFFFE3', '#6D8196'] },
-    { id: 'chai', name: 'Spiced Chai', colors: ['#FDFBD4', '#D47E30', '#8D5A2B'] },
-    { id: 'emerald', name: 'Emerald Odyssey', colors: ['#00674F', '#73E6CB', '#3EBB9E'] },
-    { id: 'love', name: 'Love Notes', colors: ['#E64398', '#F172A1', '#B39BC8', '#A1C3D1'] }
-  ];
+  @ViewChild('kbFrame') kbFrame?: ElementRef<HTMLIFrameElement>;
 
   records: Record<string, DayRecord> = {};
   
@@ -84,7 +89,7 @@ export class AppComponent implements OnInit, OnDestroy {
   activeCategoryId = 'work';
   selectedDate: string = getLocalDateString(new Date());
   
-  activeTab: 'grid' | 'stats' | 'glance' = 'grid';
+  activeTab: 'grid' | 'stats' | 'glance' | 'learn' = 'grid';
   isSettingsOpen = false;
   syncState: SyncState = { status: 'idle' };
 
@@ -105,18 +110,52 @@ export class AppComponent implements OnInit, OnDestroy {
       this.dbService.saveLocalSettings(this.settings);
     }
     
-    // Load theme settings
-    const savedTheme = localStorage.getItem('box_tracker_theme') || 'cosmic';
-    const savedDarkMode = localStorage.getItem('box_tracker_dark_mode') !== 'false';
-    this.currentTheme = savedTheme;
-    this.isDarkMode = savedDarkMode;
+    // Load appearance setting (single identity, dark by default)
+    this.isDarkMode = localStorage.getItem('box_tracker_dark_mode') !== 'false';
     this.applyTheme();
 
     // Apply categories as CSS variables
     this.applyCssVariables();
 
+    // One-time recolor of the saved default palette to the Cadence identity
+    this.migrateCategoryColors();
+
     // Trigger initial sync
     this.initSync();
+  }
+
+  // Recolor still-default categories to the new identity palette, persist the
+  // change locally, and push it to Supabase. Because each recolored category
+  // gets a fresh updatedAt, initSync()'s merge also re-uploads any that don't
+  // land here, so the update propagates even if the first push fails.
+  private migrateCategoryColors(): void {
+    if (localStorage.getItem(COLOR_MIGRATION_FLAG) === 'done') return;
+
+    const now = new Date().toISOString();
+    const changed: Category[] = [];
+    const updatedCategories = this.settings.categories.map((cat) => {
+      const rule = CATEGORY_COLOR_MIGRATION[cat.id];
+      if (rule && cat.color.toLowerCase() === rule.from.toLowerCase()) {
+        const recolored: Category = { ...cat, color: rule.to, updatedAt: now };
+        changed.push(recolored);
+        return recolored;
+      }
+      return cat;
+    });
+
+    localStorage.setItem(COLOR_MIGRATION_FLAG, 'done');
+    if (changed.length === 0) return;
+
+    this.settings = { ...this.settings, categories: updatedCategories };
+    this.dbService.saveLocalSettings(this.settings);
+    this.applyCssVariables();
+
+    const { supabaseUrl, supabaseAnonKey, syncEnabled } = this.settings;
+    if (syncEnabled && supabaseUrl && supabaseAnonKey) {
+      changed.forEach((cat) =>
+        this.dbService.upsertCategory(supabaseUrl, supabaseAnonKey, cat).catch(console.error)
+      );
+    }
   }
 
   ngOnDestroy(): void {
@@ -130,25 +169,35 @@ export class AppComponent implements OnInit, OnDestroy {
 
   private applyCssVariables(): void {
     this.settings.categories.forEach((cat) => {
+      // Empty cells are theme-managed (see --color-idle in styles.css) so they
+      // recede in both light and dark, rather than baking in a single hex.
+      if (cat.id === 'idle') return;
       document.documentElement.style.setProperty(`--color-${cat.id}`, cat.color);
     });
   }
 
   applyTheme(): void {
-    document.documentElement.setAttribute('data-theme', this.currentTheme);
-    document.documentElement.setAttribute('data-dark-mode', this.isDarkMode ? 'true' : 'false');
-    localStorage.setItem('box_tracker_theme', this.currentTheme);
+    const mode = this.isDarkMode ? 'dark' : 'light';
+    document.documentElement.setAttribute('data-theme', mode);
     localStorage.setItem('box_tracker_dark_mode', this.isDarkMode ? 'true' : 'false');
-  }
-
-  selectTheme(themeId: string): void {
-    this.currentTheme = themeId;
-    this.applyTheme();
+    this.syncKnowledgeBaseTheme();
   }
 
   toggleDarkMode(): void {
     this.isDarkMode = !this.isDarkMode;
     this.applyTheme();
+  }
+
+  // Mirror the app's light/dark choice into the embedded knowledge base iframe
+  // (same-origin asset, so we can set its theme attribute directly).
+  syncKnowledgeBaseTheme(): void {
+    const doc = this.kbFrame?.nativeElement?.contentDocument;
+    if (!doc?.documentElement) return;
+    try {
+      doc.documentElement.setAttribute('data-theme', this.isDarkMode ? 'dark' : 'light');
+    } catch {
+      /* cross-origin or not yet ready — ignore */
+    }
   }
 
   private async initSync(): Promise<void> {
@@ -676,7 +725,7 @@ export class AppComponent implements OnInit, OnDestroy {
     
     const a = document.createElement('a');
     a.href = url;
-    a.download = `chronobox-backup-${getLocalDateString(new Date())}.json`;
+    a.download = `cadence-backup-${getLocalDateString(new Date())}.json`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);

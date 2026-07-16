@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter, HostListener } from '@angular/core';
+import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { SyncState } from '../../types';
 
@@ -53,36 +53,6 @@ import { SyncState } from '../../types';
           </ng-template>
         </div>
 
-        <!-- THEME SELECTION TRIGGER -->
-        <div class="theme-selector-container">
-          <button class="btn btn-secondary btn-icon" (click)="toggleThemeMenu($event)" title="Choose Color Theme">
-            <!-- Palette Icon SVG -->
-            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"/><path d="M7.5 10.5c.828 0 1.5-.672 1.5-1.5s-.672-1.5-1.5-1.5-1.5.672-1.5 1.5.672 1.5 1.5 1.5z"/><path d="M11.5 7.5c.828 0 1.5-.672 1.5-1.5s-.672-1.5-1.5-1.5-1.5.672-1.5 1.5.672 1.5 1.5 1.5z"/><path d="M16.5 9.5c.828 0 1.5-.672 1.5-1.5s-.672-1.5-1.5-1.5-1.5.672-1.5 1.5.672 1.5 1.5 1.5z"/><path d="M6 14c0-2 2-3 4-3 2.5 0 4.5 1.5 4.5 4 0 2-2 3-4.5 3-2 0-4-1.5-4-4z"/></svg>
-          </button>
-
-          <!-- Floating Theme Menu Dropup -->
-          <div *ngIf="isThemeMenuOpen" class="theme-dropdown-menu" (click)="$event.stopPropagation()">
-            <h4>Themes</h4>
-            <div class="theme-options-list">
-              <button
-                *ngFor="let t of themesList"
-                class="theme-option-btn"
-                [class.active]="currentTheme === t.id"
-                (click)="selectThemeOption(t.id)"
-              >
-                <div class="theme-option-preview">
-                  <span
-                    *ngFor="let color of t.colors"
-                    class="preview-dot"
-                    [style.backgroundColor]="color"
-                  ></span>
-                </div>
-                <span class="theme-option-name">{{ t.name }}</span>
-              </button>
-            </div>
-          </div>
-        </div>
-
         <!-- DARK MODE TOGGLE BUTTON -->
         <button class="btn btn-secondary btn-icon" (click)="toggleDarkMode.emit()" [title]="isDarkMode ? 'Switch to Light Mode' : 'Switch to Dark Mode'">
           <!-- Sun SVG (Active during Dark Mode) -->
@@ -101,10 +71,10 @@ import { SyncState } from '../../types';
       <!-- 2. LOGO (RIGHT) -->
       <div class="header-logo">
         <div>
-          <h1>ChronoBox</h1>
-          <p class="subtitle">14-Day 24-Hour Life Tracker</p>
+          <h1>Cadence</h1>
+          <p class="subtitle">ADHD time &amp; focus tracker</p>
         </div>
-        <div class="logo-icon">⏳</div>
+        <div class="logo-icon">◐</div>
       </div>
     </header>
   `
@@ -114,32 +84,12 @@ export class HeaderComponent {
   @Input() syncState: SyncState = { status: 'idle' };
   @Input() isSyncEnabled = false;
 
-  @Input() currentTheme = 'cosmic';
   @Input() isDarkMode = true;
-  @Input() themesList: any[] = [];
 
   @Output() prevPeriod = new EventEmitter<void>();
   @Output() nextPeriod = new EventEmitter<void>();
   @Output() resetPeriod = new EventEmitter<void>();
   @Output() openSettings = new EventEmitter<void>();
 
-  @Output() selectTheme = new EventEmitter<string>();
   @Output() toggleDarkMode = new EventEmitter<void>();
-
-  isThemeMenuOpen = false;
-
-  @HostListener('window:click')
-  closeThemeMenu(): void {
-    this.isThemeMenuOpen = false;
-  }
-
-  toggleThemeMenu(event: Event): void {
-    event.stopPropagation();
-    this.isThemeMenuOpen = !this.isThemeMenuOpen;
-  }
-
-  selectThemeOption(themeId: string): void {
-    this.selectTheme.emit(themeId);
-    this.isThemeMenuOpen = false;
-  }
 }

@@ -1,253 +1,119 @@
-@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap');
+
+/* =========================================================================
+   CADENCE — ADHD time & focus tracker
+   One visual identity (dark default + light), sharing the design language
+   of the built-in ADHD knowledge base: deep-violet grounds, a magenta→amber
+   "hot" signal gradient, teal "cool" accents, and clear semantic states.
+
+   Every legacy variable name (--bg-primary, --text-secondary, --accent-color
+   …) is preserved and re-pointed to the new tokens, so all existing layout
+   rules and inline component styles keep working untouched.
+   ========================================================================= */
 
 :root {
-  /* Color System */
-  --bg-primary: #0b0b0d;
-  --bg-secondary: #131316;
-  --bg-tertiary: #1b1b1f;
-  --border-color: #242429;
-  --border-hover: #33333b;
-  
-  --text-primary: #f5f5f7;
-  --text-secondary: #86868b;
-  --text-tertiary: #515154;
-  --text-muted: #3d3d40;
+  /* ---- Core identity (dark) ---- */
+  --ground: #14121C;
+  --surface: #1E1B2A;
+  --surface-2: #262138;
+  --raised: #2E2743;
+  --line: #372F4E;
+  --line-strong: #4A3F68;
 
-  --accent-color: #a855f7; /* purple */
-  --accent-glow: rgba(168, 85, 247, 0.15);
-  
-  /* Layout variables */
-  --font-sans: 'Outfit', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  --border-radius-sm: 6px;
-  --border-radius-md: 10px;
+  --ink: #ECE8F6;
+  --ink-soft: #C8C1DC;
+  --muted: #948CAE;
+  --faint: #6E6688;
+
+  --hot-1: #FF3D8B;
+  --hot-2: #FF7A5C;
+  --hot-3: #FFB347;
+  --cool: #54D8DE;
+  --cool-deep: #2C99A0;
+  --good: #57D9A3;
+  --warn: #FFC24B;
+  --bad: #FF6B7A;
+
+  --grad-hot: linear-gradient(100deg, var(--hot-1), var(--hot-3));
+  --grad-cool: linear-gradient(120deg, var(--cool), var(--cool-deep));
+
+  /* ---- Legacy aliases (kept so every existing rule keeps working) ---- */
+  --bg-primary: var(--ground);
+  --bg-secondary: var(--surface);
+  --bg-tertiary: var(--surface-2);
+  --border-color: var(--line);
+  --border-hover: var(--line-strong);
+  --text-primary: var(--ink);
+  --text-secondary: var(--ink-soft);
+  --text-tertiary: var(--muted);
+  --text-muted: var(--faint);
+  --accent-color: var(--hot-1);
+  --accent-glow: rgba(255, 61, 139, 0.16);
+  --border-highlight: var(--hot-1);
+
+  /* ---- Type ---- */
+  --font-sans: 'Outfit', system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --mono: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
+  --serif: Charter, "Iowan Old Style", Palatino, Georgia, serif;
+
+  /* ---- Radii ---- */
+  --border-radius-sm: 7px;
+  --border-radius-md: 11px;
   --border-radius-lg: 16px;
   --border-radius-xl: 24px;
-  
+
+  /* ---- Motion ---- */
   --transition-fast: 0.15s ease;
-  --transition-normal: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-  --shadow-sm: 0 2px 8px rgba(0,0,0,0.5);
-  --shadow-md: 0 10px 30px rgba(0,0,0,0.6);
-  --shadow-lg: 0 20px 50px rgba(0,0,0,0.8);
-  
-  /* Category Colors */
-  --color-sleep: #6366f1; /* Indigo */
-  --color-social: #f43f5e; /* Rose */
-  --color-work: #3b82f6; /* Blue */
-  --color-learn: #10b981; /* Emerald */
-  --color-exercise: #f59e0b; /* Amber */
-  --color-idle: #27272a; /* Dark Gray */
+  --transition-normal: 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* ---- Elevation ---- */
+  --shadow-sm: 0 2px 10px rgba(0, 0, 0, 0.35);
+  --shadow-md: 0 14px 34px -14px rgba(0, 0, 0, 0.6);
+  --shadow-lg: 0 26px 60px -22px rgba(0, 0, 0, 0.75);
+
+  /* ---- Category defaults (only used for brand-new installs) ---- */
+  --color-sleep: #7C6BF0;    /* Violet */
+  --color-social: #FF3D8B;   /* Hot magenta (a signal, not a reward) */
+  --color-work: #54D8DE;     /* Cool teal */
+  --color-learn: #57D9A3;    /* Green */
+  --color-exercise: #FFB347; /* Amber */
+  --color-idle: #2A2438;     /* Empty */
+
+  color-scheme: dark;
 }
 
-/* Theme Styles & Mode Overrides */
+/* ---- Light mode (single override, driven by html[data-theme="light"]) ---- */
+html[data-theme="light"] {
+  --ground: #F6F3FA;
+  --surface: #FFFFFF;
+  --surface-2: #F3EFF8;
+  --raised: #FBF9FE;
+  --line: #E4DCF0;
+  --line-strong: #CBBEE4;
 
-/* --- 0. COSMIC ECLIPSE (DEFAULT) --- */
-html[data-theme="cosmic"][data-dark-mode="false"] {
-  --bg-primary: #f6f8fa;
-  --bg-secondary: #ffffff;
-  --bg-tertiary: #edf2f7;
-  --border-color: #d2d6dc;
-  --border-hover: #b2b6bc;
-  --text-primary: #0f172a;
-  --text-secondary: #475569;
-  --text-tertiary: #64748b;
-  --text-muted: #94a3b8;
-  --shadow-sm: 0 2px 8px rgba(0,0,0,0.06);
-  --shadow-md: 0 10px 30px rgba(0,0,0,0.08);
-  --shadow-lg: 0 20px 50px rgba(0,0,0,0.12);
-  --accent-color: #a855f7;
-  --accent-glow: rgba(168, 85, 247, 0.1);
-}
+  --ink: #1C1730;
+  --ink-soft: #3B3357;
+  --muted: #6E6688;
+  --faint: #A79FBE;
 
-html[data-theme="cosmic"][data-dark-mode="true"] {
-  --bg-primary: #0b0b0d;
-  --bg-secondary: #131316;
-  --bg-tertiary: #1b1b1f;
-  --border-color: #242429;
-  --border-hover: #33333b;
-  --text-primary: #f5f5f7;
-  --text-secondary: #86868b;
-  --text-tertiary: #515154;
-  --text-muted: #3d3d40;
-  --shadow-sm: 0 2px 8px rgba(0,0,0,0.5);
-  --shadow-md: 0 10px 30px rgba(0,0,0,0.6);
-  --shadow-lg: 0 20px 50px rgba(0,0,0,0.8);
-  --accent-color: #a855f7;
-  --accent-glow: rgba(168, 85, 247, 0.15);
-}
+  --hot-1: #E01B6E;
+  --hot-2: #E85A3C;
+  --hot-3: #E08600;
+  --cool: #1F97A0;
+  --cool-deep: #147078;
+  --good: #199E6B;
+  --warn: #C9860B;
+  --bad: #D93B4C;
 
-/* --- 1. COTTON CANDY SKIES --- */
-html[data-theme="cotton"][data-dark-mode="false"] {
-  --bg-primary: #fdf5f8;
-  --bg-secondary: #ffffff;
-  --bg-tertiary: #f4ebf7;
-  --border-color: #ebd3e0;
-  --border-hover: #d2a3c1;
-  --text-primary: #2d1826;
-  --text-secondary: #6e4e64;
-  --text-tertiary: #a07d95;
-  --text-muted: #caa6be;
-  --shadow-sm: 0 2px 8px rgba(220,160,195,0.08);
-  --shadow-md: 0 10px 30px rgba(220,160,195,0.1);
-  --shadow-lg: 0 20px 50px rgba(220,160,195,0.15);
-  --accent-color: #B298E7;
-  --accent-glow: rgba(178, 152, 231, 0.15);
-}
+  --accent-glow: rgba(224, 27, 110, 0.12);
 
-html[data-theme="cotton"][data-dark-mode="true"] {
-  --bg-primary: #120e18;
-  --bg-secondary: #171220;
-  --bg-tertiary: #201a2d;
-  --border-color: #2b233a;
-  --border-hover: #3d3253;
-  --text-primary: #f1ebfa;
-  --text-secondary: #a698be;
-  --text-tertiary: #786b8f;
-  --text-muted: #534866;
-  --shadow-sm: 0 2px 8px rgba(0,0,0,0.5);
-  --shadow-md: 0 10px 30px rgba(0,0,0,0.6);
-  --shadow-lg: 0 20px 50px rgba(0,0,0,0.8);
-  --accent-color: #B298E7;
-  --accent-glow: rgba(178, 152, 231, 0.2);
-}
+  --shadow-sm: 0 2px 10px rgba(60, 40, 90, 0.08);
+  --shadow-md: 0 14px 34px -16px rgba(60, 40, 90, 0.28);
+  --shadow-lg: 0 26px 60px -24px rgba(60, 40, 90, 0.35);
 
-/* --- 2. INK WASH --- */
-html[data-theme="ink"][data-dark-mode="false"] {
-  --bg-primary: #ffffe3;
-  --bg-secondary: #ffffff;
-  --bg-tertiary: #f4f4eb;
-  --border-color: #cbcbcb;
-  --border-hover: #a0a0a0;
-  --text-primary: #2d2d2d;
-  --text-secondary: #4a4a4a;
-  --text-tertiary: #787878;
-  --text-muted: #aaaaaa;
-  --shadow-sm: 0 2px 8px rgba(0,0,0,0.05);
-  --shadow-md: 0 10px 30px rgba(0,0,0,0.07);
-  --shadow-lg: 0 20px 50px rgba(0,0,0,0.1);
-  --accent-color: #6D8196;
-  --accent-glow: rgba(109, 129, 150, 0.15);
-}
+  --color-idle: #E7E0F2;
 
-html[data-theme="ink"][data-dark-mode="true"] {
-  --bg-primary: #1c1d1f;
-  --bg-secondary: #242528;
-  --bg-tertiary: #2e3034;
-  --border-color: #3e4044;
-  --border-hover: #4e5056;
-  --text-primary: #f0f0f2;
-  --text-secondary: #cbcbcb;
-  --text-tertiary: #929396;
-  --text-muted: #5e5f62;
-  --shadow-sm: 0 2px 8px rgba(0,0,0,0.5);
-  --shadow-md: 0 10px 30px rgba(0,0,0,0.6);
-  --shadow-lg: 0 20px 50px rgba(0,0,0,0.8);
-  --accent-color: #6D8196;
-  --accent-glow: rgba(109, 129, 150, 0.25);
-}
-
-/* --- 3. SPICED CHAI --- */
-html[data-theme="chai"][data-dark-mode="false"] {
-  --bg-primary: #fdfbd4;
-  --bg-secondary: #ffffff;
-  --bg-tertiary: #f5edd0;
-  --border-color: #e6d3af;
-  --border-hover: #d2b588;
-  --text-primary: #3d230b;
-  --text-secondary: #6b4321;
-  --text-tertiary: #9c6c44;
-  --text-muted: #caa685;
-  --shadow-sm: 0 2px 8px rgba(139,90,43,0.06);
-  --shadow-md: 0 10px 30px rgba(139,90,43,0.08);
-  --shadow-lg: 0 20px 50px rgba(139,90,43,0.12);
-  --accent-color: #D47E30;
-  --accent-glow: rgba(212, 126, 48, 0.15);
-}
-
-html[data-theme="chai"][data-dark-mode="true"] {
-  --bg-primary: #150f09;
-  --bg-secondary: #1d160f;
-  --bg-tertiary: #2a1f16;
-  --border-color: #3f2f21;
-  --border-hover: #5e4632;
-  --text-primary: #f6efe9;
-  --text-secondary: #cbb8a7;
-  --text-tertiary: #9b8777;
-  --text-muted: #64564c;
-  --shadow-sm: 0 2px 8px rgba(0,0,0,0.5);
-  --shadow-md: 0 10px 30px rgba(0,0,0,0.6);
-  --shadow-lg: 0 20px 50px rgba(0,0,0,0.8);
-  --accent-color: #D47E30;
-  --accent-glow: rgba(212, 126, 48, 0.25);
-}
-
-/* --- 4. EMERALD ODYSSEY --- */
-html[data-theme="emerald"][data-dark-mode="false"] {
-  --bg-primary: #f2fbf7;
-  --bg-secondary: #ffffff;
-  --bg-tertiary: #e3f5ed;
-  --border-color: #c9ebd9;
-  --border-hover: #a1d7b9;
-  --text-primary: #003628;
-  --text-secondary: #005a45;
-  --text-tertiary: #3ebb9e;
-  --text-muted: #72cca6;
-  --shadow-sm: 0 2px 8px rgba(0,103,79,0.06);
-  --shadow-md: 0 10px 30px rgba(0,103,79,0.08);
-  --shadow-lg: 0 20px 50px rgba(0,103,79,0.12);
-  --accent-color: #00674F;
-  --accent-glow: rgba(0, 103, 79, 0.15);
-}
-
-html[data-theme="emerald"][data-dark-mode="true"] {
-  --bg-primary: #041411;
-  --bg-secondary: #081d19;
-  --bg-tertiary: #0e2a24;
-  --border-color: #173b33;
-  --border-hover: #23544a;
-  --text-primary: #f0fbf7;
-  --text-secondary: #73e6cb;
-  --text-tertiary: #3ebb9e;
-  --text-muted: #1c5244;
-  --shadow-sm: 0 2px 8px rgba(0,0,0,0.5);
-  --shadow-md: 0 10px 30px rgba(0,0,0,0.6);
-  --shadow-lg: 0 20px 50px rgba(0,0,0,0.8);
-  --accent-color: #73E6CB;
-  --accent-glow: rgba(115, 230, 203, 0.2);
-}
-
-/* --- 5. LOVE NOTES --- */
-html[data-theme="love"][data-dark-mode="false"] {
-  --bg-primary: #faf6f8;
-  --bg-secondary: #ffffff;
-  --bg-tertiary: #f2e7ef;
-  --border-color: #e5cedd;
-  --border-hover: #cb9ebe;
-  --text-primary: #380d22;
-  --text-secondary: #7c2452;
-  --text-tertiary: #b36b94;
-  --text-muted: #d99cbe;
-  --shadow-sm: 0 2px 8px rgba(241,114,161,0.06);
-  --shadow-md: 0 10px 30px rgba(241,114,161,0.08);
-  --shadow-lg: 0 20px 50px rgba(241,114,161,0.12);
-  --accent-color: #F172A1;
-  --accent-glow: rgba(241, 114, 161, 0.15);
-}
-
-html[data-theme="love"][data-dark-mode="true"] {
-  --bg-primary: #160c14;
-  --bg-secondary: #1e111d;
-  --bg-tertiary: #2b1929;
-  --border-color: #3e263d;
-  --border-hover: #583756;
-  --text-primary: #fef0f7;
-  --text-secondary: #f172a1;
-  --text-tertiary: #b39bc8;
-  --text-muted: #7c5f92;
-  --shadow-sm: 0 2px 8px rgba(0,0,0,0.5);
-  --shadow-md: 0 10px 30px rgba(0,0,0,0.6);
-  --shadow-lg: 0 20px 50px rgba(0,0,0,0.8);
-  --accent-color: #E64398;
-  --accent-glow: rgba(230, 67, 152, 0.2);
+  color-scheme: light;
 }
 
 /* Reset & Core Styles */
@@ -260,12 +126,24 @@ html[data-theme="love"][data-dark-mode="true"] {
 }
 
 body {
-  background-color: var(--bg-primary);
+  background-color: var(--ground);
+  background-image:
+    radial-gradient(900px 520px at 12% -8%, rgba(255, 61, 139, 0.10), transparent 60%),
+    radial-gradient(760px 480px at 92% 4%, rgba(84, 216, 222, 0.09), transparent 62%),
+    radial-gradient(680px 520px at 60% 108%, rgba(255, 179, 71, 0.06), transparent 60%);
+  background-attachment: fixed;
   color: var(--text-primary);
   font-family: var(--font-sans);
   min-height: 100dvh;
   overflow-x: hidden;
   line-height: 1.5;
+}
+
+html[data-theme="light"] body {
+  background-image:
+    radial-gradient(900px 520px at 12% -8%, rgba(224, 27, 110, 0.07), transparent 60%),
+    radial-gradient(760px 480px at 92% 4%, rgba(31, 151, 160, 0.06), transparent 62%),
+    radial-gradient(680px 520px at 60% 108%, rgba(224, 134, 0, 0.05), transparent 60%);
 }
 
 /* Custom Scrollbars */
@@ -279,12 +157,12 @@ body {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: var(--border-color);
-  border-radius: var(--border-radius-sm);
+  background: var(--line-strong);
+  border-radius: 999px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--border-hover);
+  background: var(--hot-1);
 }
 
 #root {
@@ -2352,6 +2230,264 @@ app-tracker-grid, app-stats-dashboard, app-daily-glance {
   font-weight: 700;
   color: #f43f5e;
   text-shadow: 0 0 8px rgba(244, 63, 94, 0.2);
+}
+
+
+/* =========================================================================
+   IDENTITY UPGRADE LAYER
+   Loaded last so it refines the components above. Everything here speaks the
+   knowledge-base language: the hot gradient as the single accent, teal focus,
+   semantic good/warn/bad, and mono micro-labels.
+   ========================================================================= */
+
+/* ---- Micro typography: mono, tracked-out labels ---- */
+.form-group label,
+.panel-section h4,
+.avg-title,
+.detail-hour-strip-section h5,
+.detail-allocations-section h5,
+.detail-notes-section h5,
+.reflection-preview-box h5,
+.theme-dropdown-menu h4,
+.date-spacer,
+.hour-label-cell {
+  font-family: var(--mono);
+}
+
+/* Header tagline reads as a crisp mono micro-label */
+.header-logo .subtitle {
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+/* ---- Selection + focus ---- */
+::selection { background: var(--hot-1); color: #fff; }
+
+.form-input:focus {
+  border-color: var(--cool);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--cool) 24%, transparent);
+}
+
+button:focus-visible,
+a:focus-visible,
+.tab-btn:focus-visible {
+  outline: 2px solid var(--cool);
+  outline-offset: 2px;
+}
+
+/* ---- Links ---- */
+a { color: var(--cool); }
+
+/* ---- Cards: inset top highlight + hot border on hover ---- */
+.card {
+  background: var(--surface);
+  box-shadow: var(--shadow-sm), inset 0 1px 0 rgba(255, 255, 255, 0.035);
+}
+html[data-theme="light"] .card {
+  box-shadow: var(--shadow-sm), inset 0 1px 0 rgba(255, 255, 255, 0.8);
+}
+.card:hover {
+  border-color: color-mix(in srgb, var(--hot-1) 40%, var(--line));
+  box-shadow: var(--shadow-md), inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
+/* ---- Buttons ---- */
+.btn { font-weight: 600; letter-spacing: -0.01em; }
+
+.btn-primary {
+  background: var(--grad-hot);
+  color: #fff;
+  border: none;
+  box-shadow: 0 6px 18px -6px rgba(255, 61, 139, 0.6);
+}
+.btn-primary:hover {
+  background: var(--grad-hot);
+  filter: brightness(1.06) saturate(1.05);
+  box-shadow: 0 10px 24px -6px rgba(255, 61, 139, 0.72);
+  transform: translateY(-1px);
+}
+
+.btn-secondary {
+  background: var(--surface-2);
+  border-color: var(--line);
+}
+.btn-secondary:hover {
+  background: var(--raised);
+  border-color: var(--line-strong);
+  color: var(--ink);
+}
+
+.btn-danger {
+  background: color-mix(in srgb, var(--bad) 14%, transparent);
+  color: var(--bad);
+  border: 1px solid color-mix(in srgb, var(--bad) 32%, transparent);
+}
+.btn-danger:hover {
+  background: color-mix(in srgb, var(--bad) 24%, transparent);
+  border-color: color-mix(in srgb, var(--bad) 55%, transparent);
+}
+
+/* ---- Header + brand ---- */
+.header-container {
+  background: color-mix(in srgb, var(--surface) 82%, transparent);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  box-shadow: var(--shadow-sm), inset 0 1px 0 rgba(255, 255, 255, 0.035);
+}
+
+.header-logo h1 {
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  background: var(--grad-hot);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.logo-icon {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--hot-1) 14%, var(--surface-2));
+  border: 1px solid color-mix(in srgb, var(--hot-1) 30%, var(--line));
+  box-shadow: 0 0 20px -6px rgba(255, 61, 139, 0.5);
+  font-size: 1.25rem;
+}
+
+/* ---- Tabs ---- */
+.tab-btn {
+  border-radius: var(--border-radius-md) var(--border-radius-md) 0 0;
+  letter-spacing: -0.01em;
+}
+.tab-btn:hover { color: var(--ink); background: color-mix(in srgb, var(--surface-2) 60%, transparent); }
+.tab-btn.active {
+  color: var(--hot-1);
+  border-bottom-color: var(--hot-1);
+  background: linear-gradient(180deg, var(--accent-glow), transparent);
+}
+
+/* ---- Grid: today / selected / hover accents ---- */
+.grid-row-wrapper:hover {
+  background: color-mix(in srgb, var(--hot-1) 5%, transparent);
+  border-color: color-mix(in srgb, var(--hot-1) 12%, transparent);
+}
+.grid-row-wrapper.selected {
+  background: color-mix(in srgb, var(--hot-1) 7%, transparent);
+  border-color: color-mix(in srgb, var(--hot-1) 30%, transparent);
+}
+.grid-row-wrapper.today {
+  border-color: color-mix(in srgb, var(--hot-1) 45%, transparent);
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--hot-1) 18%, transparent);
+}
+
+/* ---- Hour cells ---- */
+.hour-box {
+  border-radius: 5px;
+  border: 1px solid rgba(0, 0, 0, 0.18);
+}
+html[data-theme="light"] .hour-box { border-color: rgba(60, 40, 90, 0.08); }
+.hour-box.filled {
+  border: none;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.14);
+}
+.hour-box:hover {
+  transform: scale(1.18);
+  z-index: 5;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.5), 0 0 0 2px color-mix(in srgb, var(--hot-1) 55%, transparent);
+}
+
+/* ---- Progress + stat bars: subtle sheen ---- */
+.progress-fill,
+.bar-fill,
+.alloc-row-progress-fill {
+  background-image: linear-gradient(180deg, rgba(255, 255, 255, 0.22), rgba(255, 255, 255, 0));
+}
+
+/* ---- Floating palette bar ---- */
+.bottom-palette-bar {
+  background: color-mix(in srgb, var(--surface) 88%, transparent);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-color: var(--line);
+  box-shadow: var(--shadow-lg), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+.palette-inline-item.active {
+  background: color-mix(in srgb, var(--hot-1) 10%, var(--surface-2));
+}
+
+/* ---- Sync badges: token-driven so light mode is correct ---- */
+.sync-badge.idle,
+.sync-badge.success {
+  background: color-mix(in srgb, var(--good) 14%, transparent);
+  color: var(--good);
+  border-color: color-mix(in srgb, var(--good) 26%, transparent);
+}
+.sync-badge.syncing {
+  background: color-mix(in srgb, var(--cool) 14%, transparent);
+  color: var(--cool);
+  border-color: color-mix(in srgb, var(--cool) 26%, transparent);
+}
+.sync-badge.error {
+  background: color-mix(in srgb, var(--bad) 14%, transparent);
+  color: var(--bad);
+  border-color: color-mix(in srgb, var(--bad) 26%, transparent);
+}
+.sync-badge.local {
+  background: color-mix(in srgb, var(--muted) 12%, transparent);
+  color: var(--muted);
+  border-color: color-mix(in srgb, var(--muted) 24%, transparent);
+}
+
+/* ---- Insights ---- */
+.insight-card { border-left: 4px solid var(--hot-1); }
+.insight-card.warning { border-left-color: var(--warn); }
+.insight-card.success { border-left-color: var(--good); }
+.insight-card.info { border-left-color: var(--cool); }
+.stats-total-hours .number { color: var(--hot-1); }
+
+/* ---- Binge (a warning metric): route to semantic red ---- */
+.binge-value,
+.binge-pill,
+.detail-binge-value .value { color: var(--bad); }
+.binge-pill {
+  background: color-mix(in srgb, var(--bad) 10%, transparent);
+  border-color: color-mix(in srgb, var(--bad) 28%, transparent);
+}
+
+/* ---- Modal ---- */
+.modal-backdrop { background: rgba(10, 8, 18, 0.7); }
+.modal-content { box-shadow: var(--shadow-lg), inset 0 1px 0 rgba(255, 255, 255, 0.05); }
+.sql-code { color: var(--hot-3); }
+
+/* ---- Footer ---- */
+.app-footer { border-top-color: var(--line); }
+
+/* =========================================================================
+   LEARN TAB — embedded ADHD knowledge base
+   ========================================================================= */
+.learn-view {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  height: 100%;
+}
+.kb-frame {
+  width: 100%;
+  height: 100%;
+  min-height: 70vh;
+  border: 1px solid var(--line);
+  border-radius: var(--border-radius-lg);
+  background: var(--ground);
+  box-shadow: var(--shadow-md);
+}
+@media (max-width: 1200px) {
+  .learn-view { height: auto; }
+  .kb-frame { height: 82vh; }
 }
 
 

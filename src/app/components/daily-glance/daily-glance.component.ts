@@ -203,6 +203,7 @@ export class DailyGlanceComponent implements OnChanges {
   }
 
   getCellColor(catId: string): string {
+    if (catId === 'idle') return 'var(--color-idle)';
     const cat = this.categories.find(c => c.id === catId);
     return cat ? cat.color : 'var(--color-idle)';
   }
