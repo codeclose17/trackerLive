@@ -6,6 +6,7 @@ import { TrackerGridComponent } from './components/tracker-grid/tracker-grid.com
 import { StatsDashboardComponent } from './components/stats-dashboard/stats-dashboard.component';
 import { SettingsModalComponent } from './components/settings-modal/settings-modal.component';
 import { DailyGlanceComponent } from './components/daily-glance/daily-glance.component';
+import { DayProgressBarComponent } from './components/shared/day-progress-bar/day-progress-bar.component';
 import { Category, DayRecord, Settings, SyncState } from './types';
 import { DbService } from './services/db.service';
 
@@ -65,7 +66,8 @@ const generateDateRange = (startDate: Date): string[] => {
     TrackerGridComponent,
     StatsDashboardComponent,
     SettingsModalComponent,
-    DailyGlanceComponent
+    DailyGlanceComponent,
+    DayProgressBarComponent
   ],
   templateUrl: './app.component.html',
   styleUrl: './app.component.css'

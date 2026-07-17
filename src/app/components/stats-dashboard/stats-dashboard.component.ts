@@ -1,6 +1,7 @@
 import { Component, Input, OnChanges } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Category, DayRecord } from '../../types';
+import { EvidenceDotsComponent } from '../shared/evidence-dots/evidence-dots.component';
 
 interface Insight {
   type: string;
@@ -11,7 +12,7 @@ interface Insight {
 @Component({
   selector: 'app-stats-dashboard',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, EvidenceDotsComponent],
   template: `
     <div class="stats-dashboard-grid">
       <!-- CARD 1: OVERALL BREAKDOWN -->
@@ -94,6 +95,7 @@ interface Insight {
         
         <div class="insight-footer">
           * Focus Insight: Consistency is better than perfection. Just checking in daily strengthens cognitive routing and visual memory.
+          <kb-evidence label="Evidence" [filled]="2"></kb-evidence>
         </div>
       </div>
     </div>
