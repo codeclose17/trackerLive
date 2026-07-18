@@ -1,6 +1,13 @@
 import { Injectable } from '@angular/core';
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
-import { Category, DayRecord, SyncLog } from '../types';
+import { Category, DayRecord, Settings, SyncLog } from '../types';
+
+// Bump this whenever a stored shape changes in a way that needs a real
+// migration (a rename, a type change, a required field) — purely additive
+// optional fields (the norm throughout this build) don't need a bump,
+// since old data deserializes into them as `undefined` safely. [step 47]
+const CURRENT_SCHEMA_VERSION = 1;
+const SCHEMA_VERSION_KEY = 'box_tracker_schema_version';
 
 @Injectable({
   providedIn: 'root'
@@ -311,14 +318,19 @@ export class DbService {
   }
 
   // Local Storage - Settings
-  getLocalSettings(defaultCategories: Category[]): {
-    supabaseUrl: string;
-    supabaseAnonKey: string;
-    syncEnabled: boolean;
-    categories: Category[];
-  } {
+  // Typed as the full Settings shape (not a 4-field subset) — the previous
+  // narrower signature was misleading: every extra field added across this
+  // build (gamification, wakeTimeTarget, notifications, etc.) was already
+  // being saved/restored correctly at runtime via JSON.stringify/parse
+  // (TypeScript's structural typing just permitted passing the wider
+  // object where a narrower one was declared), but the signature didn't
+  // say so, which offered zero protection against a future refactor
+  // accidentally dropping a field. [step 47]
+  getLocalSettings(defaultCategories: Category[]): Settings {
+    this.runMigrations();
+
     const data = localStorage.getItem(this.LOCAL_STORAGE_SETTINGS_KEY);
-    const fallback = {
+    const fallback: Settings = {
       supabaseUrl: '',
       supabaseAnonKey: '',
       syncEnabled: false,
@@ -330,6 +342,7 @@ export class DbService {
     try {
       const parsed = JSON.parse(data);
       return {
+        ...parsed, // every optional field (gamification, notifications, etc.) rides through as-is
         supabaseUrl: parsed.supabaseUrl || '',
         supabaseAnonKey: parsed.supabaseAnonKey || '',
         syncEnabled: !!parsed.syncEnabled,
@@ -341,12 +354,25 @@ export class DbService {
     }
   }
 
-  saveLocalSettings(settings: {
-    supabaseUrl: string;
-    supabaseAnonKey: string;
-    syncEnabled: boolean;
-    categories: Category[];
-  }): void {
+  saveLocalSettings(settings: Settings): void {
     localStorage.setItem(this.LOCAL_STORAGE_SETTINGS_KEY, JSON.stringify(settings));
+    localStorage.setItem(SCHEMA_VERSION_KEY, String(CURRENT_SCHEMA_VERSION));
+  }
+
+  // Runs once per version bump, before the first read of a session. Every
+  // field added so far has been purely additive/optional, so there is
+  // nothing to actually transform yet — this exists so that WHEN a future
+  // change needs a real migration (a rename, a required field, a type
+  // change), there's already a versioned place to put it instead of
+  // silently corrupting existing users' data.
+  private runMigrations(): void {
+    const storedVersion = parseInt(localStorage.getItem(SCHEMA_VERSION_KEY) || '0', 10);
+    if (storedVersion >= CURRENT_SCHEMA_VERSION) return;
+
+    // No transformations needed yet for version 0 -> 1 (all changes so far
+    // were additive optional fields). Future migrations get added here,
+    // each gated on `storedVersion < N`.
+
+    localStorage.setItem(SCHEMA_VERSION_KEY, String(CURRENT_SCHEMA_VERSION));
   }
 }

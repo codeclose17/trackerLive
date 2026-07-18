@@ -1560,8 +1560,24 @@ export class AppComponent implements OnInit, OnDestroy {
 
   // Backup Export/Import
   handleExportData(): void {
+    // Every locally-stored piece of user data, not just records/categories
+    // — step 47 explicitly requires "export includes everything." Settings
+    // (categories, gamification, wakeTimeTarget, notifications, etc.) is
+    // included wholesale since it's already the full Settings shape.
     const localData = {
+      exportVersion: 1,
       records: this.dbService.getLocalRecords(),
+      settings: this.settings,
+      tasks: this.taskService.getTasks(),
+      rewardBank: this.taskService.getRewardBank(),
+      winLog: this.taskService.getWinLog(),
+      impulseLog: this.taskService.getImpulseLog(),
+      frictionCard: this.taskService.getFrictionCard(),
+      boredomActivities: this.taskService.getBoredomActivities(),
+      rsdEntries: this.taskService.getRsdEntries(),
+      personalRecords: this.taskService.getPersonalRecords(),
+      // Kept for backward compatibility with older exported backups that
+      // only had these two top-level keys (see handleImportData).
       categories: this.settings.categories
     };
     const jsonStr = JSON.stringify(localData, null, 2);
@@ -1584,16 +1600,84 @@ export class AppComponent implements OnInit, OnDestroy {
         const parsed = JSON.parse(e.target?.result as string);
         if (parsed && typeof parsed === 'object') {
           const importedRecords = parsed.records || {};
-          const importedCategories = parsed.categories || [];
-          
+          // Backward-compatible: old backups (pre step-47) only had a
+          // top-level `categories` key; newer ones nest it under `settings`.
+          const importedCategories = parsed.settings?.categories || parsed.categories || [];
+
           const mergedRecords = { ...this.dbService.getLocalRecords(), ...importedRecords };
           this.dbService.saveLocalRecords(mergedRecords);
           this.records = mergedRecords;
 
           if (importedCategories.length > 0) {
             this.settings = { ...this.settings, categories: importedCategories };
-            this.dbService.saveLocalSettings(this.settings);
-            this.applyCssVariables();
+          }
+          // Merge in the rest of settings (gamification, wakeTimeTarget,
+          // notifications, etc.) if present — absent on old backups, so
+          // nothing breaks importing them.
+          if (parsed.settings) {
+            this.settings = {
+              ...this.settings,
+              ...parsed.settings,
+              // Never import Supabase credentials from a backup file — the
+              // importing device keeps its own connection settings.
+              supabaseUrl: this.settings.supabaseUrl,
+              supabaseAnonKey: this.settings.supabaseAnonKey,
+              syncEnabled: this.settings.syncEnabled,
+              categories: importedCategories.length > 0 ? importedCategories : this.settings.categories
+            };
+          }
+          this.dbService.saveLocalSettings(this.settings);
+          this.applyCssVariables();
+
+          // Local-only data (steps 15-27, 34-37, 40, 43 — kept intentionally
+          // local per this build's design, see step 47 evidence) — merge in
+          // whatever the backup has, imported data doesn't overwrite newer
+          // local entries with the same id.
+          const mergeById = <T extends { id: string }>(local: T[], imported: T[] | undefined): T[] => {
+            if (!imported || imported.length === 0) return local;
+            const localIds = new Set(local.map(x => x.id));
+            return [...local, ...imported.filter(x => !localIds.has(x.id))];
+          };
+
+          if (parsed.tasks) {
+            this.tasks = mergeById(this.tasks, parsed.tasks);
+            this.taskService.saveTasks(this.tasks);
+          }
+          if (parsed.winLog) {
+            this.wins = mergeById(this.wins, parsed.winLog);
+            this.taskService.saveWinLog(this.wins);
+          }
+          if (parsed.impulseLog) {
+            this.impulseEntries = mergeById(this.impulseEntries, parsed.impulseLog);
+            this.taskService.saveImpulseLog(this.impulseEntries);
+          }
+          if (parsed.rsdEntries) {
+            this.rsdEntries = mergeById(this.rsdEntries, parsed.rsdEntries);
+            this.taskService.saveRsdEntries(this.rsdEntries);
+          }
+          if (parsed.frictionCard) {
+            this.frictionCard = parsed.frictionCard;
+            this.taskService.saveFrictionCard(this.frictionCard);
+          }
+          if (parsed.boredomActivities) {
+            this.boredomActivities = mergeById(this.boredomActivities, parsed.boredomActivities);
+            this.taskService.saveBoredomActivities(this.boredomActivities);
+          }
+          if (parsed.rewardBank) {
+            this.rewardBank = parsed.rewardBank;
+            this.taskService.saveRewardBank(this.rewardBank);
+          }
+          // Personal records: only adopt an imported record if it's
+          // actually better than the local one, same rule checkPersonalRecords
+          // itself uses — an import should never silently downgrade a record.
+          if (parsed.personalRecords) {
+            const { updated } = checkPersonalRecords(this.personalRecords, {
+              focusStreak: parsed.personalRecords.longestFocusStreak?.value ?? 0,
+              wakeConsistency: parsed.personalRecords.bestWakeConsistency?.value ?? null,
+              lastCompletedWeekImpulseCount: parsed.personalRecords.lowestImpulseWeek?.value ?? null
+            });
+            this.personalRecords = updated;
+            this.taskService.savePersonalRecords(this.personalRecords);
           }
 
           // Sync in background if enabled
