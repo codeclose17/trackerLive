@@ -1,0 +1,107 @@
+{
+  "configVersion": 1,
+  "timestamp": 1784382215380,
+  "index": "/trackerLive/index.html",
+  "assetGroups": [
+    {
+      "name": "app",
+      "installMode": "prefetch",
+      "updateMode": "prefetch",
+      "cacheQueryOptions": {
+        "ignoreVary": true
+      },
+      "urls": [
+        "/trackerLive/adhd-knowledge-base.html",
+        "/trackerLive/chunk-6AXFZQID.js",
+        "/trackerLive/chunk-7JNYF7MN.js",
+        "/trackerLive/chunk-FZHFE3ZY.js",
+        "/trackerLive/chunk-GEVAXP42.js",
+        "/trackerLive/chunk-H64MYPEI.js",
+        "/trackerLive/chunk-J5OYGMTE.js",
+        "/trackerLive/chunk-KGIQ6CRB.js",
+        "/trackerLive/chunk-L2KBPEYN.js",
+        "/trackerLive/chunk-NCZRH6EX.js",
+        "/trackerLive/chunk-OAWZXJQQ.js",
+        "/trackerLive/chunk-WNATQ7KB.js",
+        "/trackerLive/chunk-XPMEH6OQ.js",
+        "/trackerLive/chunk-XSYW43VL.js",
+        "/trackerLive/favicon.ico",
+        "/trackerLive/index.html",
+        "/trackerLive/main-3WNC4Z5W.js",
+        "/trackerLive/manifest.webmanifest",
+        "/trackerLive/polyfills-FFHMD2TL.js",
+        "/trackerLive/styles-PD6NHZSD.css"
+      ],
+      "patterns": []
+    },
+    {
+      "name": "assets",
+      "installMode": "lazy",
+      "updateMode": "prefetch",
+      "cacheQueryOptions": {
+        "ignoreVary": true
+      },
+      "urls": [
+        "/trackerLive/icons/icon-128x128.png",
+        "/trackerLive/icons/icon-144x144.png",
+        "/trackerLive/icons/icon-152x152.png",
+        "/trackerLive/icons/icon-192x192.png",
+        "/trackerLive/icons/icon-384x384.png",
+        "/trackerLive/icons/icon-512x512.png",
+        "/trackerLive/icons/icon-72x72.png",
+        "/trackerLive/icons/icon-96x96.png"
+      ],
+      "patterns": []
+    }
+  ],
+  "dataGroups": [],
+  "hashTable": {
+    "/trackerLive/adhd-knowledge-base.html": "4d2f9b6685c83d8dbdb412196e31c770c7371801",
+    "/trackerLive/chunk-6AXFZQID.js": "0e82c7d29cb274f7f34b1f6b706675b7c8b533a3",
+    "/trackerLive/chunk-7JNYF7MN.js": "f9f0a2239d13b00169e024af3d8ab71b3e73ab83",
+    "/trackerLive/chunk-FZHFE3ZY.js": "bab1837c1e8e884737a3c3bb13a356d8e6f1ad27",
+    "/trackerLive/chunk-GEVAXP42.js": "f2581742af26d911d177606d2a33c6043b77b23b",
+    "/trackerLive/chunk-H64MYPEI.js": "910d133a8b8f4922de22d2bc5722ff8e1e89d96d",
+    "/trackerLive/chunk-J5OYGMTE.js": "4553cc3344f5c3c9bb63b76d4cee60963c916be3",
+    "/trackerLive/chunk-KGIQ6CRB.js": "4445f93a0a92caeb8bee4eaa177ccc06a06316fc",
+    "/trackerLive/chunk-L2KBPEYN.js": "b8621dcef4cd999c94a3d8b6174eb705bdd9c33c",
+    "/trackerLive/chunk-NCZRH6EX.js": "6e1dd411a5729bc2492399fd42744f3b14fe7151",
+    "/trackerLive/chunk-OAWZXJQQ.js": "8d972cc30042c4b03d88f13422611aa6eec64d0b",
+    "/trackerLive/chunk-WNATQ7KB.js": "ba781c73decffb3c3e5972af7d7b0bb38e030f9f",
+    "/trackerLive/chunk-XPMEH6OQ.js": "00978c49499322d308428b61f45bb2af0bb98976",
+    "/trackerLive/chunk-XSYW43VL.js": "d3fefc6e4e76036a8fd5a0a5d831fb890b0fde02",
+    "/trackerLive/favicon.ico": "9c39f434fe1261f68c5e3eefdf734630d99c5670",
+    "/trackerLive/icons/icon-128x128.png": "f912963bdc6d5a38d8f1dd0afbaab2ce8d657acb",
+    "/trackerLive/icons/icon-144x144.png": "b155fd5f2fd5d2ea7760721063003c4cd95fd783",
+    "/trackerLive/icons/icon-152x152.png": "eae6e0f0c8afb8aaae339e2a569b43e9238e5e6c",
+    "/trackerLive/icons/icon-192x192.png": "15c4180454633880d98674aa7394656196c91584",
+    "/trackerLive/icons/icon-384x384.png": "94a915751ef6c9282df9aea405ad679230631814",
+    "/trackerLive/icons/icon-512x512.png": "1de182f76f7329dfa8f9fcdd1fdcdd695bea6a99",
+    "/trackerLive/icons/icon-72x72.png": "aa88a6096bd973be7f6d7a5489bfa6bc2463f8c4",
+    "/trackerLive/icons/icon-96x96.png": "7fb8f59c30ce2ff12c700321a0b39e14b3dc8f95",
+    "/trackerLive/index.html": "b9401d3a4fbfdf8cc6623ea535fc790575eca984",
+    "/trackerLive/main-3WNC4Z5W.js": "b69697ebb7f0cfcd1cd57bdd49c4fe2676ec40c9",
+    "/trackerLive/manifest.webmanifest": "575f855781c3532f83ea9574bc573357a0b0be9c",
+    "/trackerLive/polyfills-FFHMD2TL.js": "f49b49a155bc7d192db62a4c15d0a612b460a667",
+    "/trackerLive/styles-PD6NHZSD.css": "d202309890bc035879a6e6a237f0cb8d00cad932"
+  },
+  "navigationUrls": [
+    {
+      "positive": true,
+      "regex": "^\\/.*$"
+    },
+    {
+      "positive": false,
+      "regex": "^\\/(?:.+\\/)?[^/]*\\.[^/]*$"
+    },
+    {
+      "positive": false,
+      "regex": "^\\/(?:.+\\/)?[^/]*__[^/]*$"
+    },
+    {
+      "positive": false,
+      "regex": "^\\/(?:.+\\/)?[^/]*__[^/]*\\/.*$"
+    }
+  ],
+  "navigationRequestStrategy": "performance"
+}
