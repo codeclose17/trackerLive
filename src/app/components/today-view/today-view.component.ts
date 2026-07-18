@@ -66,6 +66,13 @@ import { Category, DayRecord, PlannedBlock } from '../../types';
               [style.backgroundColor]="getCellColor(hIdx)"
               [title]="hIdx + ':00 — ' + getCellName(hIdx) + ' (drag to paint, double-click to clear)'"
             ></div>
+            <!-- STEP 41: time-truth overlay — marks hours with a planned block -->
+            <span
+              class="today-plan-marker"
+              *ngIf="getPlannedBlockAtHour(hIdx) as block"
+              [class.plan-kept]="block.done"
+              [title]="'Planned: ' + block.action + (block.done ? ' — done' : ' — not yet done')"
+            >{{ block.done ? '✓' : '○' }}</span>
             <span class="today-hour-cat-name">{{ getCellName(hIdx) }}</span>
             <span *ngIf="hIdx === currentHour" class="now-marker" aria-hidden="true">now</span>
           </div>
@@ -185,6 +192,17 @@ export class TodayViewComponent implements OnInit, OnDestroy, OnChanges {
     const catId = this.getHourCategory(hIdx);
     const cat = this.categories.find(c => c.id === catId);
     return cat ? cat.name : 'Idle / Uncategorized';
+  }
+
+  // STEP 41: time-truth overlay — finds the planned block (if any) whose
+  // start time falls within this hour, so "planned vs actual" is visible
+  // right on the timeline the user is already painting.
+  getPlannedBlockAtHour(hIdx: number): PlannedBlock | null {
+    const blocks = this.record?.plannedBlocks || [];
+    return blocks.find(b => {
+      const blockHour = parseInt(b.time.split(':')[0], 10);
+      return blockHour === hIdx;
+    }) || null;
   }
 
   private paint(hIdx: number, shiftKey: boolean): void {

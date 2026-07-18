@@ -1206,12 +1206,25 @@ a:hover {
   line-height: 1.5;
 }
 
+.insight-mechanism {
+  font-size: 0.85rem;
+  color: var(--ink-soft);
+  line-height: 1.5;
+  margin-top: 8px;
+  padding: 0.6rem 0.8rem;
+  background: var(--surface-2);
+  border-radius: var(--border-radius-sm);
+}
+
+.insight-mechanism b {
+  color: var(--cool);
+}
+
 .insight-footer {
-  font-size: 0.75rem;
+  font-size: 0.8rem;
   color: var(--text-tertiary);
   border-top: 1px solid var(--border-color);
   padding-top: 0.75rem;
-  font-style: italic;
 }
 
 /* 6. Settings Modal & Setup SQL */
@@ -4850,6 +4863,252 @@ html[data-theme="light"] .today-hour-box { border-color: rgba(60, 40, 90, 0.08);
   font-size: 0.88rem;
   color: var(--ink-soft);
   margin: 4px 0;
+}
+
+/* =========================================================================
+   INSIGHT ENGINE: weekly review, time-truth, trigger heatmap, records
+   (Phase G, steps 40-43)
+   ========================================================================= */
+
+/* ---- Weekly review (step 40) ---- */
+.weekly-review {
+  padding: 1rem 1.15rem;
+  margin-bottom: 0.75rem;
+  border-left: 4px solid var(--cool);
+}
+
+.weekly-review h4 {
+  margin: 4px 0 12px;
+  font-size: 1.05rem;
+}
+
+.review-autopsy {
+  background: var(--surface-2);
+  border-radius: var(--border-radius-md);
+  padding: 0.75rem 1rem;
+  margin-bottom: 14px;
+}
+
+.review-autopsy-label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--ink);
+  margin: 0 0 6px;
+}
+
+.review-autopsy-reasons {
+  margin: 0;
+  padding-left: 20px;
+}
+
+.review-autopsy-reasons li {
+  font-size: 0.85rem;
+  color: var(--ink-soft);
+  margin: 3px 0;
+}
+
+.review-experiment-picker label {
+  display: block;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--muted);
+  margin-bottom: 6px;
+}
+
+.review-experiment-picker .form-input {
+  margin-bottom: 8px;
+}
+
+/* ---- Pinned weekly experiment (Today) ---- */
+.active-experiment-banner {
+  padding: 0.85rem 1rem;
+  border-left: 4px solid var(--hot-3);
+}
+
+.active-experiment-label {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--hot-3);
+  font-weight: 600;
+}
+
+.active-experiment-banner p {
+  margin: 6px 0 0;
+  font-size: 0.95rem;
+  color: var(--ink);
+}
+
+/* ---- Time-truth overlay (step 41) ---- */
+.today-plan-marker {
+  flex: none;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--hot-3);
+  width: 18px;
+  text-align: center;
+}
+
+.today-plan-marker.plan-kept {
+  color: var(--good);
+}
+
+.trade-summary {
+  font-size: 0.88rem;
+  color: var(--ink-soft);
+  line-height: 1.5;
+  background: var(--surface-2);
+  border-radius: var(--border-radius-md);
+  padding: 0.65rem 0.9rem;
+  margin: 0;
+}
+
+.block-completion-pill {
+  font-size: 0.72rem;
+  font-family: var(--mono);
+  color: var(--muted);
+  background: var(--surface-2);
+  border-radius: 999px;
+  padding: 2px 8px;
+}
+
+/* ---- Trigger heatmap (step 42) ---- */
+.trigger-heatmap-card {
+  grid-column: 1 / -1;
+}
+
+.heatmap-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  margin-top: 10px;
+  overflow-x: auto;
+}
+
+.heatmap-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.heatmap-weekday-label {
+  font-family: var(--mono);
+  font-size: 0.68rem;
+  color: var(--muted);
+  width: 30px;
+  flex: none;
+}
+
+.heatmap-cells {
+  display: flex;
+  gap: 2px;
+}
+
+.heatmap-cell {
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+  background: var(--hot-1);
+  flex: none;
+}
+
+.heatmap-hot-cells {
+  margin-top: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.heatmap-hot-label {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--hot-1);
+  font-weight: 600;
+}
+
+.heatmap-hot-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  font-size: 0.85rem;
+  color: var(--ink-soft);
+}
+
+/* ---- Records board (step 43) ---- */
+.records-board-card {
+  grid-column: 1 / -1;
+}
+
+.records-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.record-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.6rem 0.85rem;
+  background: var(--surface-2);
+  border-radius: var(--border-radius-md);
+}
+
+.record-label {
+  font-size: 0.88rem;
+  color: var(--ink-soft);
+}
+
+.record-value {
+  font-family: var(--mono);
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--hot-3);
+}
+
+.record-celebration-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 350;
+  background: rgba(10, 8, 18, 0.75);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+}
+
+.record-celebration {
+  text-align: center;
+  padding: 2rem;
+  max-width: 340px;
+}
+
+.record-celebration-emoji {
+  font-size: 2.5rem;
+  display: block;
+  margin-bottom: 8px;
+}
+
+.record-celebration h4 {
+  margin: 0 0 12px;
+}
+
+.record-celebration ul {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 18px;
+}
+
+.record-celebration ul li {
+  font-size: 0.95rem;
+  color: var(--ink-soft);
+  margin: 6px 0;
 }
 
 

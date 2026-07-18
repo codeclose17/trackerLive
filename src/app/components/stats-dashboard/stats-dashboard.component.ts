@@ -1,7 +1,9 @@
-import { Component, Input, OnChanges } from '@angular/core';
+import { Component, Input, Output, EventEmitter, OnChanges } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Category, DayRecord, ImpulseLogEntry } from '../../types';
-import { EvidenceDotsComponent } from '../shared/evidence-dots/evidence-dots.component';
+import { computeInsights, Insight } from '../../utils/insights';
+import { TriggerHeatmapComponent } from '../trigger-heatmap/trigger-heatmap.component';
+import { HeatmapCell } from '../../utils/trigger-heatmap';
 
 interface CycleOverlayRow {
   cycleDay: number;
@@ -9,16 +11,10 @@ interface CycleOverlayRow {
   severityPercent: number;
 }
 
-interface Insight {
-  type: string;
-  title: string;
-  message: string;
-}
-
 @Component({
   selector: 'app-stats-dashboard',
   standalone: true,
-  imports: [CommonModule, EvidenceDotsComponent],
+  imports: [CommonModule, TriggerHeatmapComponent],
   template: `
     <div class="stats-dashboard-grid">
       <!-- CARD 1: OVERALL BREAKDOWN -->
@@ -83,25 +79,25 @@ interface Insight {
         </div>
       </div>
 
-      <!-- CARD 3: FOCUS INSIGHTS -->
+      <!-- CARD 3: FOCUS INSIGHTS (mechanism-citing, cross-metric correlations — step 39) -->
       <div class="stats-card card insight-card" [ngClass]="insight.type">
         <div class="card-header-icon">
           <!-- Award SVG (Success) -->
           <svg *ngIf="insight.type === 'success'" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 8px; vertical-align: middle;"><circle cx="12" cy="8" r="7"/><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"/></svg>
-          
+
           <!-- Info SVG (Others) -->
           <svg *ngIf="insight.type !== 'success'" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 8px; vertical-align: middle;"><circle cx="12" cy="12" r="10"/><line x1="12" x2="12" y1="16" y2="12"/><line x1="12" x2="12.01" y1="8" y2="8"/></svg>
           <h3>Focus Insights</h3>
         </div>
-        
+
         <div class="insight-body">
           <h4 class="insight-title">{{ insight.title }}</h4>
           <p class="insight-message">{{ insight.message }}</p>
+          <p class="insight-mechanism"><b>Why:</b> {{ insight.mechanism }}</p>
         </div>
-        
+
         <div class="insight-footer">
-          * Focus Insight: Consistency is better than perfection. Just checking in daily strengthens cognitive routing and visual memory.
-          <kb-evidence label="Evidence" [filled]="2"></kb-evidence>
+          <button class="regulator-kb-link" (click)="openKb.emit(insight.kbAnchor)">Read the mechanism in full →</button>
         </div>
       </div>
 
@@ -123,6 +119,12 @@ interface Insight {
           <p class="muted-text italic-text">No cycle-day + impulse data logged together yet. Log your cycle day on Today to see the overlay build up here.</p>
         </ng-template>
       </div>
+
+      <!-- CARD 5: TRIGGER HEATMAP (step 42) -->
+      <app-trigger-heatmap
+        [impulseEntries]="impulseEntries"
+        (preCommit)="preCommitBlock.emit($event)"
+      ></app-trigger-heatmap>
     </div>
   `
 })
@@ -133,12 +135,17 @@ export class StatsDashboardComponent implements OnChanges {
   @Input() cycleAwareModeEnabled = false;
   @Input() impulseEntries: ImpulseLogEntry[] = [];
 
+  @Output() openKb = new EventEmitter<string>();
+  @Output() preCommitBlock = new EventEmitter<HeatmapCell>();
+
   activeRecordsCount = 0;
   private hourCounts: Record<string, number> = {};
   insight: Insight = {
     type: 'info',
-    title: 'Start Tracking!',
-    message: 'Paint some boxes on the grid above to unlock personalized insights.'
+    title: 'Start tracking',
+    message: 'Paint some hours on Today to unlock personalized insights.',
+    mechanism: 'Insights need at least a few days of real data to correlate against.',
+    kbAnchor: 'definition'
   };
 
   ngOnChanges(): void {
@@ -164,8 +171,9 @@ export class StatsDashboardComponent implements OnChanges {
       }
     });
 
-    // Generate insight
-    this.insight = this.generateInsight();
+    // Generate insight: cross-metric correlation engine (step 39), replaces
+    // the old category-average-only rules entirely.
+    this.insight = computeInsights(this.dates, this.records, this.impulseEntries);
   }
 
   getCategoryTotal(catId: string): number {
@@ -182,68 +190,6 @@ export class StatsDashboardComponent implements OnChanges {
     const total = this.getCategoryTotal(catId);
     const days = this.activeRecordsCount || this.dates.length || 1;
     return (total / days).toFixed(1);
-  }
-
-  private generateInsight(): Insight {
-    if (this.activeRecordsCount === 0) {
-      return {
-        type: 'info',
-        title: 'Start Tracking!',
-        message: 'Paint some boxes on the grid above to unlock personalized insights.'
-      };
-    }
-
-    const sleepAvg = parseFloat(this.getCategoryAverage('sleep'));
-    const socialAvg = parseFloat(this.getCategoryAverage('social'));
-    const learnAvg = parseFloat(this.getCategoryAverage('learn'));
-    const workAvg = parseFloat(this.getCategoryAverage('work'));
-    const bingeAvg = parseFloat(this.getBingeAverage());
-
-    if (bingeAvg > 3) {
-      return {
-        type: 'warning',
-        title: 'High Binge Frequency',
-        message: `You are averaging ${bingeAvg} binge sessions per day. Frequent multitasking or quick switching depletes your cognitive attention spans. Try focusing on a single task for 25 minutes (Pomodoro technique) before taking a break.`
-      };
-    }
-
-    if (sleepAvg < 7) {
-      return {
-        type: 'warning',
-        title: 'Prioritize Sleep',
-        message: `Your sleep is averaging ${sleepAvg}h. Sleep deprivation blocks dopamine receptor replenishment, drastically reducing attention span and impulse control. Try setting a "wind down" alarm at 10 PM.`
-      };
-    }
-
-    if (socialAvg > 3 && socialAvg > learnAvg) {
-      return {
-        type: 'warning',
-        title: 'Mindful Scrolling',
-        message: `Social media (${socialAvg}h/day) is taking up more time than learning (${learnAvg}h/day). Try the "10-minute rule" — study for 10 minutes before opening social apps.`
-      };
-    }
-
-    if (learnAvg > 2 && workAvg > 0) {
-      return {
-        type: 'success',
-        title: 'Executive Brilliance',
-        message: `Incredible! You are dedicating an average of ${learnAvg}h/day to learning. Keep feeding your curiosity. That focus momentum is powerful!`
-      };
-    }
-
-    if (workAvg > 8) {
-      return {
-        type: 'warning',
-        title: 'Prevent Burnout',
-        message: `You are averaging ${workAvg}h/day on work. Excessive hyperfocus blocks cognitive shifting, leading to mental fatigue and executive dysfunction. Make sure to schedule micro-breaks to reset your focus routing.`
-      };
-    }
-
-    return {
-      type: 'success',
-      title: 'Healthy Rhythm',
-      message: 'You are maintaining a balanced breakdown. A steady division of labor, learning, and sleep stabilizes dopamine baseline levels, helping you prevent task paralysis.'
-    };
   }
 
   getTotalBinges(): number {

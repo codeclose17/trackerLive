@@ -69,6 +69,14 @@ export interface RsdEntry {
   createdAt: string;
 }
 
+// [step 43] Personal-best tracking. Each record stores the best value seen
+// so far and whether its "new record" celebration has already been shown.
+export interface PersonalRecords {
+  longestFocusStreak?: { value: number; celebrated: boolean };
+  bestWakeConsistency?: { value: number; celebrated: boolean };
+  lowestImpulseWeek?: { value: number; celebrated: boolean };
+}
+
 // [step 30] Movement logged for the "exercise = natural stimulant" hint.
 export interface MovementEntry {
   id: string;
@@ -91,6 +99,14 @@ export interface Settings {
   gamification?: GamificationState; // step 23
   wakeTimeTarget?: string; // "HH:MM", step 28
   cycleAwareModeEnabled?: boolean; // step 34, off by default
+  activeExperiment?: WeeklyExperiment; // step 40, pinned on Today all week
+}
+
+// [step 40] The single experiment chosen during the weekly review, pinned
+// on Today until the week it was picked for ends.
+export interface WeeklyExperiment {
+  text: string;
+  weekStartDate: string; // YYYY-MM-DD — the Sunday this was picked for
 }
 
 // XP & levels. Stored on Settings (not a separate blob) so it rides the

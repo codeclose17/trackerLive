@@ -80,6 +80,12 @@
           (dismiss)="handleDismissQuickLog()"
         ></app-hourly-quick-log>
 
+        <!-- STEP 40: this week's experiment, pinned -->
+        <div class="active-experiment-banner card" *ngIf="activeExperimentIfCurrent">
+          <span class="active-experiment-label">🧪 This week's experiment</span>
+          <p>{{ activeExperimentIfCurrent!.text }}</p>
+        </div>
+
         <!-- STEP 21: backwards milestones due on this date -->
         <div class="milestones-due-banner card" *ngIf="milestonesDueToday.length > 0">
           <span class="milestones-due-label">🎯 Due {{ selectedDate === todayDate ? 'today' : 'this day' }}</span>
@@ -247,9 +253,11 @@
         [categories]="settings.categories"
         [tasks]="tasks"
         [wakeConsistency]="wakeConsistency"
+        [impulseEntries]="impulseEntries"
         (prevWeek)="handlePrevWeek()"
         (nextWeek)="handleNextWeek()"
         (openDay)="handleOpenWeekDay($event)"
+        (saveExperiment)="handleSaveExperiment($event)"
       ></app-week-view>
 
       <!-- VIEW T: TASKS TAB — brain-dump inbox + task shredder -->
@@ -268,7 +276,16 @@
         [categories]="settings.categories"
         [cycleAwareModeEnabled]="settings.cycleAwareModeEnabled || false"
         [impulseEntries]="impulseEntries"
+        (openKb)="openKbSection($event)"
+        (preCommitBlock)="handlePreCommitFromHeatmap($event)"
       ></app-stats-dashboard>
+
+      <app-records-board
+        *ngIf="activeTab === 'stats'"
+        [records]="personalRecords"
+        [newlyBroken]="newlyBrokenRecords"
+        (dismiss)="dismissRecordCelebration()"
+      ></app-records-board>
 
       <!-- VIEW D: LEARN (EMBEDDED ADHD KNOWLEDGE BASE) -->
       <div *ngIf="activeTab === 'learn'" class="learn-view">

@@ -26,10 +26,14 @@ import { BodyRegulatorsComponent } from './components/body-regulators/body-regul
 import { OverwhelmSosComponent } from './components/overwhelm-sos/overwhelm-sos.component';
 import { RsdFirstAidComponent } from './components/rsd-first-aid/rsd-first-aid.component';
 import { MoodCheckinComponent } from './components/mood-checkin/mood-checkin.component';
+import { RecordsBoardComponent } from './components/records-board/records-board.component';
 import {
   BoredomActivity, CaffeineEntry, Category, DayRecord, FrictionCard, ImpulseLogEntry, ImpulseTrigger,
-  MovementEntry, MoodEnergyCheckIn, PlannedBlock, RewardBank, RsdEntry, Settings, SyncState, Task, WinLogEntry
+  MovementEntry, MoodEnergyCheckIn, PersonalRecords, PlannedBlock, RewardBank, RsdEntry, Settings,
+  SyncState, Task, WeeklyExperiment, WinLogEntry
 } from './types';
+import { HeatmapCell } from './utils/trigger-heatmap';
+import { computeLastCompletedWeekImpulseCount, checkPersonalRecords } from './utils/personal-records';
 import { DbService } from './services/db.service';
 import { TaskService } from './services/task.service';
 import { XP_AWARDS } from './utils/gamification';
@@ -112,7 +116,8 @@ const generateDateRange = (startDate: Date, length: number): string[] => {
     BodyRegulatorsComponent,
     OverwhelmSosComponent,
     RsdFirstAidComponent,
-    MoodCheckinComponent
+    MoodCheckinComponent,
+    RecordsBoardComponent
   ],
   templateUrl: './app.component.html',
   styleUrl: './app.component.css'
@@ -155,6 +160,8 @@ export class AppComponent implements OnInit, OnDestroy {
   boredomActivities: BoredomActivity[] = [];
   rsdEntries: RsdEntry[] = [];
   isSosOpen = false;
+  personalRecords: PersonalRecords = {};
+  newlyBrokenRecords: string[] = [];
   isSettingsOpen = false;
   syncState: SyncState = { status: 'idle' };
 
@@ -233,6 +240,44 @@ export class AppComponent implements OnInit, OnDestroy {
     this.frictionCard = this.taskService.getFrictionCard();
     this.boredomActivities = this.taskService.getBoredomActivities();
     this.rsdEntries = this.taskService.getRsdEntries();
+    this.personalRecords = this.taskService.getPersonalRecords();
+
+    // Check records once after everything's loaded. Also re-checked after
+    // any mutation that could plausibly move one of these three metrics
+    // (see refreshPersonalRecords() call sites below) rather than on a
+    // timer or every change-detection cycle.
+    this.refreshPersonalRecords();
+  }
+
+  // ---- Records board (step 43) ----
+  refreshPersonalRecords(): void {
+    const lastCompletedWeekImpulseCount = computeLastCompletedWeekImpulseCount(this.impulseEntries);
+    const { updated, newlyBroken } = checkPersonalRecords(this.personalRecords, {
+      focusStreak: this.streak.streakDays,
+      wakeConsistency: this.wakeConsistency.daysWithData > 0 ? this.wakeConsistency.score : null,
+      lastCompletedWeekImpulseCount
+    });
+
+    if (newlyBroken.length > 0) {
+      this.personalRecords = updated;
+      this.taskService.savePersonalRecords(updated);
+      this.newlyBrokenRecords = [...this.newlyBrokenRecords, ...newlyBroken];
+    }
+  }
+
+  dismissRecordCelebration(): void {
+    // Mark whatever was just celebrated as seen, so it won't re-celebrate
+    // on the next refresh.
+    const updated: PersonalRecords = { ...this.personalRecords };
+    this.newlyBrokenRecords.forEach((key) => {
+      const k = key as keyof PersonalRecords;
+      if (updated[k]) {
+        updated[k] = { ...updated[k]!, celebrated: true };
+      }
+    });
+    this.personalRecords = updated;
+    this.taskService.savePersonalRecords(updated);
+    this.newlyBrokenRecords = [];
   }
 
   // ---- Overwhelm SOS (step 35) ----
@@ -343,6 +388,9 @@ export class AppComponent implements OnInit, OnDestroy {
       this.dbService.saveLocalRecords(this.records);
       this.queueSupabaseSync(this.todayDate);
     }
+
+    // Impulse count can move the lowest-impulse-week record (step 43).
+    this.refreshPersonalRecords();
   }
 
   // ---- Boredom kit (step 27) ----
@@ -468,6 +516,67 @@ export class AppComponent implements OnInit, OnDestroy {
   // ---- Cycle-aware mode, opt-in only (step 34) ----
   handleSetCycleDay(day: number | null): void {
     this.updateTodayField({ cycleDay: day ?? undefined });
+  }
+
+  // ---- Trigger heatmap pre-commit (step 42) ----
+  // Finds the next occurrence of the hot cell's weekday (today if it
+  // matches) and adds a pre-commit block there at that hour — turning "you
+  // tend to slip at Tue 15:00" into a concrete scheduled block.
+  handlePreCommitFromHeatmap(cell: HeatmapCell): void {
+    const today = new Date();
+    const daysUntil = (cell.weekday - today.getDay() + 7) % 7;
+    const targetDate = new Date(today);
+    targetDate.setDate(today.getDate() + daysUntil);
+    const targetDateStr = getLocalDateString(targetDate);
+
+    const existing = this.records[targetDateStr] || {
+      date: targetDateStr,
+      hours: Array(24).fill('idle'),
+      notes: '',
+      updatedAt: new Date().toISOString()
+    };
+    const currentBlocks = existing.plannedBlocks || [];
+    if (currentBlocks.length >= 3) return; // respects the planner's own cap
+
+    const newBlock: PlannedBlock = {
+      id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+      time: `${cell.hour.toString().padStart(2, '0')}:00`,
+      action: 'do something intentional instead',
+      place: '',
+      done: false
+    };
+
+    const updated: DayRecord = {
+      ...existing,
+      plannedBlocks: [...currentBlocks, newBlock],
+      updatedAt: new Date().toISOString()
+    };
+    this.records = { ...this.records, [targetDateStr]: updated };
+    this.dbService.saveLocalRecords(this.records);
+    this.queueSupabaseSync(targetDateStr);
+
+    if (daysUntil === 0) {
+      this.activeTab = 'today';
+      this.selectedDate = this.todayDate;
+    }
+  }
+
+  // ---- Weekly review (step 40) ----
+  handleSaveExperiment(event: WeeklyExperiment): void {
+    this.settings = { ...this.settings, activeExperiment: event };
+    this.dbService.saveLocalSettings(this.settings);
+  }
+
+  // Pinned "all week" — stays visible on Today until 7 days after the
+  // Sunday it was chosen for have elapsed, then quietly retires so a stale
+  // experiment doesn't linger forever.
+  get activeExperimentIfCurrent(): WeeklyExperiment | null {
+    const exp = this.settings.activeExperiment;
+    if (!exp) return null;
+    const weekStart = new Date(exp.weekStartDate);
+    const weekEnd = new Date(weekStart);
+    weekEnd.setDate(weekStart.getDate() + 7);
+    return new Date() < weekEnd ? exp : null;
   }
 
   // ---- XP & levels (step 23) ----
@@ -1166,6 +1275,10 @@ export class AppComponent implements OnInit, OnDestroy {
       this.dismissedQuickLogHours.add(hourIndex);
       this.refreshQuickLogPrompt();
     }
+
+    // Painting can move the streak (step 22) or wake-consistency (step 28)
+    // metrics, both of which feed the records board.
+    this.refreshPersonalRecords();
 
     // Debounce background sync to avoid concurrent write race conditions
     this.queueSupabaseSync(date);

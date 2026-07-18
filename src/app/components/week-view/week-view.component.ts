@@ -1,14 +1,24 @@
 import { Component, Input, Output, EventEmitter, OnChanges } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Category, DayRecord, Task } from '../../types';
+import { Category, DayRecord, ImpulseLogEntry, Task } from '../../types';
 import { WakeConsistencyResult } from '../../utils/sleep';
+import { computeBestDayAutopsy, isReviewDay } from '../../utils/weekly-review';
+import { computeWeeklyTradeSummary } from '../../utils/time-truth';
+import { WeeklyReviewComponent } from '../weekly-review/weekly-review.component';
 
 @Component({
   selector: 'app-week-view',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, WeeklyReviewComponent],
   template: `
     <div class="week-view">
+      <!-- STEP 40: weekly review, only on Sundays -->
+      <app-weekly-review
+        *ngIf="showWeeklyReview"
+        [bestDay]="bestDayAutopsy"
+        (saveExperiment)="onSaveExperiment($event)"
+      ></app-weekly-review>
+
       <div class="week-header">
         <button class="btn btn-secondary btn-icon" (click)="prevWeek.emit()" title="Previous week">
           <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
@@ -25,6 +35,9 @@ import { WakeConsistencyResult } from '../../utils/sleep';
           <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
         </button>
       </div>
+
+      <!-- STEP 41: weekly trade summary, non-shaming copy -->
+      <p class="trade-summary" *ngIf="tradeSummary">{{ tradeSummary }}</p>
 
       <div class="week-strips">
         <div
@@ -58,6 +71,9 @@ import { WakeConsistencyResult } from '../../utils/sleep';
             <span *ngIf="getMilestonesForDate(dateStr).length > 0" class="milestone-pill" [title]="getMilestonesForDate(dateStr).length + ' milestone(s) due'">
               🎯 {{ getMilestonesForDate(dateStr).length }}
             </span>
+            <span *ngIf="getBlockCompletionText(dateStr) as text" class="block-completion-pill" [title]="text">
+              {{ text }}
+            </span>
             <button class="btn btn-secondary btn-icon btn-sm-square" (click)="editDay($event, dateStr)" title="Edit this day">
               <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
             </button>
@@ -73,10 +89,12 @@ export class WeekViewComponent implements OnChanges {
   @Input() categories: Category[] = [];
   @Input() tasks: Task[] = [];
   @Input() wakeConsistency: WakeConsistencyResult | null = null;
+  @Input() impulseEntries: ImpulseLogEntry[] = [];
 
   @Output() prevWeek = new EventEmitter<void>();
   @Output() nextWeek = new EventEmitter<void>();
   @Output() openDay = new EventEmitter<string>();
+  @Output() saveExperiment = new EventEmitter<{ text: string; weekStartDate: string }>();
 
   weekRangeText = '';
 
@@ -90,6 +108,33 @@ export class WeekViewComponent implements OnChanges {
     const startStr = start.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
     const endStr = end.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
     this.weekRangeText = `${startStr} – ${endStr}`;
+  }
+
+  // STEP 40: weekly review only appears on Sundays, scoped to the current
+  // (real) week — not shown when browsing a past/future week, since the
+  // review is about "this week ending", not an arbitrary displayed range.
+  get showWeeklyReview(): boolean {
+    return isReviewDay() && this.dates.includes(this.todayDateStr);
+  }
+
+  private get todayDateStr(): string {
+    const d = new Date();
+    const y = d.getFullYear();
+    const m = (d.getMonth() + 1).toString().padStart(2, '0');
+    const day = d.getDate().toString().padStart(2, '0');
+    return `${y}-${m}-${day}`;
+  }
+
+  get bestDayAutopsy() {
+    const impulseCountsByDate: Record<string, number> = {};
+    this.impulseEntries.forEach((entry) => {
+      impulseCountsByDate[entry.date] = (impulseCountsByDate[entry.date] || 0) + 1;
+    });
+    return computeBestDayAutopsy(this.dates, this.records, impulseCountsByDate);
+  }
+
+  onSaveExperiment(text: string): void {
+    this.saveExperiment.emit({ text, weekStartDate: this.dates[0] || this.todayDateStr });
   }
 
   isToday(dateStr: string): boolean {
@@ -129,6 +174,19 @@ export class WeekViewComponent implements OnChanges {
 
   getMilestonesForDate(dateStr: string): Task[] {
     return this.tasks.filter(t => t.isMilestone && !t.done && t.dueDate === dateStr);
+  }
+
+  // STEP 41: time-truth overlay on Week — planned vs actually-done blocks
+  // per day, at a glance.
+  getBlockCompletionText(dateStr: string): string | null {
+    const blocks = this.records[dateStr]?.plannedBlocks || [];
+    if (blocks.length === 0) return null;
+    const done = blocks.filter(b => b.done).length;
+    return `${done}/${blocks.length} planned`;
+  }
+
+  get tradeSummary(): string | null {
+    return computeWeeklyTradeSummary(this.dates, this.records, this.categories);
   }
 
   editDay(event: Event, dateStr: string): void {

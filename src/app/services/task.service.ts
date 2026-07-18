@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { BoredomActivity, FrictionCard, ImpulseLogEntry, RewardBank, RsdEntry, Task, WinLogEntry } from '../types';
+import { BoredomActivity, FrictionCard, ImpulseLogEntry, PersonalRecords, RewardBank, RsdEntry, Task, WinLogEntry } from '../types';
 
 const TASKS_KEY = 'box_tracker_tasks';
 const REWARD_BANK_KEY = 'box_tracker_reward_bank';
@@ -8,6 +8,7 @@ const IMPULSE_LOG_KEY = 'box_tracker_impulse_log';
 const FRICTION_CARD_KEY = 'box_tracker_friction_card';
 const BOREDOM_ACTIVITIES_KEY = 'box_tracker_boredom_activities';
 const RSD_ENTRIES_KEY = 'box_tracker_rsd_entries';
+const PERSONAL_RECORDS_KEY = 'box_tracker_personal_records';
 
 @Injectable({
   providedIn: 'root'
@@ -104,5 +105,18 @@ export class TaskService {
 
   saveRsdEntries(entries: RsdEntry[]): void {
     localStorage.setItem(RSD_ENTRIES_KEY, JSON.stringify(entries));
+  }
+
+  getPersonalRecords(): PersonalRecords {
+    try {
+      const raw = localStorage.getItem(PERSONAL_RECORDS_KEY);
+      return raw ? JSON.parse(raw) : {};
+    } catch {
+      return {};
+    }
+  }
+
+  savePersonalRecords(records: PersonalRecords): void {
+    localStorage.setItem(PERSONAL_RECORDS_KEY, JSON.stringify(records));
   }
 }
