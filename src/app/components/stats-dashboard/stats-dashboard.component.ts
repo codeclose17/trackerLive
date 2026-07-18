@@ -1,7 +1,13 @@
 import { Component, Input, OnChanges } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Category, DayRecord } from '../../types';
+import { Category, DayRecord, ImpulseLogEntry } from '../../types';
 import { EvidenceDotsComponent } from '../shared/evidence-dots/evidence-dots.component';
+
+interface CycleOverlayRow {
+  cycleDay: number;
+  impulseCount: number;
+  severityPercent: number;
+}
 
 interface Insight {
   type: string;
@@ -98,6 +104,25 @@ interface Insight {
           <kb-evidence label="Evidence" [filled]="2"></kb-evidence>
         </div>
       </div>
+
+      <!-- CARD 4: CYCLE OVERLAY (opt-in only, step 34) -->
+      <div class="stats-card card" *ngIf="cycleAwareModeEnabled">
+        <div class="card-header-icon">
+          <h3>🌙 Cycle vs symptoms</h3>
+        </div>
+        <div class="cycle-overlay-list" *ngIf="cycleOverlayRows.length > 0; else noCycleData">
+          <div class="cycle-overlay-row" *ngFor="let row of cycleOverlayRows">
+            <span class="cycle-overlay-day">Day {{ row.cycleDay }}</span>
+            <div class="cycle-overlay-bar-track">
+              <div class="cycle-overlay-bar-fill" [style.width.%]="row.severityPercent"></div>
+            </div>
+            <span class="cycle-overlay-count">{{ row.impulseCount }} impulse{{ row.impulseCount === 1 ? '' : 's' }}</span>
+          </div>
+        </div>
+        <ng-template #noCycleData>
+          <p class="muted-text italic-text">No cycle-day + impulse data logged together yet. Log your cycle day on Today to see the overlay build up here.</p>
+        </ng-template>
+      </div>
     </div>
   `
 })
@@ -105,6 +130,8 @@ export class StatsDashboardComponent implements OnChanges {
   @Input() dates: string[] = [];
   @Input() records: Record<string, DayRecord> = {};
   @Input() categories: Category[] = [];
+  @Input() cycleAwareModeEnabled = false;
+  @Input() impulseEntries: ImpulseLogEntry[] = [];
 
   activeRecordsCount = 0;
   private hourCounts: Record<string, number> = {};
@@ -234,5 +261,31 @@ export class StatsDashboardComponent implements OnChanges {
     const total = this.getTotalBinges();
     const days = this.activeRecordsCount || this.dates.length || 1;
     return (total / days).toFixed(1);
+  }
+
+  // Cycle-day vs symptom overlay (step 34). Uses impulse-log entries as the
+  // symptom proxy (something already being tracked) rather than inventing a
+  // new severity input — one impulse-log entry per date, grouped by the
+  // cycle day logged on that same date's DayRecord.
+  get cycleOverlayRows(): CycleOverlayRow[] {
+    const impulsesByDate: Record<string, number> = {};
+    this.impulseEntries.forEach((entry) => {
+      impulsesByDate[entry.date] = (impulsesByDate[entry.date] || 0) + 1;
+    });
+
+    const byCycleDay: Record<number, number> = {};
+    this.dates.forEach((dateStr) => {
+      const record = this.records[dateStr];
+      if (record?.cycleDay === undefined || record.cycleDay === null) return;
+      const impulses = impulsesByDate[dateStr] || 0;
+      byCycleDay[record.cycleDay] = (byCycleDay[record.cycleDay] || 0) + impulses;
+    });
+
+    const rows = Object.entries(byCycleDay)
+      .map(([cycleDay, impulseCount]) => ({ cycleDay: parseInt(cycleDay, 10), impulseCount }))
+      .sort((a, b) => a.cycleDay - b.cycleDay);
+
+    const maxCount = Math.max(1, ...rows.map(r => r.impulseCount));
+    return rows.map(r => ({ ...r, severityPercent: Math.round((r.impulseCount / maxCount) * 100) }));
   }
 }

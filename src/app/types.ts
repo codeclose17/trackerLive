@@ -37,6 +37,29 @@ export interface DayRecord {
   eveningRitualDone?: boolean;
   eveningReflection1?: string;
   eveningReflection2?: string;
+
+  // Body regulators — Phase E, steps 28-34
+  morningLightDone?: boolean;         // step 29: sunlight chip
+  movementLog?: MovementEntry[];      // step 30
+  proteinBreakfastDone?: boolean;     // step 31
+  caffeineLog?: CaffeineEntry[];      // step 32
+  stressResetCount?: number;          // step 33: physiological sighs done today
+  coldExposureDone?: boolean;         // step 33
+  cycleDay?: number;                  // step 34, opt-in only
+}
+
+// [step 30] Movement logged for the "exercise = natural stimulant" hint.
+export interface MovementEntry {
+  id: string;
+  type: string; // free text: "walk", "farm work", "run"...
+  minutes: number;
+  loggedAt: string; // ISO timestamp — the focus-window hint counts 90 min from here
+}
+
+// [step 32]
+export interface CaffeineEntry {
+  id: string;
+  loggedAt: string; // ISO timestamp
 }
 
 export interface Settings {
@@ -45,6 +68,8 @@ export interface Settings {
   syncEnabled: boolean;
   categories: Category[];
   gamification?: GamificationState; // step 23
+  wakeTimeTarget?: string; // "HH:MM", step 28
+  cycleAwareModeEnabled?: boolean; // step 34, off by default
 }
 
 // XP & levels. Stored on Settings (not a separate blob) so it rides the

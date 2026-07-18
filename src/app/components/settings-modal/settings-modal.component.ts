@@ -168,6 +168,17 @@ import { BoredomActivity } from '../../types';
             </div>
             <button class="btn btn-secondary btn-sm" (click)="addBoredomActivity()" [disabled]="boredomActivities.length >= 5">+ Add activity</button>
           </div>
+
+          <div class="sync-toggle-row">
+            <div class="toggle-info">
+              <span class="toggle-label">Cycle-aware mode</span>
+              <span class="toggle-sub">Off by default. When on, log your cycle day and see it overlaid against symptoms in Insights.</span>
+            </div>
+            <label class="switch">
+              <input type="checkbox" [(ngModel)]="cycleAwareModeEnabled" />
+              <span class="slider round"></span>
+            </label>
+          </div>
         </div>
 
         <!-- SECTION 3: BACKUP / EXPORT / IMPORT -->
@@ -224,6 +235,7 @@ export class SettingsModalComponent implements OnInit {
   @Input() syncEnabled = false;
   @Input() initialFrictionWhyText = '';
   @Input() initialBoredomActivities: BoredomActivity[] = [];
+  @Input() initialCycleAwareModeEnabled = false;
 
   @Output() close = new EventEmitter<void>();
   @Output() saveSettings = new EventEmitter<{
@@ -232,12 +244,14 @@ export class SettingsModalComponent implements OnInit {
     syncEnabled: boolean;
     frictionWhyText: string;
     boredomActivities: BoredomActivity[];
+    cycleAwareModeEnabled: boolean;
   }>();
   @Output() exportData = new EventEmitter<void>();
   @Output() importData = new EventEmitter<File>();
 
   frictionWhyText = '';
   boredomActivities: BoredomActivity[] = [];
+  cycleAwareModeEnabled = false;
 
   url = '';
   key = '';
@@ -286,6 +300,7 @@ alter publication supabase_realtime add table public.tracker_categories;
     this.enabled = this.syncEnabled;
     this.frictionWhyText = this.initialFrictionWhyText;
     this.boredomActivities = this.initialBoredomActivities.map(a => ({ ...a }));
+    this.cycleAwareModeEnabled = this.initialCycleAwareModeEnabled;
   }
 
   addBoredomActivity(): void {
@@ -323,7 +338,8 @@ alter publication supabase_realtime add table public.tracker_categories;
       supabaseAnonKey: this.key.trim(),
       syncEnabled: this.enabled && this.url.trim() !== '' && this.key.trim() !== '',
       frictionWhyText: this.frictionWhyText.trim(),
-      boredomActivities: this.boredomActivities.filter(a => a.text.trim() !== '')
+      boredomActivities: this.boredomActivities.filter(a => a.text.trim() !== ''),
+      cycleAwareModeEnabled: this.cycleAwareModeEnabled
     });
   }
 

@@ -1,6 +1,7 @@
 import { Component, Input, Output, EventEmitter, OnChanges } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Category, DayRecord, Task } from '../../types';
+import { WakeConsistencyResult } from '../../utils/sleep';
 
 @Component({
   selector: 'app-week-view',
@@ -15,6 +16,10 @@ import { Category, DayRecord, Task } from '../../types';
         <div class="week-header-info">
           <h2>{{ weekRangeText }}</h2>
           <p class="subtitle">A 7-day rhythm view — enough to see patterns, not enough to overwhelm.</p>
+        </div>
+        <div class="wake-consistency-badge" *ngIf="wakeConsistency && wakeConsistency.daysWithData > 0" [title]="wakeConsistency.daysWithData + ' day(s) of sleep data this week'">
+          <span class="wake-consistency-label">Wake consistency</span>
+          <span class="wake-consistency-score">{{ wakeConsistency.score }}%</span>
         </div>
         <button class="btn btn-secondary btn-icon" (click)="nextWeek.emit()" title="Next week">
           <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
@@ -67,6 +72,7 @@ export class WeekViewComponent implements OnChanges {
   @Input() records: Record<string, DayRecord> = {};
   @Input() categories: Category[] = [];
   @Input() tasks: Task[] = [];
+  @Input() wakeConsistency: WakeConsistencyResult | null = null;
 
   @Output() prevWeek = new EventEmitter<void>();
   @Output() nextWeek = new EventEmitter<void>();

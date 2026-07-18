@@ -1,5 +1,6 @@
 import { Component, OnInit, OnDestroy, HostListener, NgZone, ViewChild, ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { HeaderComponent } from './components/header/header.component';
 import { CategoryPickerComponent } from './components/category-picker/category-picker.component';
 import { StatsDashboardComponent } from './components/stats-dashboard/stats-dashboard.component';
@@ -20,14 +21,17 @@ import { StreakBadgeComponent } from './components/streak-badge/streak-badge.com
 import { WinLogComponent } from './components/win-log/win-log.component';
 import { ImpulseLogComponent } from './components/impulse-log/impulse-log.component';
 import { BoredomKitComponent } from './components/boredom-kit/boredom-kit.component';
+import { SleepAnchorComponent } from './components/sleep-anchor/sleep-anchor.component';
+import { BodyRegulatorsComponent } from './components/body-regulators/body-regulators.component';
 import {
-  BoredomActivity, Category, DayRecord, FrictionCard, ImpulseLogEntry, ImpulseTrigger,
-  PlannedBlock, RewardBank, Settings, SyncState, Task, WinLogEntry
+  BoredomActivity, CaffeineEntry, Category, DayRecord, FrictionCard, ImpulseLogEntry, ImpulseTrigger,
+  MovementEntry, PlannedBlock, RewardBank, Settings, SyncState, Task, WinLogEntry
 } from './types';
 import { DbService } from './services/db.service';
 import { TaskService } from './services/task.service';
 import { XP_AWARDS } from './utils/gamification';
 import { computeStreak } from './utils/streak';
+import { computeWakeConsistency } from './utils/sleep';
 
 const DEFAULT_CATEGORIES: Category[] = [
   { id: 'sleep', name: 'Sleep', color: '#7C6BF0' },
@@ -80,6 +84,7 @@ const generateDateRange = (startDate: Date, length: number): string[] => {
   standalone: true,
   imports: [
     CommonModule,
+    FormsModule,
     HeaderComponent,
     CategoryPickerComponent,
     StatsDashboardComponent,
@@ -99,7 +104,9 @@ const generateDateRange = (startDate: Date, length: number): string[] => {
     StreakBadgeComponent,
     WinLogComponent,
     ImpulseLogComponent,
-    BoredomKitComponent
+    BoredomKitComponent,
+    SleepAnchorComponent,
+    BodyRegulatorsComponent
   ],
   templateUrl: './app.component.html',
   styleUrl: './app.component.css'
@@ -152,6 +159,16 @@ export class AppComponent implements OnInit, OnDestroy {
   private static readonly EVENING_RITUAL_HOUR_KEY = 'box_tracker_evening_ritual_hour';
   private static readonly DEFAULT_EVENING_RITUAL_HOUR = 20;
   eveningRitualHour = AppComponent.DEFAULT_EVENING_RITUAL_HOUR;
+
+  // Caffeine cutoff (step 32): bedtime (wake target - 8h) minus 9h of
+  // half-life buffer. Default wake 07:00 -> bedtime 23:00 -> cutoff 14:00,
+  // matching the plan's stated default exactly.
+  get caffeineCutoffHour(): number {
+    const wake = this.settings.wakeTimeTarget || '07:00';
+    const [h] = wake.split(':').map(Number);
+    const bedtimeHour = (h - 8 + 24) % 24;
+    return (bedtimeHour - 9 + 24) % 24;
+  }
 
   // Hourly quick-log (step 11): prompts for the most recent past unlogged
   // hour of today, one at a time, dismissible.
@@ -259,6 +276,118 @@ export class AppComponent implements OnInit, OnDestroy {
     this.taskService.saveFrictionCard(this.frictionCard);
     this.boredomActivities = boredomActivities;
     this.taskService.saveBoredomActivities(boredomActivities);
+  }
+
+  // ---- Body regulators (steps 28-33) ----
+  handleWakeTimeTargetChange(time: string): void {
+    this.settings = { ...this.settings, wakeTimeTarget: time };
+    this.dbService.saveLocalSettings(this.settings);
+  }
+
+  get wakeConsistency() {
+    return computeWakeConsistency(this.weekDates, this.records, this.wakeTimeTargetHour);
+  }
+
+  private get wakeTimeTargetHour(): number {
+    const wake = this.settings.wakeTimeTarget || '07:00';
+    return parseInt(wake.split(':')[0], 10);
+  }
+
+  get morningLightStreak(): number {
+    let streak = 0;
+    let cursor = new Date();
+    for (let i = 0; i < 60; i++) {
+      const y = cursor.getFullYear();
+      const m = (cursor.getMonth() + 1).toString().padStart(2, '0');
+      const d = cursor.getDate().toString().padStart(2, '0');
+      const dateStr = `${y}-${m}-${d}`;
+      const record = this.records[dateStr];
+      if (record?.morningLightDone) {
+        streak++;
+        cursor.setDate(cursor.getDate() - 1);
+      } else {
+        break;
+      }
+    }
+    return streak;
+  }
+
+  private updateTodayField(patch: Partial<DayRecord>): void {
+    const existing = this.getOrCreateTodayRecord();
+    const updated: DayRecord = { ...existing, ...patch, updatedAt: new Date().toISOString() };
+    this.records = { ...this.records, [this.todayDate]: updated };
+    this.dbService.saveLocalRecords(this.records);
+    this.queueSupabaseSync(this.todayDate);
+  }
+
+  // Deep-links a "why this works" microcopy link into the embedded KB.
+  // Stopgap ahead of step 44 (native KB, proper deep links) — same-origin
+  // iframe, so we can reach into its document once it's loaded.
+  openKbSection(anchorId: string): void {
+    this.activeTab = 'learn';
+    const tryScroll = () => {
+      const doc = this.kbFrame?.nativeElement?.contentDocument;
+      const el = doc?.getElementById(anchorId);
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    };
+    // The iframe may not be loaded yet if this is the first time switching
+    // to Learn; give it a beat, then try again once via the load event too.
+    setTimeout(tryScroll, 50);
+    this.kbFrame?.nativeElement?.addEventListener('load', tryScroll, { once: true });
+  }
+
+  handleToggleMorningLight(): void {
+    const record = this.records[this.todayDate];
+    const next = !record?.morningLightDone;
+    this.updateTodayField({ morningLightDone: next });
+    if (next) {
+      this.awardXp(2);
+    }
+  }
+
+  handleToggleProteinBreakfast(): void {
+    const record = this.records[this.todayDate];
+    this.updateTodayField({ proteinBreakfastDone: !record?.proteinBreakfastDone });
+  }
+
+  handleAddMovement(event: { type: string; minutes: number }): void {
+    const record = this.records[this.todayDate];
+    const entry: MovementEntry = {
+      id: `${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+      type: event.type,
+      minutes: event.minutes,
+      loggedAt: new Date().toISOString()
+    };
+    this.updateTodayField({ movementLog: [...(record?.movementLog || []), entry] });
+    this.awardXp(3);
+    this.appendWin(`Moved: ${event.type} (${event.minutes} min)`, 'instant-win');
+  }
+
+  handleAddCaffeine(): void {
+    const record = this.records[this.todayDate];
+    const entry: CaffeineEntry = {
+      id: `${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+      loggedAt: new Date().toISOString()
+    };
+    this.updateTodayField({ caffeineLog: [...(record?.caffeineLog || []), entry] });
+  }
+
+  handleIncrementStressReset(): void {
+    const record = this.records[this.todayDate];
+    this.updateTodayField({ stressResetCount: (record?.stressResetCount || 0) + 1 });
+    this.awardXp(2);
+  }
+
+  handleToggleColdExposure(): void {
+    const record = this.records[this.todayDate];
+    this.updateTodayField({ coldExposureDone: !record?.coldExposureDone });
+  }
+
+  // ---- Cycle-aware mode, opt-in only (step 34) ----
+  handleSetCycleDay(day: number | null): void {
+    this.updateTodayField({ cycleDay: day ?? undefined });
   }
 
   // ---- XP & levels (step 23) ----
@@ -995,12 +1124,14 @@ export class AppComponent implements OnInit, OnDestroy {
     syncEnabled: boolean;
     frictionWhyText: string;
     boredomActivities: BoredomActivity[];
+    cycleAwareModeEnabled: boolean;
   }): void {
     this.settings = {
       ...this.settings,
       supabaseUrl: newSyncSettings.supabaseUrl,
       supabaseAnonKey: newSyncSettings.supabaseAnonKey,
-      syncEnabled: newSyncSettings.syncEnabled
+      syncEnabled: newSyncSettings.syncEnabled,
+      cycleAwareModeEnabled: newSyncSettings.cycleAwareModeEnabled
     };
     this.dbService.saveLocalSettings(this.settings);
     this.handleSaveSafetyNet(newSyncSettings.frictionWhyText, newSyncSettings.boredomActivities);

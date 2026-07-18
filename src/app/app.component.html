@@ -149,6 +149,44 @@
           ></app-boredom-kit>
         </div>
 
+        <!-- Body regulators: sleep anchor, sunlight, protein, movement, caffeine, stress reset -->
+        <app-sleep-anchor
+          *ngIf="selectedDate === todayDate"
+          [wakeTimeTarget]="settings.wakeTimeTarget || '07:00'"
+          (wakeTimeTargetChange)="handleWakeTimeTargetChange($event)"
+        ></app-sleep-anchor>
+
+        <app-body-regulators
+          *ngIf="selectedDate === todayDate"
+          [record]="todayViewRecord"
+          [morningLightStreak]="morningLightStreak"
+          [caffeineCutoffHour]="caffeineCutoffHour"
+          (toggleMorningLightDone)="handleToggleMorningLight()"
+          (toggleProteinBreakfastDone)="handleToggleProteinBreakfast()"
+          (addMovement)="handleAddMovement($event)"
+          (addCaffeine)="handleAddCaffeine()"
+          (incrementStressReset)="handleIncrementStressReset()"
+          (toggleColdExposureDone)="handleToggleColdExposure()"
+          (openKb)="openKbSection($event)"
+        ></app-body-regulators>
+
+        <!-- STEP 34: cycle-aware mode, opt-in only -->
+        <div class="regulator-card card" *ngIf="settings.cycleAwareModeEnabled && selectedDate === todayDate">
+          <h4>🌙 Cycle day</h4>
+          <div class="regulator-form">
+            <input
+              class="form-input regulator-minutes-input"
+              type="number"
+              min="1"
+              max="40"
+              placeholder="day #"
+              [ngModel]="todayViewRecord?.cycleDay"
+              (ngModelChange)="handleSetCycleDay($event)"
+            />
+            <span class="ritual-hint">Logged privately — used only for the Insights overlay.</span>
+          </div>
+        </div>
+
         <!-- Evening ritual: only for today's own record, only from 20:00 -->
         <app-evening-ritual
           *ngIf="selectedDate === todayDate && showEveningRitual"
@@ -179,6 +217,7 @@
         [records]="records"
         [categories]="settings.categories"
         [tasks]="tasks"
+        [wakeConsistency]="wakeConsistency"
         (prevWeek)="handlePrevWeek()"
         (nextWeek)="handleNextWeek()"
         (openDay)="handleOpenWeekDay($event)"
@@ -198,6 +237,8 @@
         [dates]="dates"
         [records]="records"
         [categories]="settings.categories"
+        [cycleAwareModeEnabled]="settings.cycleAwareModeEnabled || false"
+        [impulseEntries]="impulseEntries"
       ></app-stats-dashboard>
 
       <!-- VIEW D: LEARN (EMBEDDED ADHD KNOWLEDGE BASE) -->
@@ -266,6 +307,7 @@
       [syncEnabled]="settings.syncEnabled"
       [initialFrictionWhyText]="frictionCard.whyText"
       [initialBoredomActivities]="boredomActivities"
+      [initialCycleAwareModeEnabled]="settings.cycleAwareModeEnabled || false"
       (close)="isSettingsOpen = false"
       (saveSettings)="handleSaveSettings($event)"
       (exportData)="handleExportData()"
