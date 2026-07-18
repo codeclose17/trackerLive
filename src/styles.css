@@ -4588,5 +4588,269 @@ html[data-theme="light"] .today-hour-box { border-color: rgba(60, 40, 90, 0.08);
   white-space: nowrap;
 }
 
+/* =========================================================================
+   EMOTION TOOLS: overwhelm SOS, RSD first-aid, mood check-in (Phase F)
+   ========================================================================= */
+
+/* ---- Overwhelm SOS ---- */
+.sos-launcher {
+  position: fixed;
+  left: 20px;
+  bottom: calc(20px + env(safe-area-inset-bottom, 0px));
+  z-index: 95;
+  font-family: var(--font-sans);
+  font-size: 0.8rem;
+  font-weight: 700;
+  padding: 0.6rem 1rem;
+  min-height: 44px;
+  border-radius: 999px;
+  border: 1.5px solid color-mix(in srgb, var(--bad) 45%, var(--line));
+  background: color-mix(in srgb, var(--bad) 14%, var(--surface));
+  color: var(--bad);
+  cursor: pointer;
+  box-shadow: var(--shadow-md);
+}
+
+@media (min-width: 1000px) {
+  .sos-launcher { left: 268px; bottom: 28px; }
+}
+
+@media (max-width: 899px) {
+  .sos-launcher { bottom: calc(84px + env(safe-area-inset-bottom, 0px)); }
+}
+
+.sos-fullscreen {
+  position: fixed;
+  inset: 0;
+  z-index: 400;
+  background: var(--ground);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+}
+
+.sos-exit {
+  position: absolute;
+  top: calc(16px + env(safe-area-inset-top, 0px));
+  right: 16px;
+  font-family: var(--font-sans);
+  font-size: 0.85rem;
+  font-weight: 600;
+  padding: 0.5rem 0.9rem;
+  min-height: 44px;
+  border-radius: var(--border-radius-md);
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+  color: var(--ink);
+  cursor: pointer;
+}
+
+.sos-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 1.5rem;
+  max-width: 420px;
+}
+
+.sos-eyebrow {
+  font-family: var(--mono);
+  font-size: 12px;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--cool);
+  font-weight: 600;
+}
+
+.sos-next-action {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--border-radius-lg);
+  padding: 1.5rem 1.75rem;
+  box-shadow: var(--shadow-md);
+}
+
+.sos-next-action p {
+  margin: 0;
+  font-size: 1.3rem;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.sos-next-action-empty p {
+  font-size: 1rem;
+  font-weight: 400;
+  color: var(--ink-soft);
+}
+
+.sos-breathing-guide {
+  display: flex;
+  justify-content: center;
+}
+
+.sos-breath-circle {
+  width: 140px;
+  height: 140px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-family: var(--font-sans);
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--ink);
+  background: color-mix(in srgb, var(--cool) 18%, var(--surface-2));
+  border: 2px solid var(--cool);
+  transform: scale(1.2);
+  transition: transform 4s ease-in-out;
+}
+
+.sos-breath-circle.exhale {
+  transform: scale(0.8);
+  transition: transform 6s ease-in-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sos-breath-circle, .sos-breath-circle.exhale {
+    transition: none;
+    transform: none;
+  }
+}
+
+/* ---- RSD first-aid ---- */
+.rsd-launcher {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.9rem 1.1rem;
+  flex-wrap: wrap;
+}
+
+.rsd-launcher h4 { margin: 0 0 2px; font-size: 0.95rem; }
+
+.rsd-flow {
+  padding: 1rem 1.15rem;
+}
+
+.rsd-step {
+  margin: 12px 0;
+}
+
+.rsd-step label {
+  display: block;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--muted);
+  margin-bottom: 6px;
+}
+
+.rsd-flow-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.6rem;
+  margin-top: 8px;
+  flex-wrap: wrap;
+}
+
+.rsd-entries { margin-top: 4px; }
+.rsd-entries h4 { font-size: 0.9rem; color: var(--muted); margin: 0 0 8px; }
+
+.rsd-entry {
+  position: relative;
+  padding: 0.85rem 2.5rem 0.85rem 1rem;
+  margin-bottom: 8px;
+}
+
+.rsd-entry-row {
+  font-size: 0.85rem;
+  color: var(--ink-soft);
+  margin: 4px 0;
+}
+
+.rsd-entry-row b { color: var(--ink); }
+
+.rsd-delete-btn {
+  position: absolute;
+  top: 0.6rem;
+  right: 0.6rem;
+}
+
+/* ---- Mood/energy check-in ---- */
+.mood-checkin {
+  padding: 0.9rem 1.1rem;
+}
+
+.mood-checkin h4 { margin: 0 0 8px; font-size: 0.95rem; }
+
+.mood-checkin-scale {
+  margin: 10px 0;
+}
+
+.mood-checkin-label {
+  font-size: 0.82rem;
+  color: var(--muted);
+  display: block;
+  margin-bottom: 6px;
+}
+
+.mood-checkin-buttons {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.mood-checkin-btn {
+  width: 44px;
+  height: 44px;
+  min-height: 44px;
+  border-radius: 50%;
+  border: 1.5px solid var(--line);
+  background: var(--surface-2);
+  color: var(--ink);
+  font-family: var(--mono);
+  font-weight: 700;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.mood-checkin-btn:hover {
+  border-color: var(--hot-1);
+  color: var(--hot-1);
+}
+
+.mood-checkin-count {
+  font-size: 0.75rem;
+  color: var(--faint);
+  margin: 8px 0 0;
+}
+
+/* ---- Resurfaced wins (low-mood check-in response) ---- */
+.resurfaced-wins-banner {
+  padding: 0.9rem 1.1rem;
+  border-left: 4px solid var(--good);
+}
+
+.resurfaced-wins-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  font-size: 0.88rem;
+  color: var(--ink);
+  font-weight: 600;
+}
+
+.resurfaced-wins-list {
+  margin: 10px 0 0;
+  padding-left: 20px;
+}
+
+.resurfaced-wins-list li {
+  font-size: 0.88rem;
+  color: var(--ink-soft);
+  margin: 4px 0;
+}
+
 
 

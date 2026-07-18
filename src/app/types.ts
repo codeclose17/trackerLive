@@ -46,6 +46,27 @@ export interface DayRecord {
   stressResetCount?: number;          // step 33: physiological sighs done today
   coldExposureDone?: boolean;         // step 33
   cycleDay?: number;                  // step 34, opt-in only
+
+  // Emotion tools — Phase F, steps 35-37
+  sosUsageCount?: number;             // step 35: private SOS use tally
+  moodEnergyCheckIns?: MoodEnergyCheckIn[]; // step 37, max 3/day
+}
+
+// [step 37] 2-tap check-in, 1-5 scale, max 3 per day.
+export interface MoodEnergyCheckIn {
+  id: string;
+  mood: number;   // 1-5
+  energy: number; // 1-5
+  loggedAt: string; // ISO timestamp
+}
+
+// [step 36] RSD first-aid reframe entries — private, listed, deletable.
+export interface RsdEntry {
+  id: string;
+  whatHappened: string;
+  storyImTellingMyself: string;
+  kinderRead: string;
+  createdAt: string;
 }
 
 // [step 30] Movement logged for the "exercise = natural stimulant" hint.

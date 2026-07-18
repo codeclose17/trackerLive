@@ -1,5 +1,11 @@
 <app-day-progress-bar></app-day-progress-bar>
 <app-inbox-fab (capture)="handleCaptureTask($event)"></app-inbox-fab>
+<app-overwhelm-sos
+  [isOpen]="isSosOpen"
+  [smallestNextAction]="sosSmallestNextAction"
+  (open)="handleOpenSos()"
+  (exit)="handleExitSos()"
+></app-overwhelm-sos>
 <div class="app-shell">
   <!-- DESKTOP SIDEBAR NAV (>=1000px) -->
   <nav class="side-nav" aria-label="Main navigation">
@@ -129,11 +135,34 @@
           (spent)="handleRewardSpent($event)"
         ></app-reward-bank>
 
+        <div class="resurfaced-wins-banner card" *ngIf="resurfacedWins.length > 0">
+          <div class="resurfaced-wins-head">
+            <span>Rough moment? Here's proof you've done hard things before:</span>
+            <button class="btn btn-secondary btn-icon btn-sm-square" (click)="dismissResurfacedWins()" title="Dismiss">✕</button>
+          </div>
+          <ul class="resurfaced-wins-list">
+            <li *ngFor="let win of resurfacedWins">{{ win.text }}</li>
+          </ul>
+        </div>
+
         <app-win-log
           *ngIf="selectedDate === todayDate"
           [wins]="wins"
           (addWin)="handleAddManualWin($event)"
         ></app-win-log>
+
+        <app-mood-checkin
+          *ngIf="selectedDate === todayDate"
+          [checkInsToday]="moodCheckInsToday"
+          (checkIn)="handleMoodCheckIn($event)"
+        ></app-mood-checkin>
+
+        <app-rsd-first-aid
+          *ngIf="selectedDate === todayDate"
+          [entries]="rsdEntries"
+          (saveEntry)="handleSaveRsdEntry($event)"
+          (deleteEntry)="handleDeleteRsdEntry($event)"
+        ></app-rsd-first-aid>
 
         <!-- Impulse log (replaces the old binge tally) + boredom kit -->
         <div class="impulse-and-boredom-row" *ngIf="selectedDate === todayDate">

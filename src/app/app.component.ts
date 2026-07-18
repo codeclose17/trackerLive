@@ -23,9 +23,12 @@ import { ImpulseLogComponent } from './components/impulse-log/impulse-log.compon
 import { BoredomKitComponent } from './components/boredom-kit/boredom-kit.component';
 import { SleepAnchorComponent } from './components/sleep-anchor/sleep-anchor.component';
 import { BodyRegulatorsComponent } from './components/body-regulators/body-regulators.component';
+import { OverwhelmSosComponent } from './components/overwhelm-sos/overwhelm-sos.component';
+import { RsdFirstAidComponent } from './components/rsd-first-aid/rsd-first-aid.component';
+import { MoodCheckinComponent } from './components/mood-checkin/mood-checkin.component';
 import {
   BoredomActivity, CaffeineEntry, Category, DayRecord, FrictionCard, ImpulseLogEntry, ImpulseTrigger,
-  MovementEntry, PlannedBlock, RewardBank, Settings, SyncState, Task, WinLogEntry
+  MovementEntry, MoodEnergyCheckIn, PlannedBlock, RewardBank, RsdEntry, Settings, SyncState, Task, WinLogEntry
 } from './types';
 import { DbService } from './services/db.service';
 import { TaskService } from './services/task.service';
@@ -106,7 +109,10 @@ const generateDateRange = (startDate: Date, length: number): string[] => {
     ImpulseLogComponent,
     BoredomKitComponent,
     SleepAnchorComponent,
-    BodyRegulatorsComponent
+    BodyRegulatorsComponent,
+    OverwhelmSosComponent,
+    RsdFirstAidComponent,
+    MoodCheckinComponent
   ],
   templateUrl: './app.component.html',
   styleUrl: './app.component.css'
@@ -147,6 +153,8 @@ export class AppComponent implements OnInit, OnDestroy {
   impulseEntries: ImpulseLogEntry[] = [];
   frictionCard: FrictionCard = { whyText: '' };
   boredomActivities: BoredomActivity[] = [];
+  rsdEntries: RsdEntry[] = [];
+  isSosOpen = false;
   isSettingsOpen = false;
   syncState: SyncState = { status: 'idle' };
 
@@ -224,6 +232,78 @@ export class AppComponent implements OnInit, OnDestroy {
     this.impulseEntries = this.taskService.getImpulseLog();
     this.frictionCard = this.taskService.getFrictionCard();
     this.boredomActivities = this.taskService.getBoredomActivities();
+    this.rsdEntries = this.taskService.getRsdEntries();
+  }
+
+  // ---- Overwhelm SOS (step 35) ----
+  get sosSmallestNextAction(): string | null {
+    const record = this.records[this.todayDate];
+    const blocks = (record?.plannedBlocks || []).filter(b => !b.done);
+    if (blocks.length === 0) return null;
+    const next = [...blocks].sort((a, b) => a.time.localeCompare(b.time))[0];
+    return next.action;
+  }
+
+  handleOpenSos(): void {
+    this.isSosOpen = true;
+    // Logged privately: a plain counter on today's record, not surfaced in
+    // any social/shared view — same privacy bar as the RSD entries.
+    const record = this.records[this.todayDate];
+    this.updateTodayField({ sosUsageCount: (record?.sosUsageCount || 0) + 1 });
+  }
+
+  handleExitSos(): void {
+    this.isSosOpen = false;
+  }
+
+  // ---- RSD first-aid (step 36) ----
+  handleSaveRsdEntry(entry: { whatHappened: string; storyImTellingMyself: string; kinderRead: string }): void {
+    const newEntry: RsdEntry = {
+      id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+      ...entry,
+      createdAt: new Date().toISOString()
+    };
+    this.rsdEntries = [...this.rsdEntries, newEntry];
+    this.taskService.saveRsdEntries(this.rsdEntries);
+  }
+
+  handleDeleteRsdEntry(id: string): void {
+    this.rsdEntries = this.rsdEntries.filter(e => e.id !== id);
+    this.taskService.saveRsdEntries(this.rsdEntries);
+  }
+
+  // ---- Mood/energy check-ins (step 37) ----
+  get moodCheckInsToday(): MoodEnergyCheckIn[] {
+    return this.records[this.todayDate]?.moodEnergyCheckIns || [];
+  }
+
+  handleMoodCheckIn(event: { mood: number; energy: number }): void {
+    const record = this.records[this.todayDate];
+    const existing = record?.moodEnergyCheckIns || [];
+    if (existing.length >= 3) return; // hard cap, enforced here too
+    const entry: MoodEnergyCheckIn = {
+      id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+      mood: event.mood,
+      energy: event.energy,
+      loggedAt: new Date().toISOString()
+    };
+    this.updateTodayField({ moodEnergyCheckIns: [...existing, entry] });
+
+    // Step 24: low mood resurfaces 3 past wins.
+    if (event.mood <= 2) {
+      this.resurfaceWinsForLowMood();
+    }
+  }
+
+  private resurfaceWinsForLowMood(): void {
+    const recent = [...this.wins].reverse().slice(0, 3);
+    this.resurfacedWins = recent;
+  }
+
+  resurfacedWins: WinLogEntry[] = [];
+
+  dismissResurfacedWins(): void {
+    this.resurfacedWins = [];
   }
 
   // ---- Impulse log + friction cards (steps 25, 26) ----
