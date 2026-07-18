@@ -4124,5 +4124,188 @@ html[data-theme="light"] .today-hour-box { border-color: rgba(60, 40, 90, 0.08);
   padding: 0.5rem 0;
 }
 
+/* =========================================================================
+   IMPULSE LOG, FRICTION CARDS, BOREDOM KIT (steps 25-27)
+   ========================================================================= */
+
+.impulse-and-boredom-row {
+  display: flex;
+  gap: 0.65rem;
+  flex-wrap: wrap;
+}
+
+.impulse-and-boredom-row > * {
+  flex: 1;
+  min-width: 220px;
+}
+
+.impulse-log-launcher,
+.boredom-kit-launcher {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.85rem 1rem;
+  flex-wrap: wrap;
+  cursor: pointer;
+  border: none;
+  width: 100%;
+  text-align: left;
+  font-family: var(--font-sans);
+  color: var(--ink);
+}
+
+.impulse-log-launcher h4 {
+  margin: 0 0 2px;
+  font-size: 0.95rem;
+}
+
+.boredom-kit-launcher {
+  justify-content: center;
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+
+.impulse-flow-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 250;
+  background: rgba(10, 8, 18, 0.7);
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+}
+
+@media (min-width: 640px) {
+  .impulse-flow-backdrop {
+    align-items: center;
+  }
+}
+
+.impulse-flow-sheet {
+  width: 100%;
+  max-width: 440px;
+  padding: 1.25rem;
+  border-radius: var(--border-radius-xl) var(--border-radius-xl) 0 0;
+}
+
+@media (min-width: 640px) {
+  .impulse-flow-sheet {
+    border-radius: var(--border-radius-xl);
+  }
+}
+
+.impulse-flow-sheet h4 {
+  margin: 0 0 12px;
+}
+
+.impulse-trigger-grid {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.friction-card {
+  background: color-mix(in srgb, var(--hot-1) 8%, var(--surface));
+  border: 1px solid color-mix(in srgb, var(--hot-1) 28%, var(--line));
+  border-radius: var(--border-radius-lg);
+  padding: 0.9rem 1.1rem;
+  margin-bottom: 14px;
+}
+
+.friction-card-empty {
+  background: var(--surface-2);
+  border-color: var(--line);
+}
+
+.friction-card-label {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--hot-1);
+  font-weight: 600;
+}
+
+.friction-card-text {
+  margin: 6px 0 0;
+  font-size: 0.95rem;
+  font-style: italic;
+  color: var(--ink);
+}
+
+.surf-timer {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  padding: 0.75rem 0;
+  border-top: 1px dashed var(--line);
+  border-bottom: 1px dashed var(--line);
+  margin-bottom: 14px;
+}
+
+.surf-timer-label {
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+
+.surf-timer-clock {
+  font-family: var(--mono);
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: var(--cool);
+}
+
+.impulse-flow-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+/* ---- Boredom kit ---- */
+.boredom-activities {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin: 12px 0;
+}
+
+.boredom-activity-btn {
+  font-family: var(--font-sans);
+  font-size: 0.9rem;
+  font-weight: 500;
+  padding: 0.75rem 1rem;
+  min-height: 44px;
+  border-radius: var(--border-radius-md);
+  border: 1px solid var(--line);
+  background: var(--surface-2);
+  color: var(--ink);
+  cursor: pointer;
+  text-align: left;
+  transition: all var(--transition-fast);
+}
+
+.boredom-activity-btn:hover {
+  border-color: var(--good);
+  background: color-mix(in srgb, var(--good) 8%, var(--surface-2));
+}
+
+/* ---- Settings: personal safety net editor ---- */
+.boredom-editor-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-bottom: 8px;
+}
+
+.boredom-editor-row {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.boredom-editor-row .form-input {
+  flex: 1;
+}
+
 
 

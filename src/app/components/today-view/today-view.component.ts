@@ -72,19 +72,6 @@ import { Category, DayRecord, PlannedBlock } from '../../types';
         </div>
       </div>
 
-      <!-- BINGE / IMPULSE COUNT -->
-      <div class="today-binge-row card">
-        <span class="binge-label">
-          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" x2="12" y1="8" y2="12"/><line x1="12" x2="12.01" y1="16" y2="16"/></svg>
-          Binge / Impulse Count Today:
-        </span>
-        <div class="binge-counter">
-          <button class="btn btn-secondary btn-icon btn-sm-square" (click)="adjustBingeCount(-1)">-</button>
-          <span class="binge-value">{{ bingeCount }}</span>
-          <button class="btn btn-secondary btn-icon btn-sm-square" (click)="adjustBingeCount(1)">+</button>
-        </div>
-      </div>
-
       <!-- NOTES -->
       <div class="today-notes-section card">
         <h4>Today's Reflections</h4>
@@ -106,7 +93,6 @@ export class TodayViewComponent implements OnInit, OnDestroy, OnChanges {
 
   @Output() paintHour = new EventEmitter<{ date: string; hourIndex: number; categoryId: string }>();
   @Output() updateNotes = new EventEmitter<{ date: string; notes: string }>();
-  @Output() updateBingeCount = new EventEmitter<{ date: string; count: number }>();
   @Output() plannedBlocksChange = new EventEmitter<{ date: string; blocks: PlannedBlock[] }>();
   /** ONE primary CTA when nothing is planned yet: hand focus to the planner below. */
   @Output() focusPlanner = new EventEmitter<void>();
@@ -184,10 +170,6 @@ export class TodayViewComponent implements OnInit, OnDestroy, OnChanges {
     return this.record?.notes || '';
   }
 
-  get bingeCount(): number {
-    return this.record?.bingeCount || 0;
-  }
-
   getHourCategory(hIdx: number): string {
     return this.record?.hours?.[hIdx] ?? 'idle';
   }
@@ -241,11 +223,6 @@ export class TodayViewComponent implements OnInit, OnDestroy, OnChanges {
     if (!isNaN(hIdx)) {
       this.paint(hIdx, false);
     }
-  }
-
-  adjustBingeCount(amount: number): void {
-    const next = Math.max(0, this.bingeCount + amount);
-    this.updateBingeCount.emit({ date: this.date, count: next });
   }
 
   onNotesChange(newNotes: string): void {

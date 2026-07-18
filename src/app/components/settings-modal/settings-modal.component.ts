@@ -2,6 +2,7 @@ import { Component, Input, Output, EventEmitter, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { DbService } from '../../services/db.service';
+import { BoredomActivity } from '../../types';
 
 @Component({
   selector: 'app-settings-modal',
@@ -137,6 +138,38 @@ import { DbService } from '../../services/db.service';
           </ol>
         </div>
 
+        <!-- SECTION 2.5: PERSONAL SAFETY NET (friction card + boredom kit) -->
+        <div class="settings-section">
+          <h3>
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 4px; vertical-align: middle;"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z"/></svg>
+            Personal safety net
+          </h3>
+          <p class="section-desc">Written in a calm moment, shown to you in a tempted one.</p>
+
+          <div class="form-group">
+            <label>Your "why" — shown before you continue past a logged urge</label>
+            <textarea
+              class="form-input notes-textarea"
+              placeholder="e.g. I want to remember how good it feels to finish what I start…"
+              [(ngModel)]="frictionWhyText"
+              maxlength="240"
+            ></textarea>
+          </div>
+
+          <div class="form-group">
+            <label>Boredom kit — up to 5 quick, dopamine-safe activities</label>
+            <div class="boredom-editor-list">
+              <div class="boredom-editor-row" *ngFor="let activity of boredomActivities; let i = index">
+                <input class="form-input" type="text" [(ngModel)]="activity.text" maxlength="60" placeholder="e.g. 20 push-ups" />
+                <button class="btn btn-secondary btn-icon btn-sm-square" (click)="removeBoredomActivity(i)" title="Remove">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+                </button>
+              </div>
+            </div>
+            <button class="btn btn-secondary btn-sm" (click)="addBoredomActivity()" [disabled]="boredomActivities.length >= 5">+ Add activity</button>
+          </div>
+        </div>
+
         <!-- SECTION 3: BACKUP / EXPORT / IMPORT -->
         <div class="settings-section backup-section">
           <h3>
@@ -189,15 +222,22 @@ export class SettingsModalComponent implements OnInit {
   @Input() supabaseUrl = '';
   @Input() supabaseAnonKey = '';
   @Input() syncEnabled = false;
+  @Input() initialFrictionWhyText = '';
+  @Input() initialBoredomActivities: BoredomActivity[] = [];
 
   @Output() close = new EventEmitter<void>();
   @Output() saveSettings = new EventEmitter<{
     supabaseUrl: string;
     supabaseAnonKey: string;
     syncEnabled: boolean;
+    frictionWhyText: string;
+    boredomActivities: BoredomActivity[];
   }>();
   @Output() exportData = new EventEmitter<void>();
   @Output() importData = new EventEmitter<File>();
+
+  frictionWhyText = '';
+  boredomActivities: BoredomActivity[] = [];
 
   url = '';
   key = '';
@@ -244,6 +284,20 @@ alter publication supabase_realtime add table public.tracker_categories;
     this.url = this.supabaseUrl;
     this.key = this.supabaseAnonKey;
     this.enabled = this.syncEnabled;
+    this.frictionWhyText = this.initialFrictionWhyText;
+    this.boredomActivities = this.initialBoredomActivities.map(a => ({ ...a }));
+  }
+
+  addBoredomActivity(): void {
+    if (this.boredomActivities.length >= 5) return;
+    this.boredomActivities = [
+      ...this.boredomActivities,
+      { id: `${Date.now()}-${Math.random().toString(36).slice(2, 6)}`, text: '' }
+    ];
+  }
+
+  removeBoredomActivity(index: number): void {
+    this.boredomActivities = this.boredomActivities.filter((_, i) => i !== index);
   }
 
   async handleTestConnection(): Promise<void> {
@@ -267,7 +321,9 @@ alter publication supabase_realtime add table public.tracker_categories;
     this.saveSettings.emit({
       supabaseUrl: this.url.trim(),
       supabaseAnonKey: this.key.trim(),
-      syncEnabled: this.enabled && this.url.trim() !== '' && this.key.trim() !== ''
+      syncEnabled: this.enabled && this.url.trim() !== '' && this.key.trim() !== '',
+      frictionWhyText: this.frictionWhyText.trim(),
+      boredomActivities: this.boredomActivities.filter(a => a.text.trim() !== '')
     });
   }
 

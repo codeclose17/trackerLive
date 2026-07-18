@@ -18,7 +18,12 @@ import { RewardBankComponent } from './components/reward-bank/reward-bank.compon
 import { LevelBadgeComponent } from './components/level-badge/level-badge.component';
 import { StreakBadgeComponent } from './components/streak-badge/streak-badge.component';
 import { WinLogComponent } from './components/win-log/win-log.component';
-import { Category, DayRecord, PlannedBlock, RewardBank, Settings, SyncState, Task, WinLogEntry } from './types';
+import { ImpulseLogComponent } from './components/impulse-log/impulse-log.component';
+import { BoredomKitComponent } from './components/boredom-kit/boredom-kit.component';
+import {
+  BoredomActivity, Category, DayRecord, FrictionCard, ImpulseLogEntry, ImpulseTrigger,
+  PlannedBlock, RewardBank, Settings, SyncState, Task, WinLogEntry
+} from './types';
 import { DbService } from './services/db.service';
 import { TaskService } from './services/task.service';
 import { XP_AWARDS } from './utils/gamification';
@@ -92,7 +97,9 @@ const generateDateRange = (startDate: Date, length: number): string[] => {
     RewardBankComponent,
     LevelBadgeComponent,
     StreakBadgeComponent,
-    WinLogComponent
+    WinLogComponent,
+    ImpulseLogComponent,
+    BoredomKitComponent
   ],
   templateUrl: './app.component.html',
   styleUrl: './app.component.css'
@@ -130,6 +137,9 @@ export class AppComponent implements OnInit, OnDestroy {
   tasks: Task[] = [];
   rewardBank: RewardBank = { minutesPerBlock: 5, bankedMinutes: 0 };
   wins: WinLogEntry[] = [];
+  impulseEntries: ImpulseLogEntry[] = [];
+  frictionCard: FrictionCard = { whyText: '' };
+  boredomActivities: BoredomActivity[] = [];
   isSettingsOpen = false;
   syncState: SyncState = { status: 'idle' };
 
@@ -194,6 +204,61 @@ export class AppComponent implements OnInit, OnDestroy {
     this.tasks = this.taskService.getTasks();
     this.rewardBank = this.taskService.getRewardBank();
     this.wins = this.taskService.getWinLog();
+    this.impulseEntries = this.taskService.getImpulseLog();
+    this.frictionCard = this.taskService.getFrictionCard();
+    this.boredomActivities = this.taskService.getBoredomActivities();
+  }
+
+  // ---- Impulse log + friction cards (steps 25, 26) ----
+  get impulseEntriesToday(): ImpulseLogEntry[] {
+    return this.impulseEntries.filter(e => e.date === this.todayDate);
+  }
+
+  handleLogImpulse(event: { trigger: ImpulseTrigger; outcome: 'acted' | 'surfed' }): void {
+    const entry: ImpulseLogEntry = {
+      id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+      date: this.todayDate,
+      trigger: event.trigger,
+      outcome: event.outcome,
+      createdAt: new Date().toISOString()
+    };
+    this.impulseEntries = [...this.impulseEntries, entry];
+    this.taskService.saveImpulseLog(this.impulseEntries);
+
+    // Surfed urges are celebrated: a small XP award + a win-log entry, same
+    // "small frequent reward" pattern as the rest of the dopamine layer.
+    if (event.outcome === 'surfed') {
+      this.awardXp(3);
+      this.appendWin(`Surfed a ${event.trigger} urge instead of acting on it`, 'instant-win');
+    }
+
+    // Keep the legacy bingeCount tally in sync (Supabase schema still has
+    // this column) so existing stats/sync keep working without a breaking
+    // schema change — see step 25 evidence for the reasoning.
+    if (event.outcome === 'acted') {
+      const existing = this.getOrCreateTodayRecord();
+      const updated: DayRecord = {
+        ...existing,
+        bingeCount: (existing.bingeCount || 0) + 1,
+        updatedAt: new Date().toISOString()
+      };
+      this.records = { ...this.records, [this.todayDate]: updated };
+      this.dbService.saveLocalRecords(this.records);
+      this.queueSupabaseSync(this.todayDate);
+    }
+  }
+
+  // ---- Boredom kit (step 27) ----
+  handleBoredomActivityPicked(activity: BoredomActivity): void {
+    this.appendWin(`Beat boredom with: ${activity.text}`, 'instant-win');
+    this.awardXp(2);
+  }
+
+  handleSaveSafetyNet(frictionWhyText: string, boredomActivities: BoredomActivity[]): void {
+    this.frictionCard = { whyText: frictionWhyText };
+    this.taskService.saveFrictionCard(this.frictionCard);
+    this.boredomActivities = boredomActivities;
+    this.taskService.saveBoredomActivities(boredomActivities);
   }
 
   // ---- XP & levels (step 23) ----
@@ -923,43 +988,22 @@ export class AppComponent implements OnInit, OnDestroy {
     this.queueSupabaseSync(date);
   }
 
-  // Update Binge Count
-  handleUpdateBingeCount(event: { date: string; count: number }): void {
-    const { date, count } = event;
-    const existingRecord = this.records[date] || {
-      date: date,
-      hours: Array(24).fill('idle'),
-      notes: '',
-      updatedAt: new Date().toISOString()
-    };
-
-    const updatedRecord: DayRecord = {
-      ...existingRecord,
-      bingeCount: count,
-      updatedAt: new Date().toISOString()
-    };
-
-    this.records = {
-      ...this.records,
-      [date]: updatedRecord
-    };
-    this.dbService.saveLocalRecords(this.records);
-
-    // Sync in background
-    this.queueSupabaseSync(date);
-  }
-
   // Save Settings Modal
   handleSaveSettings(newSyncSettings: {
     supabaseUrl: string;
     supabaseAnonKey: string;
     syncEnabled: boolean;
+    frictionWhyText: string;
+    boredomActivities: BoredomActivity[];
   }): void {
     this.settings = {
       ...this.settings,
-      ...newSyncSettings
+      supabaseUrl: newSyncSettings.supabaseUrl,
+      supabaseAnonKey: newSyncSettings.supabaseAnonKey,
+      syncEnabled: newSyncSettings.syncEnabled
     };
     this.dbService.saveLocalSettings(this.settings);
+    this.handleSaveSafetyNet(newSyncSettings.frictionWhyText, newSyncSettings.boredomActivities);
     this.isSettingsOpen = false;
 
     // Trigger sync restart

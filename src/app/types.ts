@@ -63,6 +63,33 @@ export interface WinLogEntry {
   source: 'block' | 'ritual' | 'manual' | 'instant-win';
 }
 
+export type ImpulseTrigger = 'bored' | 'anxious' | 'tired' | 'phone';
+export type ImpulseOutcome = 'acted' | 'surfed';
+
+// Replaces the plain binge tally with a real log: urge-vs-acted, a trigger
+// tag, and whether the user surfed the urge (didn't act) — the delay
+// itself is the intervention. [step 25]
+export interface ImpulseLogEntry {
+  id: string;
+  date: string; // YYYY-MM-DD, local
+  trigger: ImpulseTrigger;
+  outcome: ImpulseOutcome;
+  createdAt: string;
+}
+
+// User-authored reminder shown before "continue anyway" on a logged
+// impulse. [step 26]
+export interface FrictionCard {
+  whyText: string;
+}
+
+// Up to 5 user-defined dopamine-safe quick activities for the "I'm bored"
+// button. [step 27]
+export interface BoredomActivity {
+  id: string;
+  text: string;
+}
+
 export interface SyncState {
   status: 'idle' | 'syncing' | 'success' | 'error';
   lastSyncedAt?: string;

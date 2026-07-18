@@ -104,7 +104,6 @@
           [activeCategoryId]="activeCategoryId"
           (paintHour)="handlePaintCell($event)"
           (updateNotes)="handleUpdateNotes($event)"
-          (updateBingeCount)="handleUpdateBingeCount($event)"
           (plannedBlocksChange)="handlePlannedBlocksChange($event.date, $event.blocks)"
           (focusPlanner)="scrollToPlanner()"
         ></app-today-view>
@@ -135,6 +134,20 @@
           [wins]="wins"
           (addWin)="handleAddManualWin($event)"
         ></app-win-log>
+
+        <!-- Impulse log (replaces the old binge tally) + boredom kit -->
+        <div class="impulse-and-boredom-row" *ngIf="selectedDate === todayDate">
+          <app-impulse-log
+            [entriesToday]="impulseEntriesToday"
+            [frictionCard]="frictionCard"
+            (logImpulse)="handleLogImpulse($event)"
+          ></app-impulse-log>
+
+          <app-boredom-kit
+            [activities]="boredomActivities"
+            (activityPicked)="handleBoredomActivityPicked($event)"
+          ></app-boredom-kit>
+        </div>
 
         <!-- Evening ritual: only for today's own record, only from 20:00 -->
         <app-evening-ritual
@@ -251,6 +264,8 @@
       [supabaseUrl]="settings.supabaseUrl"
       [supabaseAnonKey]="settings.supabaseAnonKey"
       [syncEnabled]="settings.syncEnabled"
+      [initialFrictionWhyText]="frictionCard.whyText"
+      [initialBoredomActivities]="boredomActivities"
       (close)="isSettingsOpen = false"
       (saveSettings)="handleSaveSettings($event)"
       (exportData)="handleExportData()"
