@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { createClient, SupabaseClient } from '@supabase/supabase-js';
+import type { SupabaseClient } from '@supabase/supabase-js';
 import { Category, DayRecord, Settings, SyncLog } from '../types';
 
 // Bump this whenever a stored shape changes in a way that needs a real
@@ -23,14 +23,19 @@ export class DbService {
 
   constructor() {}
 
-  // Initialize and get the Supabase client
-  getSupabaseClient(url: string, anonKey: string): SupabaseClient | null {
+  // Initialize and get the Supabase client. Dynamically imports the SDK
+  // (rather than a module-level static import) so its ~200KB doesn't sit in
+  // every user's initial bundle regardless of whether they ever configure
+  // cloud sync — verified this was in fact the single largest chunk in the
+  // build output before making this change. [step 48]
+  async getSupabaseClient(url: string, anonKey: string): Promise<SupabaseClient | null> {
     const trimmedUrl = (url || '').trim();
     const trimmedKey = (anonKey || '').trim();
     if (!trimmedUrl || !trimmedKey) return null;
 
     if (!this.supabaseInstance || this.currentSupabaseUrl !== trimmedUrl) {
       try {
+        const { createClient } = await import('@supabase/supabase-js');
         this.supabaseInstance = createClient(trimmedUrl, trimmedKey, {
           auth: {
             persistSession: false
@@ -49,7 +54,7 @@ export class DbService {
   // Test database connection
   async testConnection(url: string, anonKey: string): Promise<boolean> {
     this.logCallback('Testing connection to Supabase...', 'info');
-    const client = this.getSupabaseClient(url, anonKey);
+    const client = await this.getSupabaseClient(url, anonKey);
     if (!client) {
       this.logCallback('Supabase client failed to initialize during test', 'error');
       return false;
@@ -78,7 +83,7 @@ export class DbService {
   // Fetch all records from Supabase
   async fetchRecords(url: string, anonKey: string): Promise<DayRecord[]> {
     this.logCallback('Fetching records from Supabase...', 'info');
-    const client = this.getSupabaseClient(url, anonKey);
+    const client = await this.getSupabaseClient(url, anonKey);
     if (!client) {
       this.logCallback('Supabase client not initialized for fetching records', 'error');
       return [];
@@ -107,7 +112,7 @@ export class DbService {
   // Upsert a record to Supabase
   async upsertRecord(url: string, anonKey: string, record: DayRecord): Promise<void> {
     this.logCallback(`Upserting day record for ${record.date}...`, 'info');
-    const client = this.getSupabaseClient(url, anonKey);
+    const client = await this.getSupabaseClient(url, anonKey);
     if (!client) {
       this.logCallback('Supabase client not initialized for upserting record', 'error');
       return;
@@ -131,13 +136,13 @@ export class DbService {
   }
 
   // Subscribe to realtime updates
-  subscribeToChanges(
+  async subscribeToChanges(
     url: string,
     anonKey: string,
     onInsertOrUpdate: (record: DayRecord) => void
-  ): () => void {
+  ): Promise<() => void> {
     this.logCallback('Subscribing to realtime records changes...', 'info');
-    const client = this.getSupabaseClient(url, anonKey);
+    const client = await this.getSupabaseClient(url, anonKey);
     if (!client) return () => {};
 
     const channel = client
@@ -177,7 +182,7 @@ export class DbService {
   // Fetch all categories from Supabase
   async fetchCategories(url: string, anonKey: string): Promise<Category[]> {
     this.logCallback('Fetching categories from Supabase...', 'info');
-    const client = this.getSupabaseClient(url, anonKey);
+    const client = await this.getSupabaseClient(url, anonKey);
     if (!client) {
       this.logCallback('Supabase client not initialized for fetching categories', 'error');
       return [];
@@ -206,7 +211,7 @@ export class DbService {
   // Upsert a category to Supabase
   async upsertCategory(url: string, anonKey: string, category: Category): Promise<void> {
     this.logCallback(`Upserting category: ${category.name} (${category.id})...`, 'info');
-    const client = this.getSupabaseClient(url, anonKey);
+    const client = await this.getSupabaseClient(url, anonKey);
     if (!client) {
       this.logCallback('Supabase client not initialized for upserting category', 'error');
       return;
@@ -232,7 +237,7 @@ export class DbService {
   // Delete a category from Supabase
   async deleteCategory(url: string, anonKey: string, categoryId: string): Promise<void> {
     this.logCallback(`Deleting category ID ${categoryId} from Supabase...`, 'info');
-    const client = this.getSupabaseClient(url, anonKey);
+    const client = await this.getSupabaseClient(url, anonKey);
     if (!client) {
       this.logCallback('Supabase client not initialized for deleting category', 'error');
       return;
@@ -251,14 +256,14 @@ export class DbService {
   }
 
   // Subscribe to realtime category updates
-  subscribeToCategoryChanges(
+  async subscribeToCategoryChanges(
     url: string,
     anonKey: string,
     onInsertOrUpdate: (category: Category) => void,
     onDelete: (categoryId: string) => void
-  ): () => void {
+  ): Promise<() => void> {
     this.logCallback('Subscribing to realtime categories changes...', 'info');
-    const client = this.getSupabaseClient(url, anonKey);
+    const client = await this.getSupabaseClient(url, anonKey);
     if (!client) return () => {};
 
     const channel = client

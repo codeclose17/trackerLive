@@ -6,11 +6,13 @@
   (open)="handleOpenSos()"
   (exit)="handleExitSos()"
 ></app-overwhelm-sos>
-<app-kb-panel
-  [isOpen]="kbPanelOpen"
-  [initialChapterId]="kbPanelChapterId"
-  (close)="kbPanelOpen = false"
-></app-kb-panel>
+@defer (when kbPanelOpen; prefetch on idle) {
+  <app-kb-panel
+    [isOpen]="kbPanelOpen"
+    [initialChapterId]="kbPanelChapterId"
+    (close)="kbPanelOpen = false"
+  ></app-kb-panel>
+}
 <div class="app-shell">
   <!-- DESKTOP SIDEBAR NAV (>=1000px) -->
   <nav class="side-nav" aria-label="Main navigation">
@@ -257,47 +259,55 @@
         </div>
       </div>
 
-      <!-- VIEW B: WEEK TAB — 7-day rhythm view -->
-      <app-week-view
-        *ngIf="activeTab === 'week'"
-        [dates]="weekDates"
-        [records]="records"
-        [categories]="settings.categories"
-        [tasks]="tasks"
-        [wakeConsistency]="wakeConsistency"
-        [impulseEntries]="impulseEntries"
-        (prevWeek)="handlePrevWeek()"
-        (nextWeek)="handleNextWeek()"
-        (openDay)="handleOpenWeekDay($event)"
-        (saveExperiment)="handleSaveExperiment($event)"
-      ></app-week-view>
+      <!-- VIEW B: WEEK TAB — 7-day rhythm view. @defer keeps its chunk out
+           of the initial bundle (step 48) since Today is the default view
+           and most sessions never need Week's code at all. -->
+      @defer (when activeTab === 'week'; prefetch on idle) {
+        <app-week-view
+          *ngIf="activeTab === 'week'"
+          [dates]="weekDates"
+          [records]="records"
+          [categories]="settings.categories"
+          [tasks]="tasks"
+          [wakeConsistency]="wakeConsistency"
+          [impulseEntries]="impulseEntries"
+          (prevWeek)="handlePrevWeek()"
+          (nextWeek)="handleNextWeek()"
+          (openDay)="handleOpenWeekDay($event)"
+          (saveExperiment)="handleSaveExperiment($event)"
+        ></app-week-view>
+      }
 
       <!-- VIEW T: TASKS TAB — brain-dump inbox + task shredder -->
-      <app-task-inbox
-        *ngIf="activeTab === 'tasks'"
-        [tasks]="tasks"
-        (tasksChange)="handleTasksChange($event)"
-        (scheduleTask)="handleScheduleTask($event)"
-      ></app-task-inbox>
+      @defer (when activeTab === 'tasks'; prefetch on idle) {
+        <app-task-inbox
+          *ngIf="activeTab === 'tasks'"
+          [tasks]="tasks"
+          (tasksChange)="handleTasksChange($event)"
+          (scheduleTask)="handleScheduleTask($event)"
+        ></app-task-inbox>
+      }
 
       <!-- VIEW C: STATS / INSIGHTS TAB — long-range aggregates only -->
-      <app-stats-dashboard
-        *ngIf="activeTab === 'stats'"
-        [dates]="dates"
-        [records]="records"
-        [categories]="settings.categories"
-        [cycleAwareModeEnabled]="settings.cycleAwareModeEnabled || false"
-        [impulseEntries]="impulseEntries"
-        (openKb)="openKbSection($event)"
-        (preCommitBlock)="handlePreCommitFromHeatmap($event)"
-      ></app-stats-dashboard>
+      @defer (when activeTab === 'stats'; prefetch on idle) {
+        <app-stats-dashboard
+          *ngIf="activeTab === 'stats'"
+          [dates]="dates"
+          [records]="records"
+          [categories]="settings.categories"
+          [cycleAwareModeEnabled]="settings.cycleAwareModeEnabled || false"
+          [impulseEntries]="impulseEntries"
+          (openKb)="openKbSection($event)"
+          (preCommitBlock)="handlePreCommitFromHeatmap($event)"
+        ></app-stats-dashboard>
 
-      <app-records-board
-        *ngIf="activeTab === 'stats'"
-        [records]="personalRecords"
-        [newlyBroken]="newlyBrokenRecords"
-        (dismiss)="dismissRecordCelebration()"
-      ></app-records-board>
+        <app-records-board
+          *ngIf="activeTab === 'stats'"
+          [records]="personalRecords"
+          [newlyBroken]="newlyBrokenRecords"
+          (dismiss)="dismissRecordCelebration()"
+        ></app-records-board>
+      }
 
     </div>
 
@@ -347,21 +357,23 @@
     ></app-header>
 
     <!-- 4. DATABASE SETTINGS MODAL -->
-    <app-settings-modal
-      *ngIf="isSettingsOpen"
-      [supabaseUrl]="settings.supabaseUrl"
-      [supabaseAnonKey]="settings.supabaseAnonKey"
-      [syncEnabled]="settings.syncEnabled"
-      [initialFrictionWhyText]="frictionCard.whyText"
-      [initialBoredomActivities]="boredomActivities"
-      [initialCycleAwareModeEnabled]="settings.cycleAwareModeEnabled || false"
-      [initialNotifications]="settings.notifications || {}"
-      [notificationPermission]="notificationPermission"
-      (close)="isSettingsOpen = false"
-      (saveSettings)="handleSaveSettings($event)"
-      (exportData)="handleExportData()"
-      (importData)="handleImportData($event)"
-      (requestNotificationPermission)="handleRequestNotificationPermission()"
-    ></app-settings-modal>
+    @defer (when isSettingsOpen; prefetch on idle) {
+      <app-settings-modal
+        *ngIf="isSettingsOpen"
+        [supabaseUrl]="settings.supabaseUrl"
+        [supabaseAnonKey]="settings.supabaseAnonKey"
+        [syncEnabled]="settings.syncEnabled"
+        [initialFrictionWhyText]="frictionCard.whyText"
+        [initialBoredomActivities]="boredomActivities"
+        [initialCycleAwareModeEnabled]="settings.cycleAwareModeEnabled || false"
+        [initialNotifications]="settings.notifications || {}"
+        [notificationPermission]="notificationPermission"
+        (close)="isSettingsOpen = false"
+        (saveSettings)="handleSaveSettings($event)"
+        (exportData)="handleExportData()"
+        (importData)="handleImportData($event)"
+        (requestNotificationPermission)="handleRequestNotificationPermission()"
+      ></app-settings-modal>
+    }
   </div>
 </div>

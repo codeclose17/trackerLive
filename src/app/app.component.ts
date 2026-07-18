@@ -245,7 +245,14 @@ export class AppComponent implements OnInit, OnDestroy {
     // Compute today's ritual/quick-log state now that records are loaded
     this.refreshQuickLogPrompt();
 
-    // Load tasks (local-only for now — see step 15/16/17/19/21 evidence)
+    // Local-only data (steps 15-27, 34-37, 40, 43). Tasks/wins/impulses/RSD
+    // entries are IndexedDB-backed (step 48) with an async migration/load
+    // path — read the synchronous localStorage-seeded values immediately
+    // for the very first paint, then reconcile once TaskService's async
+    // load resolves so a second-or-later session doesn't briefly show
+    // empty data while IndexedDB is still opening. reward bank / friction
+    // card / boredom activities / personal records stay plain localStorage
+    // (small, not high-write-frequency) and are safe to read synchronously.
     this.tasks = this.taskService.getTasks();
     this.rewardBank = this.taskService.getRewardBank();
     this.wins = this.taskService.getWinLog();
@@ -254,6 +261,16 @@ export class AppComponent implements OnInit, OnDestroy {
     this.boredomActivities = this.taskService.getBoredomActivities();
     this.rsdEntries = this.taskService.getRsdEntries();
     this.personalRecords = this.taskService.getPersonalRecords();
+
+    this.taskService.ready.then(() => {
+      this.zone.run(() => {
+        this.tasks = this.taskService.getTasks();
+        this.wins = this.taskService.getWinLog();
+        this.impulseEntries = this.taskService.getImpulseLog();
+        this.rsdEntries = this.taskService.getRsdEntries();
+        this.refreshPersonalRecords();
+      });
+    });
 
     // Check records once after everything's loaded. Also re-checked after
     // any mutation that could plausibly move one of these three metrics
@@ -387,7 +404,7 @@ export class AppComponent implements OnInit, OnDestroy {
       createdAt: new Date().toISOString()
     };
     this.impulseEntries = [...this.impulseEntries, entry];
-    this.taskService.saveImpulseLog(this.impulseEntries);
+    this.taskService.appendImpulseEntry(entry);
 
     // Surfed urges are celebrated: a small XP award + a win-log entry, same
     // "small frequent reward" pattern as the rest of the dopamine layer.
@@ -618,7 +635,7 @@ export class AppComponent implements OnInit, OnDestroy {
       source
     };
     this.wins = [...this.wins, entry];
-    this.taskService.saveWinLog(this.wins);
+    this.taskService.appendWinEntry(entry);
   }
 
   handleAddManualWin(text: string): void {
@@ -1081,7 +1098,7 @@ export class AppComponent implements OnInit, OnDestroy {
       });
 
       // Set up real-time sync stream for categories
-      this.unsubscribeCategoriesRealtime = this.dbService.subscribeToCategoryChanges(
+      this.unsubscribeCategoriesRealtime = await this.dbService.subscribeToCategoryChanges(
         supabaseUrl,
         supabaseAnonKey,
         (updatedCat) => {
@@ -1149,7 +1166,7 @@ export class AppComponent implements OnInit, OnDestroy {
       );
 
       // Set up real-time sync stream for records
-      this.unsubscribeRealtime = this.dbService.subscribeToChanges(
+      this.unsubscribeRealtime = await this.dbService.subscribeToChanges(
         supabaseUrl,
         supabaseAnonKey,
         (updatedRecord) => {
