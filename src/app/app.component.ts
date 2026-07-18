@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, HostListener, NgZone, ViewChild, ElementRef } from '@angular/core';
+import { Component, OnInit, OnDestroy, HostListener, NgZone } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HeaderComponent } from './components/header/header.component';
@@ -27,6 +27,8 @@ import { OverwhelmSosComponent } from './components/overwhelm-sos/overwhelm-sos.
 import { RsdFirstAidComponent } from './components/rsd-first-aid/rsd-first-aid.component';
 import { MoodCheckinComponent } from './components/mood-checkin/mood-checkin.component';
 import { RecordsBoardComponent } from './components/records-board/records-board.component';
+import { KbPanelComponent } from './components/kb-panel/kb-panel.component';
+import { DailyLessonCardComponent } from './components/daily-lesson-card/daily-lesson-card.component';
 import {
   BoredomActivity, CaffeineEntry, Category, DayRecord, FrictionCard, ImpulseLogEntry, ImpulseTrigger,
   MovementEntry, MoodEnergyCheckIn, PersonalRecords, PlannedBlock, RewardBank, RsdEntry, Settings,
@@ -117,7 +119,9 @@ const generateDateRange = (startDate: Date, length: number): string[] => {
     OverwhelmSosComponent,
     RsdFirstAidComponent,
     MoodCheckinComponent,
-    RecordsBoardComponent
+    RecordsBoardComponent,
+    KbPanelComponent,
+    DailyLessonCardComponent
   ],
   templateUrl: './app.component.html',
   styleUrl: './app.component.css'
@@ -137,7 +141,6 @@ export class AppComponent implements OnInit, OnDestroy {
 
   isDarkMode = true;
 
-  @ViewChild('kbFrame') kbFrame?: ElementRef<HTMLIFrameElement>;
 
   records: Record<string, DayRecord> = {};
 
@@ -151,7 +154,7 @@ export class AppComponent implements OnInit, OnDestroy {
   activeCategoryId = 'work';
   selectedDate: string = getLocalDateString(new Date());
 
-  activeTab: 'today' | 'week' | 'tasks' | 'stats' | 'learn' = 'today';
+  activeTab: 'today' | 'week' | 'tasks' | 'stats' = 'today';
   tasks: Task[] = [];
   rewardBank: RewardBank = { minutesPerBlock: 5, bankedMinutes: 0 };
   wins: WinLogEntry[] = [];
@@ -160,6 +163,8 @@ export class AppComponent implements OnInit, OnDestroy {
   boredomActivities: BoredomActivity[] = [];
   rsdEntries: RsdEntry[] = [];
   isSosOpen = false;
+  kbPanelOpen = false;
+  kbPanelChapterId: string | null = null;
   personalRecords: PersonalRecords = {};
   newlyBrokenRecords: string[] = [];
   isSettingsOpen = false;
@@ -448,22 +453,11 @@ export class AppComponent implements OnInit, OnDestroy {
     this.queueSupabaseSync(this.todayDate);
   }
 
-  // Deep-links a "why this works" microcopy link into the embedded KB.
-  // Stopgap ahead of step 44 (native KB, proper deep links) — same-origin
-  // iframe, so we can reach into its document once it's loaded.
+  // Deep-links a "why this works" microcopy link into the native KB panel
+  // (step 44 — this replaced the iframe-scroll stopgap built for step 29).
   openKbSection(anchorId: string): void {
-    this.activeTab = 'learn';
-    const tryScroll = () => {
-      const doc = this.kbFrame?.nativeElement?.contentDocument;
-      const el = doc?.getElementById(anchorId);
-      if (el) {
-        el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      }
-    };
-    // The iframe may not be loaded yet if this is the first time switching
-    // to Learn; give it a beat, then try again once via the load event too.
-    setTimeout(tryScroll, 50);
-    this.kbFrame?.nativeElement?.addEventListener('load', tryScroll, { once: true });
+    this.kbPanelOpen = true;
+    this.kbPanelChapterId = anchorId;
   }
 
   handleToggleMorningLight(): void {
@@ -947,24 +941,14 @@ export class AppComponent implements OnInit, OnDestroy {
     const mode = this.isDarkMode ? 'dark' : 'light';
     document.documentElement.setAttribute('data-theme', mode);
     localStorage.setItem('box_tracker_dark_mode', this.isDarkMode ? 'true' : 'false');
-    this.syncKnowledgeBaseTheme();
+    // No separate KB theme sync needed (step 44): the KB is now rendered
+    // natively inside the app's own DOM, sharing the app's data-theme
+    // attribute and token sheet directly — there's nothing else to sync.
   }
 
   toggleDarkMode(): void {
     this.isDarkMode = !this.isDarkMode;
     this.applyTheme();
-  }
-
-  // Mirror the app's light/dark choice into the embedded knowledge base iframe
-  // (same-origin asset, so we can set its theme attribute directly).
-  syncKnowledgeBaseTheme(): void {
-    const doc = this.kbFrame?.nativeElement?.contentDocument;
-    if (!doc?.documentElement) return;
-    try {
-      doc.documentElement.setAttribute('data-theme', this.isDarkMode ? 'dark' : 'light');
-    } catch {
-      /* cross-origin or not yet ready — ignore */
-    }
   }
 
   private async initSync(): Promise<void> {
