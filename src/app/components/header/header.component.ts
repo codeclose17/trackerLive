@@ -1,15 +1,20 @@
 import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { SyncState } from '../../types';
+import { LevelBadgeComponent } from '../level-badge/level-badge.component';
+import { StreakBadgeComponent } from '../streak-badge/streak-badge.component';
 
 @Component({
   selector: 'app-header',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, LevelBadgeComponent, StreakBadgeComponent],
   template: `
     <header class="header-container">
       <!-- 1. ACTIONS, NAVIGATION & THEMES (LEFT) -->
       <div class="header-controls">
+        <app-level-badge [xp]="xp"></app-level-badge>
+        <app-streak-badge [streakDays]="streakDays" [isDimmedByOneMiss]="isDimmedByOneMiss"></app-streak-badge>
+
         <div class="period-navigator">
           <button class="btn btn-secondary btn-icon" (click)="prevPeriod.emit()" title="Previous 14 Days">
             <!-- ChevronLeft SVG -->
@@ -83,6 +88,9 @@ export class HeaderComponent {
   @Input() dateRangeText = '';
   @Input() syncState: SyncState = { status: 'idle' };
   @Input() isSyncEnabled = false;
+  @Input() xp = 0;
+  @Input() streakDays = 0;
+  @Input() isDimmedByOneMiss = false;
 
   @Input() isDarkMode = true;
 

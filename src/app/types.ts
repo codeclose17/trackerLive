@@ -44,6 +44,23 @@ export interface Settings {
   supabaseAnonKey: string;
   syncEnabled: boolean;
   categories: Category[];
+  gamification?: GamificationState; // step 23
+}
+
+// XP & levels. Stored on Settings (not a separate blob) so it rides the
+// existing Supabase sync path for free — "XP persists and syncs" without
+// building parallel sync plumbing. [step 23]
+export interface GamificationState {
+  xp: number;
+}
+
+// A single win — auto-appended on completions, or added manually.
+// [step 24]
+export interface WinLogEntry {
+  id: string;
+  text: string;
+  createdAt: string;
+  source: 'block' | 'ritual' | 'manual' | 'instant-win';
 }
 
 export interface SyncState {

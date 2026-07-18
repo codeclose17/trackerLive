@@ -1,8 +1,9 @@
 import { Injectable } from '@angular/core';
-import { RewardBank, Task } from '../types';
+import { RewardBank, Task, WinLogEntry } from '../types';
 
 const TASKS_KEY = 'box_tracker_tasks';
 const REWARD_BANK_KEY = 'box_tracker_reward_bank';
+const WIN_LOG_KEY = 'box_tracker_win_log';
 
 @Injectable({
   providedIn: 'root'
@@ -33,5 +34,18 @@ export class TaskService {
 
   saveRewardBank(bank: RewardBank): void {
     localStorage.setItem(REWARD_BANK_KEY, JSON.stringify(bank));
+  }
+
+  getWinLog(): WinLogEntry[] {
+    try {
+      const raw = localStorage.getItem(WIN_LOG_KEY);
+      return raw ? JSON.parse(raw) : [];
+    } catch {
+      return [];
+    }
+  }
+
+  saveWinLog(wins: WinLogEntry[]): void {
+    localStorage.setItem(WIN_LOG_KEY, JSON.stringify(wins));
   }
 }

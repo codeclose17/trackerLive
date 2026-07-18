@@ -10,6 +10,10 @@
         <p class="subtitle">ADHD time &amp; focus tracker</p>
       </div>
     </div>
+    <div class="side-nav-gamification">
+      <app-level-badge [xp]="xp"></app-level-badge>
+      <app-streak-badge [streakDays]="streak.streakDays" [isDimmedByOneMiss]="streak.isDimmedByOneMiss"></app-streak-badge>
+    </div>
     <div class="side-nav-links">
       <button class="tab-btn" [class.active]="activeTab === 'today'" (click)="activeTab = 'today'">
         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
@@ -126,6 +130,12 @@
           (spent)="handleRewardSpent($event)"
         ></app-reward-bank>
 
+        <app-win-log
+          *ngIf="selectedDate === todayDate"
+          [wins]="wins"
+          (addWin)="handleAddManualWin($event)"
+        ></app-win-log>
+
         <!-- Evening ritual: only for today's own record, only from 20:00 -->
         <app-evening-ritual
           *ngIf="selectedDate === todayDate && showEveningRitual"
@@ -225,6 +235,9 @@
       [syncState]="syncState"
       [isSyncEnabled]="settings.syncEnabled"
       [isDarkMode]="isDarkMode"
+      [xp]="xp"
+      [streakDays]="streak.streakDays"
+      [isDimmedByOneMiss]="streak.isDimmedByOneMiss"
       (toggleDarkMode)="toggleDarkMode()"
       (prevPeriod)="handlePrevPeriod()"
       (nextPeriod)="handleNextPeriod()"

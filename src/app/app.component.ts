@@ -15,9 +15,14 @@ import { InboxFabComponent } from './components/inbox-fab/inbox-fab.component';
 import { TaskInboxComponent } from './components/task-inbox/task-inbox.component';
 import { FocusTimerComponent } from './components/focus-timer/focus-timer.component';
 import { RewardBankComponent } from './components/reward-bank/reward-bank.component';
-import { Category, DayRecord, PlannedBlock, RewardBank, Settings, SyncState, Task } from './types';
+import { LevelBadgeComponent } from './components/level-badge/level-badge.component';
+import { StreakBadgeComponent } from './components/streak-badge/streak-badge.component';
+import { WinLogComponent } from './components/win-log/win-log.component';
+import { Category, DayRecord, PlannedBlock, RewardBank, Settings, SyncState, Task, WinLogEntry } from './types';
 import { DbService } from './services/db.service';
 import { TaskService } from './services/task.service';
+import { XP_AWARDS } from './utils/gamification';
+import { computeStreak } from './utils/streak';
 
 const DEFAULT_CATEGORIES: Category[] = [
   { id: 'sleep', name: 'Sleep', color: '#7C6BF0' },
@@ -84,7 +89,10 @@ const generateDateRange = (startDate: Date, length: number): string[] => {
     InboxFabComponent,
     TaskInboxComponent,
     FocusTimerComponent,
-    RewardBankComponent
+    RewardBankComponent,
+    LevelBadgeComponent,
+    StreakBadgeComponent,
+    WinLogComponent
   ],
   templateUrl: './app.component.html',
   styleUrl: './app.component.css'
@@ -121,6 +129,7 @@ export class AppComponent implements OnInit, OnDestroy {
   activeTab: 'today' | 'week' | 'tasks' | 'stats' | 'learn' = 'today';
   tasks: Task[] = [];
   rewardBank: RewardBank = { minutesPerBlock: 5, bankedMinutes: 0 };
+  wins: WinLogEntry[] = [];
   isSettingsOpen = false;
   syncState: SyncState = { status: 'idle' };
 
@@ -184,6 +193,42 @@ export class AppComponent implements OnInit, OnDestroy {
     // Load tasks (local-only for now — see step 15/16/17/19/21 evidence)
     this.tasks = this.taskService.getTasks();
     this.rewardBank = this.taskService.getRewardBank();
+    this.wins = this.taskService.getWinLog();
+  }
+
+  // ---- XP & levels (step 23) ----
+  // Stored on Settings.gamification so it rides the existing Supabase sync
+  // path and localStorage save — "XP persists and syncs with records"
+  // without a second sync pipeline.
+  get xp(): number {
+    return this.settings.gamification?.xp || 0;
+  }
+
+  private awardXp(amount: number): void {
+    const nextXp = this.xp + amount;
+    this.settings = { ...this.settings, gamification: { xp: nextXp } };
+    this.dbService.saveLocalSettings(this.settings);
+  }
+
+  // ---- Streak (step 22) ----
+  get streak() {
+    return computeStreak(this.records);
+  }
+
+  // ---- Win log (step 24) ----
+  private appendWin(text: string, source: WinLogEntry['source']): void {
+    const entry: WinLogEntry = {
+      id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+      text,
+      createdAt: new Date().toISOString(),
+      source
+    };
+    this.wins = [...this.wins, entry];
+    this.taskService.saveWinLog(this.wins);
+  }
+
+  handleAddManualWin(text: string): void {
+    this.appendWin(text, 'manual');
   }
 
   // ---- Focus timer + temptation bundling (steps 18, 20) ----
@@ -289,8 +334,14 @@ export class AppComponent implements OnInit, OnDestroy {
   }
 
   handleCompleteTwoMinuteTask(taskId: string): void {
+    const task = this.tasks.find(t => t.id === taskId);
     const next = this.tasks.map(t => t.id === taskId ? { ...t, done: true, doneAt: new Date().toISOString(), updatedAt: new Date().toISOString() } : t);
     this.handleTasksChange(next);
+
+    this.awardXp(XP_AWARDS.instantWin);
+    if (task) {
+      this.appendWin(`Instant win: ${task.text}`, 'instant-win');
+    }
   }
 
   // ---- Hourly quick-log (step 11) ----
@@ -366,6 +417,9 @@ export class AppComponent implements OnInit, OnDestroy {
     this.records = { ...this.records, [this.todayDate]: updated };
     this.dbService.saveLocalRecords(this.records);
     this.queueSupabaseSync(this.todayDate);
+
+    this.awardXp(XP_AWARDS.ritualDone);
+    this.appendWin('Started the day with the morning ritual', 'ritual');
   }
 
   handleSkipMorningRitual(): void {
@@ -384,6 +438,9 @@ export class AppComponent implements OnInit, OnDestroy {
     this.records = { ...this.records, [this.todayDate]: updated };
     this.dbService.saveLocalRecords(this.records);
     this.queueSupabaseSync(this.todayDate);
+
+    this.awardXp(XP_AWARDS.ritualDone);
+    this.appendWin('Closed the day with the evening ritual', 'ritual');
 
     // Pre-decide tomorrow's first block, on tomorrow's record
     if (result.tomorrowTime && result.tomorrowAction) {
@@ -430,6 +487,12 @@ export class AppComponent implements OnInit, OnDestroy {
       notes: '',
       updatedAt: new Date().toISOString()
     };
+
+    // Detect a not-done -> done transition (not add/remove/edit) so XP and
+    // the win log only fire on genuine completions.
+    const prevBlocks = existing.plannedBlocks || [];
+    const newlyDoneBlocks = blocks.filter(b => b.done && !prevBlocks.find(p => p.id === b.id)?.done);
+
     const updated: DayRecord = {
       ...existing,
       plannedBlocks: blocks.slice(0, 3),
@@ -437,6 +500,11 @@ export class AppComponent implements OnInit, OnDestroy {
     };
     this.records = { ...this.records, [dateStr]: updated };
     this.dbService.saveLocalRecords(this.records);
+
+    newlyDoneBlocks.forEach(block => {
+      this.awardXp(XP_AWARDS.plannedBlockDone);
+      this.appendWin(`Did it: ${block.action}`, 'block');
+    });
     this.queueSupabaseSync(dateStr);
   }
 
@@ -793,6 +861,14 @@ export class AppComponent implements OnInit, OnDestroy {
       notes: '',
       updatedAt: new Date().toISOString()
     };
+
+    // Small XP only for genuinely newly-categorized hours (idle -> category),
+    // not every paint stroke — dragging across an already-painted row or
+    // erasing shouldn't farm XP.
+    const wasIdle = existingRecord.hours[hourIndex] === 'idle';
+    if (wasIdle && categoryId !== 'idle') {
+      this.awardXp(XP_AWARDS.paintHour);
+    }
 
     const nextHours = [...existingRecord.hours];
     nextHours[hourIndex] = categoryId;
