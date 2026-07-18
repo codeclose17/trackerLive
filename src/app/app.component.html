@@ -1,4 +1,5 @@
 <app-day-progress-bar></app-day-progress-bar>
+<app-inbox-fab (capture)="handleCaptureTask($event)"></app-inbox-fab>
 <div class="app-shell">
   <!-- DESKTOP SIDEBAR NAV (>=1000px) -->
   <nav class="side-nav" aria-label="Main navigation">
@@ -17,6 +18,10 @@
       <button class="tab-btn" [class.active]="activeTab === 'week'" (click)="activeTab = 'week'">
         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/><path d="m9 16 2 2 4-4"/></svg>
         <span>Week</span>
+      </button>
+      <button class="tab-btn" [class.active]="activeTab === 'tasks'" (click)="activeTab = 'tasks'">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+        <span>Tasks</span>
       </button>
       <button class="tab-btn" [class.active]="activeTab === 'stats'" (click)="activeTab = 'stats'">
         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>
@@ -65,6 +70,29 @@
           (dismiss)="handleDismissQuickLog()"
         ></app-hourly-quick-log>
 
+        <!-- STEP 21: backwards milestones due on this date -->
+        <div class="milestones-due-banner card" *ngIf="milestonesDueToday.length > 0">
+          <span class="milestones-due-label">🎯 Due {{ selectedDate === todayDate ? 'today' : 'this day' }}</span>
+          <div class="milestones-due-list">
+            <div class="milestones-due-item" *ngFor="let m of milestonesDueToday">
+              <span>{{ m.text }}</span>
+              <button class="btn btn-secondary btn-sm" (click)="handleMilestoneDone(m.id)">Done</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- STEP 17: 2-minute instant-win lane -->
+        <div class="two-min-lane" *ngIf="selectedDate === todayDate && twoMinuteTasks.length > 0">
+          <span class="two-min-lane-label">⚡ Quick wins</span>
+          <div class="two-min-chips">
+            <button
+              *ngFor="let task of twoMinuteTasks"
+              class="two-min-chip"
+              (click)="handleCompleteTwoMinuteTask(task.id)"
+            >{{ task.text }}</button>
+          </div>
+        </div>
+
         <app-today-view
           [date]="selectedDate"
           [record]="todayViewRecord"
@@ -83,6 +111,20 @@
           [blocks]="todayViewRecord?.plannedBlocks || []"
           (blocksChange)="handlePlannedBlocksChange(selectedDate, $event)"
         ></app-planner-panel>
+
+        <!-- Focus timer + hyperfocus guard, and temptation-bundling reward bank -->
+        <app-focus-timer
+          *ngIf="selectedDate === todayDate"
+          (focusBlockCompleted)="handleFocusBlockCompleted()"
+          (thoughtParked)="handleThoughtParked($event)"
+        ></app-focus-timer>
+
+        <app-reward-bank
+          *ngIf="selectedDate === todayDate"
+          [bank]="rewardBank"
+          (bankChange)="handleRewardBankChange($event)"
+          (spent)="handleRewardSpent($event)"
+        ></app-reward-bank>
 
         <!-- Evening ritual: only for today's own record, only from 20:00 -->
         <app-evening-ritual
@@ -113,10 +155,19 @@
         [dates]="weekDates"
         [records]="records"
         [categories]="settings.categories"
+        [tasks]="tasks"
         (prevWeek)="handlePrevWeek()"
         (nextWeek)="handleNextWeek()"
         (openDay)="handleOpenWeekDay($event)"
       ></app-week-view>
+
+      <!-- VIEW T: TASKS TAB — brain-dump inbox + task shredder -->
+      <app-task-inbox
+        *ngIf="activeTab === 'tasks'"
+        [tasks]="tasks"
+        (tasksChange)="handleTasksChange($event)"
+        (scheduleTask)="handleScheduleTask($event)"
+      ></app-task-inbox>
 
       <!-- VIEW C: STATS / INSIGHTS TAB — long-range aggregates only -->
       <app-stats-dashboard
@@ -149,6 +200,11 @@
       <button class="tab-btn" [class.active]="activeTab === 'week'" (click)="activeTab = 'week'">
         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/><path d="m9 16 2 2 4-4"/></svg>
         <span>Week</span>
+      </button>
+
+      <button class="tab-btn" [class.active]="activeTab === 'tasks'" (click)="activeTab = 'tasks'">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+        <span>Tasks</span>
       </button>
 
       <button class="tab-btn" [class.active]="activeTab === 'stats'" (click)="activeTab = 'stats'">

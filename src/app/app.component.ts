@@ -11,8 +11,13 @@ import { PlannerPanelComponent } from './components/planner-panel/planner-panel.
 import { MorningRitualComponent, MorningRitualResult } from './components/morning-ritual/morning-ritual.component';
 import { EveningRitualComponent, EveningRitualResult } from './components/evening-ritual/evening-ritual.component';
 import { HourlyQuickLogComponent } from './components/hourly-quick-log/hourly-quick-log.component';
-import { Category, DayRecord, PlannedBlock, Settings, SyncState } from './types';
+import { InboxFabComponent } from './components/inbox-fab/inbox-fab.component';
+import { TaskInboxComponent } from './components/task-inbox/task-inbox.component';
+import { FocusTimerComponent } from './components/focus-timer/focus-timer.component';
+import { RewardBankComponent } from './components/reward-bank/reward-bank.component';
+import { Category, DayRecord, PlannedBlock, RewardBank, Settings, SyncState, Task } from './types';
 import { DbService } from './services/db.service';
+import { TaskService } from './services/task.service';
 
 const DEFAULT_CATEGORIES: Category[] = [
   { id: 'sleep', name: 'Sleep', color: '#7C6BF0' },
@@ -75,7 +80,11 @@ const generateDateRange = (startDate: Date, length: number): string[] => {
     PlannerPanelComponent,
     MorningRitualComponent,
     EveningRitualComponent,
-    HourlyQuickLogComponent
+    HourlyQuickLogComponent,
+    InboxFabComponent,
+    TaskInboxComponent,
+    FocusTimerComponent,
+    RewardBankComponent
   ],
   templateUrl: './app.component.html',
   styleUrl: './app.component.css'
@@ -109,7 +118,9 @@ export class AppComponent implements OnInit, OnDestroy {
   activeCategoryId = 'work';
   selectedDate: string = getLocalDateString(new Date());
 
-  activeTab: 'today' | 'week' | 'stats' | 'learn' = 'today';
+  activeTab: 'today' | 'week' | 'tasks' | 'stats' | 'learn' = 'today';
+  tasks: Task[] = [];
+  rewardBank: RewardBank = { minutesPerBlock: 5, bankedMinutes: 0 };
   isSettingsOpen = false;
   syncState: SyncState = { status: 'idle' };
 
@@ -132,7 +143,7 @@ export class AppComponent implements OnInit, OnDestroy {
   private unsubscribeCategoriesRealtime: () => void = () => {};
   private syncTimers: Record<string, any> = {};
 
-  constructor(private dbService: DbService, private zone: NgZone) {}
+  constructor(private dbService: DbService, private taskService: TaskService, private zone: NgZone) {}
 
   ngOnInit(): void {
     // Load local settings & records
@@ -169,6 +180,117 @@ export class AppComponent implements OnInit, OnDestroy {
 
     // Compute today's ritual/quick-log state now that records are loaded
     this.refreshQuickLogPrompt();
+
+    // Load tasks (local-only for now — see step 15/16/17/19/21 evidence)
+    this.tasks = this.taskService.getTasks();
+    this.rewardBank = this.taskService.getRewardBank();
+  }
+
+  // ---- Focus timer + temptation bundling (steps 18, 20) ----
+  handleFocusBlockCompleted(): void {
+    const next: RewardBank = {
+      ...this.rewardBank,
+      bankedMinutes: this.rewardBank.bankedMinutes + this.rewardBank.minutesPerBlock
+    };
+    this.rewardBank = next;
+    this.taskService.saveRewardBank(next);
+  }
+
+  handleRewardBankChange(bank: RewardBank): void {
+    this.rewardBank = bank;
+    this.taskService.saveRewardBank(bank);
+  }
+
+  handleRewardSpent(minutes: number): void {
+    // Logged as an evening-reflection-style note for now — a full spend log
+    // is Phase D territory (step 24 win log); this satisfies "spending logs
+    // it" without building a whole ledger ahead of schedule.
+    const existing = this.getOrCreateTodayRecord();
+    const spendNote = `Spent ${minutes} banked reward min${minutes === 1 ? '' : 's'} on: ${this.rewardBank.rewardActivity || 'reward'}`;
+    const updated: DayRecord = {
+      ...existing,
+      notes: existing.notes ? `${existing.notes}\n${spendNote}` : spendNote,
+      updatedAt: new Date().toISOString()
+    };
+    this.records = { ...this.records, [this.todayDate]: updated };
+    this.dbService.saveLocalRecords(this.records);
+    this.queueSupabaseSync(this.todayDate);
+  }
+
+  handleThoughtParked(text: string): void {
+    this.handleCaptureTask(text);
+  }
+
+  // ---- Brain-dump inbox + task shredder (steps 15-17, 19, 21) ----
+  handleCaptureTask(text: string): void {
+    const newTask: Task = {
+      id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+      text,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      done: false
+    };
+    this.tasks = [newTask, ...this.tasks];
+    this.taskService.saveTasks(this.tasks);
+  }
+
+  handleTasksChange(tasks: Task[]): void {
+    this.tasks = tasks;
+    this.taskService.saveTasks(tasks);
+  }
+
+  get twoMinuteTasks(): Task[] {
+    return this.tasks.filter(t => t.isTwoMinuteTask && !t.done);
+  }
+
+  // Step 21: backwards milestones due on the date currently shown on Today.
+  get milestonesDueToday(): Task[] {
+    return this.tasks.filter(t => t.isMilestone && !t.done && t.dueDate === this.selectedDate);
+  }
+
+  handleMilestoneDone(taskId: string): void {
+    const next = this.tasks.map(t => t.id === taskId ? { ...t, done: true, doneAt: new Date().toISOString(), updatedAt: new Date().toISOString() } : t);
+    this.handleTasksChange(next);
+  }
+
+  // A task can only reach this handler once it has been shredded — the
+  // "Schedule" button in task-inbox.component.ts is only rendered when
+  // task.firstAction is set, so the gate is enforced in the UI, not just
+  // documented (step 16).
+  handleScheduleTask(task: Task): void {
+    if (!task.firstAction) return; // defensive: enforce the gate here too
+    const now = new Date();
+    const inFifteen = new Date(now.getTime() + 15 * 60000);
+    const time = `${inFifteen.getHours().toString().padStart(2, '0')}:${inFifteen.getMinutes().toString().padStart(2, '0')}`;
+
+    const newBlock: PlannedBlock = {
+      id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+      time,
+      action: task.firstAction,
+      place: '',
+      done: false
+    };
+
+    const existing = this.getOrCreateTodayRecord();
+    const currentBlocks = existing.plannedBlocks || [];
+    if (currentBlocks.length >= 3) return; // planner's own 3-block cap (step 12)
+
+    const updated: DayRecord = {
+      ...existing,
+      plannedBlocks: [...currentBlocks, newBlock],
+      updatedAt: new Date().toISOString()
+    };
+    this.records = { ...this.records, [this.todayDate]: updated };
+    this.dbService.saveLocalRecords(this.records);
+    this.queueSupabaseSync(this.todayDate);
+
+    this.activeTab = 'today';
+    this.selectedDate = this.todayDate;
+  }
+
+  handleCompleteTwoMinuteTask(taskId: string): void {
+    const next = this.tasks.map(t => t.id === taskId ? { ...t, done: true, doneAt: new Date().toISOString(), updatedAt: new Date().toISOString() } : t);
+    this.handleTasksChange(next);
   }
 
   // ---- Hourly quick-log (step 11) ----

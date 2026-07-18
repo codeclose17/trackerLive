@@ -57,3 +57,37 @@ export interface SyncLog {
   message: string;
   type: 'info' | 'success' | 'error';
 }
+
+export type EnergyLevel = 'low' | 'med' | 'high';
+
+// A task, from raw brain-dump through to a schedulable, shreddable unit of
+// work. [ADHD-KILLER-PLAN.md Phase C — steps 15-21]
+export interface Task {
+  id: string;
+  text: string;
+  createdAt: string;
+
+  // Step 16: the task shredder. A task can't be scheduled until it has a
+  // concrete, small first step.
+  firstAction?: string;      // "the first physical action, <=10 min"
+  isTwoMinuteTask?: boolean; // step 17: instant-win lane
+
+  // Step 19: energy matching
+  energy?: EnergyLevel;
+
+  // Step 21: deadline scaffolding
+  dueDate?: string;      // YYYY-MM-DD
+  isMilestone?: boolean; // auto-generated backwards milestone, not the task itself
+  parentTaskId?: string; // milestones point back at the task they scaffold
+
+  done: boolean;
+  doneAt?: string;
+  updatedAt: string;
+}
+
+// Banked reward minutes from temptation bundling. [step 20]
+export interface RewardBank {
+  minutesPerBlock: number; // how many minutes a completed focus block earns
+  bankedMinutes: number;
+  rewardActivity?: string; // what the banked minutes are "spent" on, chosen in advance
+}

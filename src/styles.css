@@ -3077,6 +3077,47 @@ html[data-theme="light"] .today-hour-box { border-color: rgba(60, 40, 90, 0.08);
   flex-wrap: wrap;
 }
 
+.milestone-pill {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--hot-3);
+  background: color-mix(in srgb, var(--hot-3) 12%, transparent);
+  border: 1px solid color-mix(in srgb, var(--hot-3) 30%, transparent);
+  border-radius: 999px;
+  padding: 2px 8px;
+}
+
+.milestones-due-banner {
+  padding: 0.85rem 1rem;
+  border-left: 4px solid var(--hot-3);
+}
+
+.milestones-due-label {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--hot-3);
+  font-weight: 600;
+}
+
+.milestones-due-list {
+  margin-top: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.milestones-due-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  font-size: 0.88rem;
+  color: var(--ink-soft);
+  flex-wrap: wrap;
+}
+
 /* Mobile: header stays visible; on desktop we hide it via the sidebar rule above */
 .mobile-only-header {
   display: block;
@@ -3385,6 +3426,562 @@ html[data-theme="light"] .today-hour-box { border-color: rgba(60, 40, 90, 0.08);
   height: 9px;
   border-radius: 50%;
   flex: none;
+}
+
+/* =========================================================================
+   TASKS: brain-dump FAB, inbox, shredder, 2-minute lane (Phase C)
+   ========================================================================= */
+
+/* ---- Global capture FAB ---- */
+.inbox-fab {
+  position: fixed;
+  right: 20px;
+  bottom: calc(20px + env(safe-area-inset-bottom, 0px));
+  z-index: 95;
+  width: 56px;
+  height: 56px;
+  min-height: 56px;
+  border-radius: 50%;
+  background: var(--grad-hot);
+  color: #fff;
+  border: none;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  box-shadow: 0 10px 28px -8px rgba(255, 61, 139, 0.55);
+  transition: transform var(--transition-fast);
+}
+
+.inbox-fab:hover {
+  transform: scale(1.06);
+}
+
+@media (min-width: 1000px) {
+  .inbox-fab {
+    right: 28px;
+    bottom: 28px;
+  }
+}
+
+@media (max-width: 899px) {
+  /* keep clear of the fixed bottom tab bar */
+  .inbox-fab {
+    bottom: calc(84px + env(safe-area-inset-bottom, 0px));
+  }
+}
+
+.inbox-fab-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  background: rgba(10, 8, 18, 0.7);
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+}
+
+@media (min-width: 640px) {
+  .inbox-fab-backdrop {
+    align-items: center;
+  }
+}
+
+.inbox-fab-sheet {
+  width: 100%;
+  max-width: 480px;
+  padding: 1.25rem;
+  border-radius: var(--border-radius-xl) var(--border-radius-xl) 0 0;
+}
+
+@media (min-width: 640px) {
+  .inbox-fab-sheet {
+    border-radius: var(--border-radius-xl);
+  }
+}
+
+.inbox-fab-sheet h4 {
+  margin: 0 0 4px;
+}
+
+.inbox-fab-hint {
+  font-size: 0.85rem;
+  color: var(--muted);
+  margin: 0 0 12px;
+}
+
+.inbox-fab-textarea {
+  min-height: 100px;
+  width: 100%;
+}
+
+.inbox-fab-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.6rem;
+  margin-top: 12px;
+  flex-wrap: wrap;
+}
+
+/* ---- Tasks tab: inbox + shredder ---- */
+.task-inbox {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  height: 100%;
+  overflow-y: auto;
+  padding-bottom: 5rem;
+}
+
+.task-inbox-header h2 {
+  font-size: 1.4rem;
+  margin: 4px 0 6px;
+}
+
+.task-inbox-header .subtitle {
+  font-size: 0.85rem;
+  color: var(--muted);
+  max-width: 56ch;
+}
+
+.energy-filter-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.energy-filter-label {
+  font-size: 0.8rem;
+  color: var(--muted);
+  font-weight: 600;
+}
+
+.task-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+.task-inbox-empty {
+  font-size: 0.9rem;
+  color: var(--faint);
+  font-style: italic;
+  padding: 1rem 0;
+}
+
+.task-card {
+  padding: 0.85rem 1rem;
+}
+
+.task-card.done {
+  opacity: 0.55;
+}
+
+.task-card.done .task-text {
+  text-decoration: line-through;
+}
+
+.task-card-top {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.task-text {
+  flex: 1;
+  min-width: 0;
+  font-size: 0.95rem;
+  color: var(--ink);
+  word-break: break-word;
+}
+
+.task-shred-row {
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px dashed var(--line);
+}
+
+.task-shred-form {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 8px;
+  flex-wrap: wrap;
+}
+
+.task-shred-form .form-input {
+  flex: 1;
+  min-width: 160px;
+}
+
+.task-meta-row {
+  margin-top: 8px;
+}
+
+.task-first-action {
+  font-size: 0.85rem;
+  color: var(--cool);
+  font-family: var(--mono);
+}
+
+.task-tags-row {
+  display: flex;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+  margin-top: 10px;
+  align-items: center;
+}
+
+.task-tag {
+  font-family: var(--font-sans);
+  font-size: 0.78rem;
+  font-weight: 600;
+  padding: 0.35rem 0.7rem;
+  min-height: 32px;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background: var(--surface-2);
+  color: var(--ink-soft);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.task-tag.active {
+  background: color-mix(in srgb, var(--hot-1) 14%, transparent);
+  border-color: var(--hot-1);
+  color: var(--hot-1);
+}
+
+.task-due-picker {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.78rem;
+  color: var(--muted);
+  margin-left: auto;
+}
+
+.task-due-picker input {
+  font-family: var(--mono);
+  font-size: 0.75rem;
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+  border-radius: var(--border-radius-sm);
+  color: var(--ink);
+  padding: 0.25rem 0.4rem;
+  min-height: 32px;
+}
+
+.task-milestones {
+  margin-top: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.task-milestones-label {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--faint);
+}
+
+.task-milestone-chip {
+  font-size: 0.8rem;
+  color: var(--ink-soft);
+  background: var(--surface-2);
+  border-radius: var(--border-radius-sm);
+  padding: 0.3rem 0.6rem;
+}
+
+/* ---- 2-minute instant-win lane on Today ---- */
+.two-min-lane {
+  padding: 0.15rem 0.1rem;
+}
+
+.two-min-lane-label {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--hot-3);
+  font-weight: 600;
+}
+
+.two-min-chips {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin-top: 6px;
+}
+
+.two-min-chip {
+  font-family: var(--font-sans);
+  font-size: 0.85rem;
+  font-weight: 500;
+  padding: 0.5rem 0.9rem;
+  min-height: 44px;
+  border-radius: 999px;
+  border: 1.5px solid color-mix(in srgb, var(--good) 35%, var(--line));
+  background: color-mix(in srgb, var(--good) 10%, var(--surface));
+  color: var(--ink);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.two-min-chip:hover {
+  background: color-mix(in srgb, var(--good) 20%, var(--surface));
+  transform: translateY(-1px);
+}
+
+.two-min-chip:active {
+  animation: two-min-complete 0.3s ease;
+}
+
+@keyframes two-min-complete {
+  0% { transform: scale(1); }
+  50% { transform: scale(0.92); }
+  100% { transform: scale(1); }
+}
+
+/* =========================================================================
+   FOCUS TIMER + HYPERFOCUS GUARD, REWARD BANK (steps 18, 20)
+   ========================================================================= */
+
+.focus-timer-launcher {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  padding: 0.9rem 1.1rem;
+  flex-wrap: wrap;
+}
+
+.focus-timer-launcher-icon {
+  font-size: 1.6rem;
+  color: var(--hot-1);
+  flex: none;
+}
+
+.focus-timer-launcher-body {
+  flex: 1;
+  min-width: 160px;
+}
+
+.focus-timer-launcher-body h4 {
+  margin: 0 0 4px;
+  font-size: 0.98rem;
+}
+
+.focus-timer-edit-row {
+  display: flex;
+  gap: 0.85rem;
+  flex-wrap: wrap;
+}
+
+.focus-timer-edit-row label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.78rem;
+  color: var(--muted);
+}
+
+.focus-timer-edit-row input {
+  width: 52px;
+  font-family: var(--mono);
+  font-size: 0.8rem;
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+  border-radius: var(--border-radius-sm);
+  color: var(--ink);
+  padding: 0.25rem 0.35rem;
+  min-height: 32px;
+}
+
+.focus-timer-fullscreen {
+  position: fixed;
+  inset: 0;
+  z-index: 300;
+  background: var(--ground);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1.5rem;
+  padding: 2rem;
+}
+
+.focus-timer-fullscreen.hyperfocus {
+  background: color-mix(in srgb, var(--bad) 8%, var(--ground));
+}
+
+.focus-timer-close {
+  position: absolute;
+  top: calc(16px + env(safe-area-inset-top, 0px));
+  right: 16px;
+  width: 44px;
+  height: 44px;
+  min-height: 44px;
+  border-radius: 50%;
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+  color: var(--ink);
+  font-size: 1.1rem;
+  cursor: pointer;
+}
+
+.focus-timer-ring-wrap {
+  position: relative;
+  width: min(70vw, 280px);
+  height: min(70vw, 280px);
+}
+
+.focus-timer-ring {
+  width: 100%;
+  height: 100%;
+  transform: rotate(-90deg);
+}
+
+.focus-timer-track {
+  fill: none;
+  stroke: var(--surface-2);
+  stroke-width: 10;
+}
+
+.focus-timer-fill {
+  fill: none;
+  stroke: var(--hot-1);
+  stroke-width: 10;
+  stroke-linecap: round;
+  transition: stroke-dashoffset 1s linear;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .focus-timer-fill { transition: none; }
+}
+
+.focus-timer-center {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+}
+
+.focus-timer-phase {
+  font-family: var(--mono);
+  font-size: 0.85rem;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.focus-timer-time {
+  font-family: var(--mono);
+  font-size: 2.4rem;
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.focus-timer-thought-lot {
+  width: 100%;
+  max-width: 380px;
+}
+
+.hyperfocus-banner {
+  background: var(--surface);
+  border: 1px solid color-mix(in srgb, var(--bad) 40%, var(--line));
+  border-radius: var(--border-radius-lg);
+  padding: 1rem 1.25rem;
+  max-width: 380px;
+  text-align: center;
+}
+
+.hyperfocus-banner strong {
+  color: var(--bad);
+}
+
+.hyperfocus-banner p {
+  font-size: 0.88rem;
+  color: var(--ink-soft);
+  margin: 6px 0 12px;
+}
+
+/* ---- Reward bank ---- */
+.reward-bank {
+  padding: 1rem 1.15rem;
+}
+
+.reward-bank h4 {
+  margin: 0 0 4px;
+  font-size: 1rem;
+}
+
+.reward-bank-setup {
+  display: flex;
+  gap: 0.85rem;
+  flex-wrap: wrap;
+  margin-top: 10px;
+}
+
+.reward-bank-setup label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+
+.reward-bank-setup input[type="number"] {
+  width: 52px;
+  font-family: var(--mono);
+  font-size: 0.8rem;
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+  border-radius: var(--border-radius-sm);
+  color: var(--ink);
+  padding: 0.25rem 0.35rem;
+  min-height: 32px;
+}
+
+.reward-bank-activity-label {
+  flex: 1;
+  min-width: 160px;
+}
+
+.reward-bank-activity-label input[type="text"] {
+  flex: 1;
+  font-size: 0.8rem;
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+  border-radius: var(--border-radius-sm);
+  color: var(--ink);
+  padding: 0.35rem 0.5rem;
+  min-height: 32px;
+  width: 100%;
+}
+
+.reward-bank-balance {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+  margin-top: 12px;
+  flex-wrap: wrap;
+}
+
+.reward-bank-minutes {
+  font-family: var(--mono);
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: var(--good);
+}
+
+.reward-bank-label {
+  font-size: 0.8rem;
+  color: var(--muted);
+  flex: 1;
 }
 
 

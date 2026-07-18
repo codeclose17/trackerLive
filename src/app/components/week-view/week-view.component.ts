@@ -1,6 +1,6 @@
 import { Component, Input, Output, EventEmitter, OnChanges } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Category, DayRecord } from '../../types';
+import { Category, DayRecord, Task } from '../../types';
 
 @Component({
   selector: 'app-week-view',
@@ -50,6 +50,9 @@ import { Category, DayRecord } from '../../types';
             <span *ngIf="hasNotes(dateStr)" class="notes-indicator-dot" title="Has notes">
               <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5 15 8.5M4 19.5c0 .8.6 1.5 1.5 1.5H20M4 19.5c0-.8.6-1.5 1.5-1.5H20M20 4v17M4 4h16"/></svg>
             </span>
+            <span *ngIf="getMilestonesForDate(dateStr).length > 0" class="milestone-pill" [title]="getMilestonesForDate(dateStr).length + ' milestone(s) due'">
+              🎯 {{ getMilestonesForDate(dateStr).length }}
+            </span>
             <button class="btn btn-secondary btn-icon btn-sm-square" (click)="editDay($event, dateStr)" title="Edit this day">
               <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
             </button>
@@ -63,6 +66,7 @@ export class WeekViewComponent implements OnChanges {
   @Input() dates: string[] = []; // exactly 7 dates supplied by the parent
   @Input() records: Record<string, DayRecord> = {};
   @Input() categories: Category[] = [];
+  @Input() tasks: Task[] = [];
 
   @Output() prevWeek = new EventEmitter<void>();
   @Output() nextWeek = new EventEmitter<void>();
@@ -115,6 +119,10 @@ export class WeekViewComponent implements OnChanges {
   hasNotes(dateStr: string): boolean {
     const rec = this.records[dateStr];
     return !!(rec && rec.notes && rec.notes.trim().length > 0);
+  }
+
+  getMilestonesForDate(dateStr: string): Task[] {
+    return this.tasks.filter(t => t.isMilestone && !t.done && t.dueDate === dateStr);
   }
 
   editDay(event: Event, dateStr: string): void {
