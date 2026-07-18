@@ -100,6 +100,18 @@ export interface Settings {
   wakeTimeTarget?: string; // "HH:MM", step 28
   cycleAwareModeEnabled?: boolean; // step 34, off by default
   activeExperiment?: WeeklyExperiment; // step 40, pinned on Today all week
+  notifications?: NotificationSettings; // step 46, every field off by default
+}
+
+// [step 46] Each notification type is independently opt-in. Absent/undefined
+// must mean "off" everywhere this is read — never default any of these to
+// true, and never gate all of them behind one master switch that could be
+// accidentally left on.
+export interface NotificationSettings {
+  windDown?: boolean;
+  hourlyLog?: boolean;
+  blockStart?: boolean;
+  hyperfocusGuard?: boolean;
 }
 
 // [step 40] The single experiment chosen during the weekly review, pinned

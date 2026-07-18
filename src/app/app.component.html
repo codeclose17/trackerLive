@@ -143,6 +143,7 @@
           *ngIf="selectedDate === todayDate"
           (focusBlockCompleted)="handleFocusBlockCompleted()"
           (thoughtParked)="handleThoughtParked($event)"
+          (hyperfocusGuardTriggered)="handleHyperfocusGuardTriggered()"
         ></app-focus-timer>
 
         <app-reward-bank
@@ -354,10 +355,13 @@
       [initialFrictionWhyText]="frictionCard.whyText"
       [initialBoredomActivities]="boredomActivities"
       [initialCycleAwareModeEnabled]="settings.cycleAwareModeEnabled || false"
+      [initialNotifications]="settings.notifications || {}"
+      [notificationPermission]="notificationPermission"
       (close)="isSettingsOpen = false"
       (saveSettings)="handleSaveSettings($event)"
       (exportData)="handleExportData()"
       (importData)="handleImportData($event)"
+      (requestNotificationPermission)="handleRequestNotificationPermission()"
     ></app-settings-modal>
   </div>
 </div>

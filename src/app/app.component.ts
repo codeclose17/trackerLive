@@ -31,13 +31,15 @@ import { KbPanelComponent } from './components/kb-panel/kb-panel.component';
 import { DailyLessonCardComponent } from './components/daily-lesson-card/daily-lesson-card.component';
 import {
   BoredomActivity, CaffeineEntry, Category, DayRecord, FrictionCard, ImpulseLogEntry, ImpulseTrigger,
-  MovementEntry, MoodEnergyCheckIn, PersonalRecords, PlannedBlock, RewardBank, RsdEntry, Settings,
-  SyncState, Task, WeeklyExperiment, WinLogEntry
+  MovementEntry, MoodEnergyCheckIn, NotificationSettings, PersonalRecords, PlannedBlock, RewardBank,
+  RsdEntry, Settings, SyncState, Task, WeeklyExperiment, WinLogEntry
 } from './types';
 import { HeatmapCell } from './utils/trigger-heatmap';
 import { computeLastCompletedWeekImpulseCount, checkPersonalRecords } from './utils/personal-records';
 import { DbService } from './services/db.service';
 import { TaskService } from './services/task.service';
+import { NotificationService } from './services/notification.service';
+import { shouldFireWindDown, shouldFireHourlyLog, shouldFireBlockStart } from './utils/notification-triggers';
 import { XP_AWARDS } from './utils/gamification';
 import { computeStreak } from './utils/streak';
 import { computeWakeConsistency } from './utils/sleep';
@@ -198,8 +200,14 @@ export class AppComponent implements OnInit, OnDestroy {
   private unsubscribeRealtime: () => void = () => {};
   private unsubscribeCategoriesRealtime: () => void = () => {};
   private syncTimers: Record<string, any> = {};
+  private notificationCheckTimer?: ReturnType<typeof setInterval>;
 
-  constructor(private dbService: DbService, private taskService: TaskService, private zone: NgZone) {}
+  constructor(
+    private dbService: DbService,
+    private taskService: TaskService,
+    private notificationService: NotificationService,
+    private zone: NgZone
+  ) {}
 
   ngOnInit(): void {
     // Load local settings & records
@@ -252,6 +260,15 @@ export class AppComponent implements OnInit, OnDestroy {
     // (see refreshPersonalRecords() call sites below) rather than on a
     // timer or every change-detection cycle.
     this.refreshPersonalRecords();
+
+    // Notifications (step 46): reflect whatever permission the browser
+    // already granted/denied previously (don't re-prompt), and start the
+    // periodic trigger check. Runs outside Angular's zone so a 30s tick
+    // doesn't force a change-detection pass across the whole app.
+    this.notificationPermission = this.notificationService.permission;
+    this.zone.runOutsideAngular(() => {
+      this.notificationCheckTimer = setInterval(() => this.checkNotificationTriggers(), 30_000);
+    });
   }
 
   // ---- Records board (step 43) ----
@@ -926,6 +943,9 @@ export class AppComponent implements OnInit, OnDestroy {
     if (this.unsubscribeCategoriesRealtime) {
       this.unsubscribeCategoriesRealtime();
     }
+    if (this.notificationCheckTimer) {
+      clearInterval(this.notificationCheckTimer);
+    }
   }
 
   private applyCssVariables(): void {
@@ -1302,13 +1322,15 @@ export class AppComponent implements OnInit, OnDestroy {
     frictionWhyText: string;
     boredomActivities: BoredomActivity[];
     cycleAwareModeEnabled: boolean;
+    notifications: NotificationSettings;
   }): void {
     this.settings = {
       ...this.settings,
       supabaseUrl: newSyncSettings.supabaseUrl,
       supabaseAnonKey: newSyncSettings.supabaseAnonKey,
       syncEnabled: newSyncSettings.syncEnabled,
-      cycleAwareModeEnabled: newSyncSettings.cycleAwareModeEnabled
+      cycleAwareModeEnabled: newSyncSettings.cycleAwareModeEnabled,
+      notifications: newSyncSettings.notifications
     };
     this.dbService.saveLocalSettings(this.settings);
     this.handleSaveSafetyNet(newSyncSettings.frictionWhyText, newSyncSettings.boredomActivities);
@@ -1316,6 +1338,51 @@ export class AppComponent implements OnInit, OnDestroy {
 
     // Trigger sync restart
     this.initSync();
+  }
+
+  // ---- Notifications (step 46) ----
+  notificationPermission: NotificationPermission | 'unsupported' = 'default';
+
+  async handleRequestNotificationPermission(): Promise<void> {
+    // Must run directly inside this click-triggered handler — browsers
+    // reject permission requests not called from a user gesture.
+    const result = await this.notificationService.requestPermission();
+    this.notificationPermission = result;
+  }
+
+  private notifiedThisMinuteKey = '';
+
+  // Runs on a periodic timer (see ngOnInit) while the app is open. This is
+  // an honest constraint of a client-only PWA with no push server:
+  // notifications can only fire while the app/browser is running, not
+  // truly in the background when fully closed.
+  private checkNotificationTriggers(): void {
+    const notif = this.settings.notifications;
+    if (!notif || this.notificationPermission !== 'granted') return;
+
+    const now = new Date();
+    const minuteKey = `${now.getHours()}:${now.getMinutes()}`;
+    if (minuteKey === this.notifiedThisMinuteKey) return; // avoid double-firing within the same minute
+    this.notifiedThisMinuteKey = minuteKey;
+
+    if (shouldFireWindDown(notif, `${this.eveningRitualHour.toString().padStart(2, '0')}:00`, now)) {
+      this.notificationService.show('Wind-down time', 'Time to start easing into the evening ritual.', 'wind-down');
+    }
+
+    if (shouldFireHourlyLog(notif, now)) {
+      this.notificationService.show('Quick log', 'What did the last hour look like?', 'hourly-log');
+    }
+
+    const blockCheck = shouldFireBlockStart(notif, this.records[this.todayDate], now);
+    if (blockCheck.fire && blockCheck.action) {
+      this.notificationService.show('Block starting now', blockCheck.action, 'block-start');
+    }
+  }
+
+  handleHyperfocusGuardTriggered(): void {
+    if (this.settings.notifications?.hyperfocusGuard && this.notificationPermission === 'granted') {
+      this.notificationService.show('90 minutes straight', 'Time to stand up and take a break.', 'hyperfocus-guard');
+    }
   }
 
   // Categories palette additions/changes

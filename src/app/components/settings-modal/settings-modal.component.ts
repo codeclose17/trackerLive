@@ -2,7 +2,7 @@ import { Component, Input, Output, EventEmitter, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { DbService } from '../../services/db.service';
-import { BoredomActivity } from '../../types';
+import { BoredomActivity, NotificationSettings } from '../../types';
 
 @Component({
   selector: 'app-settings-modal',
@@ -181,6 +181,68 @@ import { BoredomActivity } from '../../types';
           </div>
         </div>
 
+        <!-- SECTION 2.6: NOTIFICATIONS (step 46) -->
+        <div class="settings-section">
+          <h3>
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 4px; vertical-align: middle;"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>
+            Notifications
+          </h3>
+          <p class="section-desc">All off by default. Each one is independent — turn on only what actually helps.</p>
+
+          <p class="notif-permission-note" *ngIf="notificationPermission === 'denied'">
+            Notifications are blocked in your browser settings — enable them there first if you want any of these.
+          </p>
+          <button
+            class="btn btn-secondary"
+            *ngIf="notificationPermission === 'default'"
+            (click)="requestNotificationPermission.emit()"
+          >Allow notifications</button>
+
+          <div class="sync-toggle-row" *ngIf="notificationPermission === 'granted'">
+            <div class="toggle-info">
+              <span class="toggle-label">Wind-down alarm</span>
+              <span class="toggle-sub">A nudge at your evening-ritual hour.</span>
+            </div>
+            <label class="switch">
+              <input type="checkbox" [(ngModel)]="notifWindDown" />
+              <span class="slider round"></span>
+            </label>
+          </div>
+
+          <div class="sync-toggle-row" *ngIf="notificationPermission === 'granted'">
+            <div class="toggle-info">
+              <span class="toggle-label">Hourly log reminder</span>
+              <span class="toggle-sub">A ping near the top of each hour to log what you just did.</span>
+            </div>
+            <label class="switch">
+              <input type="checkbox" [(ngModel)]="notifHourlyLog" />
+              <span class="slider round"></span>
+            </label>
+          </div>
+
+          <div class="sync-toggle-row" *ngIf="notificationPermission === 'granted'">
+            <div class="toggle-info">
+              <span class="toggle-label">Block start</span>
+              <span class="toggle-sub">A nudge when a planned Now+Next block's time arrives.</span>
+            </div>
+            <label class="switch">
+              <input type="checkbox" [(ngModel)]="notifBlockStart" />
+              <span class="slider round"></span>
+            </label>
+          </div>
+
+          <div class="sync-toggle-row" *ngIf="notificationPermission === 'granted'">
+            <div class="toggle-info">
+              <span class="toggle-label">Hyperfocus guard</span>
+              <span class="toggle-sub">A system notification at 90 continuous focus minutes, alongside the in-app alert.</span>
+            </div>
+            <label class="switch">
+              <input type="checkbox" [(ngModel)]="notifHyperfocusGuard" />
+              <span class="slider round"></span>
+            </label>
+          </div>
+        </div>
+
         <!-- SECTION 3: BACKUP / EXPORT / IMPORT -->
         <div class="settings-section backup-section">
           <h3>
@@ -236,6 +298,8 @@ export class SettingsModalComponent implements OnInit {
   @Input() initialFrictionWhyText = '';
   @Input() initialBoredomActivities: BoredomActivity[] = [];
   @Input() initialCycleAwareModeEnabled = false;
+  @Input() initialNotifications: NotificationSettings = {};
+  @Input() notificationPermission: NotificationPermission | 'unsupported' = 'default';
 
   @Output() close = new EventEmitter<void>();
   @Output() saveSettings = new EventEmitter<{
@@ -245,13 +309,19 @@ export class SettingsModalComponent implements OnInit {
     frictionWhyText: string;
     boredomActivities: BoredomActivity[];
     cycleAwareModeEnabled: boolean;
+    notifications: NotificationSettings;
   }>();
   @Output() exportData = new EventEmitter<void>();
   @Output() importData = new EventEmitter<File>();
+  @Output() requestNotificationPermission = new EventEmitter<void>();
 
   frictionWhyText = '';
   boredomActivities: BoredomActivity[] = [];
   cycleAwareModeEnabled = false;
+  notifWindDown = false;
+  notifHourlyLog = false;
+  notifBlockStart = false;
+  notifHyperfocusGuard = false;
 
   url = '';
   key = '';
@@ -301,6 +371,10 @@ alter publication supabase_realtime add table public.tracker_categories;
     this.frictionWhyText = this.initialFrictionWhyText;
     this.boredomActivities = this.initialBoredomActivities.map(a => ({ ...a }));
     this.cycleAwareModeEnabled = this.initialCycleAwareModeEnabled;
+    this.notifWindDown = !!this.initialNotifications.windDown;
+    this.notifHourlyLog = !!this.initialNotifications.hourlyLog;
+    this.notifBlockStart = !!this.initialNotifications.blockStart;
+    this.notifHyperfocusGuard = !!this.initialNotifications.hyperfocusGuard;
   }
 
   addBoredomActivity(): void {
@@ -339,7 +413,13 @@ alter publication supabase_realtime add table public.tracker_categories;
       syncEnabled: this.enabled && this.url.trim() !== '' && this.key.trim() !== '',
       frictionWhyText: this.frictionWhyText.trim(),
       boredomActivities: this.boredomActivities.filter(a => a.text.trim() !== ''),
-      cycleAwareModeEnabled: this.cycleAwareModeEnabled
+      cycleAwareModeEnabled: this.cycleAwareModeEnabled,
+      notifications: {
+        windDown: this.notifWindDown,
+        hourlyLog: this.notifHourlyLog,
+        blockStart: this.notifBlockStart,
+        hyperfocusGuard: this.notifHyperfocusGuard
+      }
     });
   }
 

@@ -5440,5 +5440,16 @@ html[data-theme="light"] .today-hour-box { border-color: rgba(60, 40, 90, 0.08);
   margin: 0 0 10px;
 }
 
+/* ---- Notification settings (step 46) ---- */
+.notif-permission-note {
+  font-size: 0.85rem;
+  color: var(--warn);
+  background: color-mix(in srgb, var(--warn) 10%, transparent);
+  border: 1px solid color-mix(in srgb, var(--warn) 26%, transparent);
+  border-radius: var(--border-radius-sm);
+  padding: 0.55rem 0.8rem;
+  margin: 8px 0;
+}
+
 
 

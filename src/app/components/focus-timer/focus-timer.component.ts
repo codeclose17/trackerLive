@@ -73,6 +73,7 @@ const HYPERFOCUS_GUARD_MINUTES = 90;
 export class FocusTimerComponent implements OnInit, OnDestroy {
   @Output() thoughtParked = new EventEmitter<string>();
   @Output() focusBlockCompleted = new EventEmitter<void>();
+  @Output() hyperfocusGuardTriggered = new EventEmitter<void>();
 
   phase: TimerPhase = 'idle';
   focusMinutes = 25;
@@ -188,6 +189,7 @@ export class FocusTimerComponent implements OnInit, OnDestroy {
       if (continuousMin >= HYPERFOCUS_GUARD_MINUTES && !this.hyperfocusAcknowledgedAt) {
         if (!this.showHyperfocusGuard) {
           this.playHyperfocusChime();
+          this.hyperfocusGuardTriggered.emit();
         }
         this.showHyperfocusGuard = true;
       }
