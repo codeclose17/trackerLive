@@ -2842,6 +2842,42 @@ html[data-theme="light"] .hour-box { border-color: rgba(60, 40, 90, 0.08); }
   color: var(--ink);
 }
 
+.next-up-card {
+  padding: 0.9rem 1.1rem;
+  border-left: 4px solid var(--hot-1);
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.next-up-eyebrow {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--hot-1);
+  font-weight: 600;
+  flex: none;
+}
+
+.next-up-text {
+  flex: 1;
+  min-width: 160px;
+  margin: 0;
+  font-size: 0.95rem;
+  color: var(--ink);
+}
+
+.next-up-empty .next-up-text {
+  color: var(--muted);
+  font-style: italic;
+}
+
+.next-up-cta {
+  flex: none;
+}
+
 .today-timeline-wrapper {
   padding: 0.75rem;
   max-height: 58vh;
@@ -3044,6 +3080,311 @@ html[data-theme="light"] .today-hour-box { border-color: rgba(60, 40, 90, 0.08);
 /* Mobile: header stays visible; on desktop we hide it via the sidebar rule above */
 .mobile-only-header {
   display: block;
+}
+
+/* =========================================================================
+   RITUALS, PLANNER, QUICK-LOG (Phase B)
+   ========================================================================= */
+
+.ritual-card {
+  padding: 1rem 1.15rem;
+  border-left: 4px solid var(--cool);
+}
+
+.ritual-eyebrow {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--cool);
+  font-weight: 600;
+}
+
+.ritual-eyebrow-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.ritual-hour-picker {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-family: var(--font-sans);
+  font-size: 0.75rem;
+  color: var(--muted);
+}
+
+.ritual-hour-picker select {
+  font-family: var(--mono);
+  font-size: 0.75rem;
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+  border-radius: var(--border-radius-sm);
+  color: var(--ink);
+  padding: 0.25rem 0.4rem;
+  min-height: 32px;
+}
+
+.ritual-card h4 {
+  margin: 6px 0 12px;
+  font-size: 1.05rem;
+}
+
+.ritual-step {
+  margin: 10px 0;
+}
+
+.ritual-step-label {
+  display: block;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--muted);
+  margin-bottom: 4px;
+}
+
+.ritual-hint {
+  font-size: 0.82rem;
+  color: var(--muted);
+  margin: 0;
+}
+
+.ritual-toggle {
+  font-family: var(--font-sans);
+  font-size: 0.88rem;
+  font-weight: 600;
+  padding: 0.55rem 1rem;
+  min-height: 44px;
+  border-radius: var(--border-radius-md);
+  border: 1px solid var(--line);
+  background: var(--surface-2);
+  color: var(--ink-soft);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.ritual-toggle.on {
+  background: color-mix(in srgb, var(--good) 14%, transparent);
+  border-color: color-mix(in srgb, var(--good) 40%, transparent);
+  color: var(--good);
+}
+
+.ritual-inline-fields {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.ritual-inline-fields .form-input {
+  flex: 1;
+  min-width: 120px;
+}
+
+.ritual-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.6rem;
+  margin-top: 14px;
+  flex-wrap: wrap;
+}
+
+/* ---- Planner panel (Now + Next) ---- */
+.planner-panel {
+  padding: 1rem 1.15rem;
+}
+
+.planner-panel h4 {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 1rem;
+  margin: 0;
+}
+
+.planner-count {
+  font-family: var(--mono);
+  font-size: 0.75rem;
+  color: var(--muted);
+  font-weight: 400;
+}
+
+.planner-hint {
+  font-size: 0.8rem;
+  color: var(--muted);
+  margin: 4px 0 12px;
+}
+
+.planner-blocks {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.planner-empty {
+  font-size: 0.85rem;
+  color: var(--faint);
+  font-style: italic;
+  padding: 0.5rem 0;
+}
+
+.planner-block {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.5rem 0.6rem;
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+  border-radius: var(--border-radius-md);
+  flex-wrap: wrap;
+}
+
+.planner-block.done {
+  opacity: 0.55;
+}
+
+.planner-block.done .planner-action {
+  text-decoration: line-through;
+}
+
+.planner-check {
+  width: 24px;
+  height: 24px;
+  min-height: 24px;
+  border-radius: 6px;
+  border: 1.5px solid var(--line-strong);
+  background: transparent;
+  color: var(--good);
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  flex: none;
+}
+
+.planner-block.done .planner-check {
+  background: color-mix(in srgb, var(--good) 18%, transparent);
+  border-color: var(--good);
+}
+
+.planner-block-text {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  flex: 1;
+  min-width: 140px;
+}
+
+.planner-time {
+  font-family: var(--mono);
+  font-size: 0.75rem;
+  color: var(--hot-3);
+  font-weight: 700;
+}
+
+.planner-action {
+  font-size: 0.88rem;
+  color: var(--ink-soft);
+}
+
+.planner-form {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 12px;
+  flex-wrap: wrap;
+}
+
+.planner-input-time {
+  width: 110px;
+  flex: none;
+}
+
+.planner-input-action {
+  flex: 2;
+  min-width: 120px;
+}
+
+.planner-input-place {
+  flex: 1;
+  min-width: 100px;
+}
+
+/* ---- Hourly quick-log banner ---- */
+.quick-log-banner {
+  padding: 0.85rem 1rem;
+  border-left: 4px solid var(--hot-1);
+}
+
+.quick-log-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.quick-log-eyebrow {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--hot-1);
+  font-weight: 600;
+}
+
+.quick-log-dismiss {
+  background: transparent;
+  border: none;
+  color: var(--muted);
+  cursor: pointer;
+  font-size: 0.9rem;
+  width: 32px;
+  height: 32px;
+  min-height: 32px;
+  border-radius: 6px;
+}
+
+.quick-log-dismiss:hover {
+  background: var(--surface-2);
+  color: var(--ink);
+}
+
+.quick-log-question {
+  margin: 6px 0 10px;
+  font-size: 0.95rem;
+}
+
+.quick-log-chips {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.quick-log-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.5rem 0.85rem;
+  min-height: 44px;
+  background: var(--surface-2);
+  border: 1.5px solid var(--line);
+  border-radius: 999px;
+  color: var(--ink);
+  font-family: var(--font-sans);
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.quick-log-chip:hover {
+  border-color: var(--line-strong);
+  background: var(--raised);
+}
+
+.quick-log-chip .dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  flex: none;
 }
 
 

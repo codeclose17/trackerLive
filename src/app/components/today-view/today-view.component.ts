@@ -1,7 +1,7 @@
 import { Component, Input, Output, EventEmitter, HostListener, OnInit, OnDestroy, OnChanges } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Category, DayRecord } from '../../types';
+import { Category, DayRecord, PlannedBlock } from '../../types';
 
 @Component({
   selector: 'app-today-view',
@@ -28,6 +28,22 @@ import { Category, DayRecord } from '../../types';
           <span class="dial-label">{{ dialPercent }}%</span>
         </div>
       </div>
+
+      <!-- NEXT UP: the single next planned block, with the app's one primary action -->
+      <div class="next-up-card card" *ngIf="nextBlock; else noNextBlock">
+        <span class="next-up-eyebrow">Next up · {{ nextBlock.time }}</span>
+        <p class="next-up-text">
+          I will {{ nextBlock.action }}<ng-container *ngIf="nextBlock.place"> at {{ nextBlock.place }}</ng-container>
+        </p>
+        <button class="btn btn-primary next-up-cta" (click)="markNextBlockDone()">Mark done</button>
+      </div>
+      <ng-template #noNextBlock>
+        <div class="next-up-card next-up-empty card">
+          <span class="next-up-eyebrow">Next up</span>
+          <p class="next-up-text">Nothing planned yet.</p>
+          <button class="btn btn-primary next-up-cta" (click)="focusPlanner.emit()">Plan your next block</button>
+        </div>
+      </ng-template>
 
       <!-- 24-HOUR VERTICAL TIMELINE (all 24 hours of today, single scroll) -->
       <div class="today-timeline-wrapper card">
@@ -91,6 +107,9 @@ export class TodayViewComponent implements OnInit, OnDestroy, OnChanges {
   @Output() paintHour = new EventEmitter<{ date: string; hourIndex: number; categoryId: string }>();
   @Output() updateNotes = new EventEmitter<{ date: string; notes: string }>();
   @Output() updateBingeCount = new EventEmitter<{ date: string; count: number }>();
+  @Output() plannedBlocksChange = new EventEmitter<{ date: string; blocks: PlannedBlock[] }>();
+  /** ONE primary CTA when nothing is planned yet: hand focus to the planner below. */
+  @Output() focusPlanner = new EventEmitter<void>();
 
   hoursArray = Array.from({ length: 24 }, (_, i) => i);
   currentHour = new Date().getHours();
@@ -143,6 +162,22 @@ export class TodayViewComponent implements OnInit, OnDestroy, OnChanges {
       month: 'long',
       day: 'numeric'
     });
+  }
+
+  /** The single next undone planned block, by time — the "Next up" card and
+   * the ONE primary CTA on this screen (step 9). */
+  get nextBlock(): PlannedBlock | null {
+    const blocks = (this.record?.plannedBlocks || []).filter(b => !b.done);
+    if (blocks.length === 0) return null;
+    return [...blocks].sort((a, b) => a.time.localeCompare(b.time))[0];
+  }
+
+  markNextBlockDone(): void {
+    const next = this.nextBlock;
+    if (!next) return;
+    const allBlocks = this.record?.plannedBlocks || [];
+    const updated = allBlocks.map(b => b.id === next.id ? { ...b, done: true } : b);
+    this.plannedBlocksChange.emit({ date: this.date, blocks: updated });
   }
 
   get notes(): string {

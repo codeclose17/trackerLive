@@ -7,7 +7,11 @@ import { SettingsModalComponent } from './components/settings-modal/settings-mod
 import { DayProgressBarComponent } from './components/shared/day-progress-bar/day-progress-bar.component';
 import { TodayViewComponent } from './components/today-view/today-view.component';
 import { WeekViewComponent } from './components/week-view/week-view.component';
-import { Category, DayRecord, Settings, SyncState } from './types';
+import { PlannerPanelComponent } from './components/planner-panel/planner-panel.component';
+import { MorningRitualComponent, MorningRitualResult } from './components/morning-ritual/morning-ritual.component';
+import { EveningRitualComponent, EveningRitualResult } from './components/evening-ritual/evening-ritual.component';
+import { HourlyQuickLogComponent } from './components/hourly-quick-log/hourly-quick-log.component';
+import { Category, DayRecord, PlannedBlock, Settings, SyncState } from './types';
 import { DbService } from './services/db.service';
 
 const DEFAULT_CATEGORIES: Category[] = [
@@ -67,7 +71,11 @@ const generateDateRange = (startDate: Date, length: number): string[] => {
     SettingsModalComponent,
     DayProgressBarComponent,
     TodayViewComponent,
-    WeekViewComponent
+    WeekViewComponent,
+    PlannerPanelComponent,
+    MorningRitualComponent,
+    EveningRitualComponent,
+    HourlyQuickLogComponent
   ],
   templateUrl: './app.component.html',
   styleUrl: './app.component.css'
@@ -105,6 +113,21 @@ export class AppComponent implements OnInit, OnDestroy {
   isSettingsOpen = false;
   syncState: SyncState = { status: 'idle' };
 
+  // Rituals — dismissed-for-session flags so skipping doesn't nag again
+  // until the next day (step 13/14).
+  morningRitualDismissed = false;
+  eveningRitualDismissed = false;
+
+  // Configurable evening-ritual start hour (0-23), persisted in localStorage.
+  private static readonly EVENING_RITUAL_HOUR_KEY = 'box_tracker_evening_ritual_hour';
+  private static readonly DEFAULT_EVENING_RITUAL_HOUR = 20;
+  eveningRitualHour = AppComponent.DEFAULT_EVENING_RITUAL_HOUR;
+
+  // Hourly quick-log (step 11): prompts for the most recent past unlogged
+  // hour of today, one at a time, dismissible.
+  quickLogHourIndex: number | null = null;
+  private dismissedQuickLogHours = new Set<number>();
+
   private unsubscribeRealtime: () => void = () => {};
   private unsubscribeCategoriesRealtime: () => void = () => {};
   private syncTimers: Record<string, any> = {};
@@ -126,6 +149,15 @@ export class AppComponent implements OnInit, OnDestroy {
     this.isDarkMode = localStorage.getItem('box_tracker_dark_mode') !== 'false';
     this.applyTheme();
 
+    // Load configurable evening-ritual start hour
+    const savedEveningHour = localStorage.getItem(AppComponent.EVENING_RITUAL_HOUR_KEY);
+    if (savedEveningHour !== null) {
+      const parsed = parseInt(savedEveningHour, 10);
+      if (!isNaN(parsed) && parsed >= 0 && parsed <= 23) {
+        this.eveningRitualHour = parsed;
+      }
+    }
+
     // Apply categories as CSS variables
     this.applyCssVariables();
 
@@ -134,6 +166,156 @@ export class AppComponent implements OnInit, OnDestroy {
 
     // Trigger initial sync
     this.initSync();
+
+    // Compute today's ritual/quick-log state now that records are loaded
+    this.refreshQuickLogPrompt();
+  }
+
+  // ---- Hourly quick-log (step 11) ----
+  // Finds the most recent fully-elapsed hour of today that's still 'idle'
+  // and hasn't been dismissed this session, and offers it up for a one-tap
+  // log. Externalizes the "what did I just do?" question instead of relying
+  // on end-of-day guessing / working memory.
+  private refreshQuickLogPrompt(): void {
+    const currentHour = new Date().getHours();
+    const record = this.records[this.todayDate];
+    const hours = record?.hours ?? Array(24).fill('idle');
+
+    for (let h = currentHour - 1; h >= 0; h--) {
+      if (this.dismissedQuickLogHours.has(h)) continue;
+      if (hours[h] === 'idle') {
+        this.quickLogHourIndex = h;
+        return;
+      }
+    }
+    this.quickLogHourIndex = null;
+  }
+
+  handleQuickLogHour(event: { hourIndex: number; categoryId: string }): void {
+    this.handlePaintCell({ date: this.todayDate, hourIndex: event.hourIndex, categoryId: event.categoryId });
+    this.dismissedQuickLogHours.add(event.hourIndex);
+    this.refreshQuickLogPrompt();
+  }
+
+  handleDismissQuickLog(): void {
+    if (this.quickLogHourIndex !== null) {
+      this.dismissedQuickLogHours.add(this.quickLogHourIndex);
+    }
+    this.refreshQuickLogPrompt();
+  }
+
+  // ---- Morning / evening rituals (steps 13/14) ----
+  get showMorningRitual(): boolean {
+    if (this.morningRitualDismissed) return false;
+    const record = this.records[this.todayDate];
+    return !record?.morningRitualDone;
+  }
+
+  get showEveningRitual(): boolean {
+    if (this.eveningRitualDismissed) return false;
+    if (new Date().getHours() < this.eveningRitualHour) return false;
+    const record = this.records[this.todayDate];
+    return !record?.eveningRitualDone;
+  }
+
+  handleEveningRitualHourChange(hour: number): void {
+    this.eveningRitualHour = hour;
+    localStorage.setItem(AppComponent.EVENING_RITUAL_HOUR_KEY, String(hour));
+  }
+
+  private getOrCreateTodayRecord(): DayRecord {
+    return this.records[this.todayDate] || {
+      date: this.todayDate,
+      hours: Array(24).fill('idle'),
+      notes: '',
+      updatedAt: new Date().toISOString()
+    };
+  }
+
+  handleMorningRitualDone(result: MorningRitualResult): void {
+    const existing = this.getOrCreateTodayRecord();
+    const updated: DayRecord = {
+      ...existing,
+      morningRitualDone: true,
+      morningSleepConfirmed: result.sleepConfirmed,
+      morningPriority: result.priority,
+      updatedAt: new Date().toISOString()
+    };
+    this.records = { ...this.records, [this.todayDate]: updated };
+    this.dbService.saveLocalRecords(this.records);
+    this.queueSupabaseSync(this.todayDate);
+  }
+
+  handleSkipMorningRitual(): void {
+    this.morningRitualDismissed = true;
+  }
+
+  handleEveningRitualDone(result: EveningRitualResult): void {
+    const existing = this.getOrCreateTodayRecord();
+    const updated: DayRecord = {
+      ...existing,
+      eveningRitualDone: true,
+      eveningReflection1: result.reflection1,
+      eveningReflection2: result.reflection2,
+      updatedAt: new Date().toISOString()
+    };
+    this.records = { ...this.records, [this.todayDate]: updated };
+    this.dbService.saveLocalRecords(this.records);
+    this.queueSupabaseSync(this.todayDate);
+
+    // Pre-decide tomorrow's first block, on tomorrow's record
+    if (result.tomorrowTime && result.tomorrowAction) {
+      const tomorrow = new Date();
+      tomorrow.setDate(tomorrow.getDate() + 1);
+      const tomorrowDate = getLocalDateString(tomorrow);
+      const tomorrowExisting = this.records[tomorrowDate] || {
+        date: tomorrowDate,
+        hours: Array(24).fill('idle'),
+        notes: '',
+        updatedAt: new Date().toISOString()
+      };
+      const newBlock: PlannedBlock = {
+        id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+        time: result.tomorrowTime,
+        action: result.tomorrowAction,
+        place: '',
+        done: false
+      };
+      const tomorrowUpdated: DayRecord = {
+        ...tomorrowExisting,
+        plannedBlocks: [...(tomorrowExisting.plannedBlocks || []), newBlock].slice(0, 3),
+        updatedAt: new Date().toISOString()
+      };
+      this.records = { ...this.records, [tomorrowDate]: tomorrowUpdated };
+      this.dbService.saveLocalRecords(this.records);
+      this.queueSupabaseSync(tomorrowDate);
+    }
+  }
+
+  handleSkipEveningRitual(): void {
+    this.eveningRitualDismissed = true;
+  }
+
+  // ---- Now+Next planner (step 12) ----
+  scrollToPlanner(): void {
+    document.getElementById('planner-panel-anchor')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  handlePlannedBlocksChange(dateStr: string, blocks: PlannedBlock[]): void {
+    const existing = this.records[dateStr] || {
+      date: dateStr,
+      hours: Array(24).fill('idle'),
+      notes: '',
+      updatedAt: new Date().toISOString()
+    };
+    const updated: DayRecord = {
+      ...existing,
+      plannedBlocks: blocks.slice(0, 3),
+      updatedAt: new Date().toISOString()
+    };
+    this.records = { ...this.records, [dateStr]: updated };
+    this.dbService.saveLocalRecords(this.records);
+    this.queueSupabaseSync(dateStr);
   }
 
   // Recolor still-default categories to the new identity palette, persist the
@@ -504,6 +686,14 @@ export class AppComponent implements OnInit, OnDestroy {
       [date]: updatedRecord
     };
     this.dbService.saveLocalRecords(this.records);
+
+    // If painting today directly, the quick-log banner for that hour (if
+    // it was showing) is now moot — recompute so it doesn't keep asking
+    // about an hour the user just logged on the timeline.
+    if (date === this.todayDate) {
+      this.dismissedQuickLogHours.add(hourIndex);
+      this.refreshQuickLogPrompt();
+    }
 
     // Debounce background sync to avoid concurrent write race conditions
     this.queueSupabaseSync(date);

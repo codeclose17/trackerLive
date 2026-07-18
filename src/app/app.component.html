@@ -48,6 +48,23 @@
           Back to Today
         </button>
 
+        <!-- Morning ritual: only for today's own record, only until completed/skipped -->
+        <app-morning-ritual
+          *ngIf="selectedDate === todayDate && showMorningRitual"
+          [initialPriority]="todayViewRecord?.morningPriority || ''"
+          (done)="handleMorningRitualDone($event)"
+          (skip)="handleSkipMorningRitual()"
+        ></app-morning-ritual>
+
+        <!-- Hourly quick-log: only relevant for today -->
+        <app-hourly-quick-log
+          *ngIf="selectedDate === todayDate"
+          [hourIndex]="quickLogHourIndex"
+          [categories]="settings.categories"
+          (logHour)="handleQuickLogHour($event)"
+          (dismiss)="handleDismissQuickLog()"
+        ></app-hourly-quick-log>
+
         <app-today-view
           [date]="selectedDate"
           [record]="todayViewRecord"
@@ -56,7 +73,25 @@
           (paintHour)="handlePaintCell($event)"
           (updateNotes)="handleUpdateNotes($event)"
           (updateBingeCount)="handleUpdateBingeCount($event)"
+          (plannedBlocksChange)="handlePlannedBlocksChange($event.date, $event.blocks)"
+          (focusPlanner)="scrollToPlanner()"
         ></app-today-view>
+
+        <!-- Now + Next planner, scoped to whichever date is being viewed -->
+        <app-planner-panel
+          id="planner-panel-anchor"
+          [blocks]="todayViewRecord?.plannedBlocks || []"
+          (blocksChange)="handlePlannedBlocksChange(selectedDate, $event)"
+        ></app-planner-panel>
+
+        <!-- Evening ritual: only for today's own record, only from 20:00 -->
+        <app-evening-ritual
+          *ngIf="selectedDate === todayDate && showEveningRitual"
+          [startHour]="eveningRitualHour"
+          (startHourChange)="handleEveningRitualHourChange($event)"
+          (done)="handleEveningRitualDone($event)"
+          (skip)="handleSkipEveningRitual()"
+        ></app-evening-ritual>
 
         <!-- FLOATING PALETTE BAR -->
         <div class="bottom-palette-bar">
