@@ -2600,12 +2600,18 @@ html[data-theme="light"] .hour-box { border-color: rgba(60, 40, 90, 0.08); }
   .palette-inline-item,
   select,
   input[type="checkbox"],
-  input[type="radio"] {
+  input[type="radio"],
+  .task-tag {
     min-height: 44px;
   }
 
   .btn-icon {
     min-width: 44px;
+  }
+
+  .color-picker-input {
+    width: 44px;
+    height: 44px;
   }
 }
 
@@ -3306,6 +3312,7 @@ html[data-theme="light"] .today-hour-box { border-color: rgba(60, 40, 90, 0.08);
   width: 24px;
   height: 24px;
   min-height: 24px;
+  min-width: 24px;
   border-radius: 6px;
   border: 1.5px solid var(--line-strong);
   background: transparent;
@@ -3314,6 +3321,17 @@ html[data-theme="light"] .today-hour-box { border-color: rgba(60, 40, 90, 0.08);
   display: grid;
   place-items: center;
   flex: none;
+}
+
+@media (max-width: 899px) {
+  /* Grow the actual tap target on mobile, not just a min-height that a
+     fixed height overrides — the 24px visual box is fine on desktop
+     (mouse precision), but a daily-use checkbox needs the real 44px
+     minimum on touch. */
+  .planner-check {
+    width: 44px;
+    height: 44px;
+  }
 }
 
 .planner-block.done .planner-check {
@@ -4830,6 +4848,15 @@ html[data-theme="light"] .today-hour-box { border-color: rgba(60, 40, 90, 0.08);
 .mood-checkin-btn:hover {
   border-color: var(--hot-1);
   color: var(--hot-1);
+}
+
+.mood-checkin-btn-grouped {
+  width: auto;
+  min-width: 44px;
+  padding: 0 1rem;
+  border-radius: 999px;
+  font-family: var(--font-sans);
+  font-size: 0.85rem;
 }
 
 .mood-checkin-count {

@@ -100,6 +100,8 @@ import { EnergyLevel, Task } from '../../types';
         <div *ngIf="tasks.length === 0" class="task-inbox-empty">
           Nothing here yet. Use the + button on any screen to capture a thought.
         </div>
+
+        <button *ngIf="hasMoreTasks" class="btn btn-secondary" (click)="showMoreTasks()">Show more</button>
       </div>
     </div>
   `
@@ -126,7 +128,30 @@ export class TaskInboxComponent {
     this.currentEnergyFilter = level;
   }
 
+  // Step 49 ADHD-UX audit: an unbounded task list violates "no infinite
+  // scroll / bounded lists" the same way win-log/RSD entries already cap
+  // themselves. Bounded to 25 visible at once, incomplete tasks surfaced
+  // first (most relevant to see), with a "show more" control rather than
+  // silently truncating data — nothing is lost, just not all rendered at
+  // once.
+  private readonly VISIBLE_TASK_LIMIT = 25;
+  visibleTaskCount = this.VISIBLE_TASK_LIMIT;
+
   get visibleTasks(): Task[] {
+    const filtered = this.energyFilteredTasks;
+    const sorted = [...filtered].sort((a, b) => Number(a.done) - Number(b.done));
+    return sorted.slice(0, this.visibleTaskCount);
+  }
+
+  get hasMoreTasks(): boolean {
+    return this.energyFilteredTasks.length > this.visibleTaskCount;
+  }
+
+  showMoreTasks(): void {
+    this.visibleTaskCount += this.VISIBLE_TASK_LIMIT;
+  }
+
+  private get energyFilteredTasks(): Task[] {
     if (this.currentEnergyFilter === null) return this.tasks;
     // Low energy -> only show low-energy tasks (protect against overcommitting).
     // Med energy -> low or med. High energy -> everything, since a
