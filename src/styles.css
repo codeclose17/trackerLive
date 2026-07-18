@@ -2640,5 +2640,411 @@ html[data-theme="light"] .hour-box { border-color: rgba(60, 40, 90, 0.08); }
   .reveal { opacity: 1; transform: none; }
 }
 
+/* =========================================================================
+   APP SHELL — Today / Week / Insights / Learn
+   Phone (<1000px): fixed bottom tab bar (already styled above), compact
+   top header. Desktop (>=1000px): fixed left sidebar nav in the KB's own
+   visual language, no bottom bar, no duplicate top header.
+   ========================================================================= */
+
+.app-shell {
+  display: flex;
+  min-height: 100dvh;
+}
+
+/* ---- Sidebar (desktop only) ---- */
+.side-nav {
+  display: none;
+}
+
+@media (min-width: 1000px) {
+  .side-nav {
+    display: flex;
+    flex-direction: column;
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    width: 240px;
+    z-index: 70;
+    background: color-mix(in srgb, var(--surface) 92%, transparent);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border-right: 1px solid var(--line);
+  }
+
+  .app-shell {
+    padding-left: 240px;
+  }
+
+  .container.dashboard-layout {
+    padding: 1.25rem 2rem;
+  }
+
+  /* Bottom tab bar and mobile header are phone-only; sidebar replaces both */
+  .tab-container,
+  .mobile-only-header {
+    display: none !important;
+  }
+}
+
+.side-nav-brand {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  padding: 20px 20px 16px;
+  border-bottom: 1px solid var(--line);
+}
+
+.side-nav-brand .logo-icon {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--hot-1) 14%, var(--surface-2));
+  border: 1px solid color-mix(in srgb, var(--hot-1) 30%, var(--line));
+  font-size: 1.1rem;
+  flex: none;
+}
+
+.side-nav-brand h1 {
+  font-size: 1.05rem;
+  line-height: 1.1;
+  background: var(--grad-hot);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  margin: 0;
+}
+
+.side-nav-brand .subtitle {
+  font-size: 0.7rem;
+  color: var(--muted);
+  font-family: var(--mono);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-top: 2px;
+}
+
+.side-nav-links {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 14px 12px;
+  flex: 1;
+}
+
+.side-nav-links .tab-btn {
+  flex-direction: row;
+  justify-content: flex-start;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: var(--border-radius-md);
+  border-bottom: none;
+  font-size: 0.88rem;
+  min-height: 44px;
+}
+
+.side-nav-links .tab-btn.active {
+  background: linear-gradient(90deg, var(--accent-glow), transparent);
+  color: var(--hot-1);
+}
+
+.side-nav-footer {
+  display: flex;
+  gap: 8px;
+  padding: 14px 16px;
+  border-top: 1px solid var(--line);
+}
+
+.side-nav-footer .btn-icon {
+  flex: 1;
+}
+
+/* ---- Today tab layout ---- */
+.today-tab-container {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  height: 100%;
+  overflow-y: auto;
+  padding-bottom: 0.5rem;
+}
+
+.back-to-today-btn {
+  align-self: flex-start;
+  font-size: 0.82rem;
+  padding: 0.4rem 0.85rem;
+}
+
+.today-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.today-eyebrow {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  color: var(--hot-3);
+  font-weight: 600;
+}
+
+.today-header-info h2 {
+  font-size: 1.5rem;
+  margin: 4px 0 0;
+}
+
+.today-dial {
+  position: relative;
+  width: 56px;
+  height: 56px;
+  flex: none;
+}
+
+.dial-svg {
+  width: 56px;
+  height: 56px;
+  transform: rotate(-90deg);
+}
+
+.dial-track {
+  fill: none;
+  stroke: var(--surface-2);
+  stroke-width: 4;
+}
+
+.dial-fill {
+  fill: none;
+  stroke: var(--hot-1);
+  stroke-width: 4;
+  stroke-linecap: round;
+  transition: stroke-dashoffset 20s linear;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dial-fill { transition: none; }
+}
+
+.dial-label {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  font-family: var(--mono);
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.today-timeline-wrapper {
+  padding: 0.75rem;
+  max-height: 58vh;
+  overflow-y: auto;
+}
+
+@media (min-width: 1000px) {
+  .today-timeline {
+    columns: 2;
+    column-gap: 1rem;
+  }
+  .today-hour-row {
+    break-inside: avoid;
+  }
+}
+
+.today-hour-row {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.4rem 0.5rem;
+  border-radius: var(--border-radius-sm);
+  cursor: pointer;
+  user-select: none;
+  transition: background var(--transition-fast);
+  min-height: 44px;
+}
+
+.today-hour-row:hover {
+  background: color-mix(in srgb, var(--hot-1) 5%, transparent);
+}
+
+.today-hour-row.now {
+  background: linear-gradient(90deg, var(--accent-glow), transparent);
+  box-shadow: inset 2px 0 0 var(--hot-1);
+}
+
+.today-hour-label {
+  font-family: var(--mono);
+  font-size: 0.75rem;
+  color: var(--muted);
+  width: 48px;
+  flex: none;
+}
+
+.today-hour-box {
+  width: 28px;
+  height: 20px;
+  border-radius: 5px;
+  border: 1px solid rgba(0, 0, 0, 0.18);
+  flex: none;
+}
+
+html[data-theme="light"] .today-hour-box { border-color: rgba(60, 40, 90, 0.08); }
+
+.today-hour-box.filled {
+  border: none;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.14);
+}
+
+.today-hour-cat-name {
+  font-size: 0.82rem;
+  color: var(--ink-soft);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  flex: 1;
+  min-width: 0;
+}
+
+.now-marker {
+  font-family: var(--mono);
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  color: var(--hot-1);
+  background: color-mix(in srgb, var(--hot-1) 14%, transparent);
+  border-radius: 999px;
+  padding: 2px 8px;
+  flex: none;
+}
+
+.today-binge-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+  padding: 0.85rem 1rem;
+}
+
+.today-notes-section {
+  padding: 1rem;
+}
+
+.today-notes-section h4 {
+  margin-bottom: 0.5rem;
+  font-size: 0.95rem;
+}
+
+.today-notes-section .notes-textarea {
+  min-height: 96px;
+}
+
+/* ---- Week tab layout ---- */
+.week-view {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  height: 100%;
+  overflow-y: auto;
+  padding-bottom: 0.5rem;
+}
+
+.week-header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.week-header-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.week-header-info h2 {
+  font-size: 1.25rem;
+  margin: 0;
+}
+
+.week-header-info .subtitle {
+  font-size: 0.8rem;
+  color: var(--muted);
+  margin-top: 2px;
+}
+
+.week-strips {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.week-day-strip {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  flex-wrap: wrap;
+  padding: 0.85rem 1rem;
+  cursor: pointer;
+}
+
+.week-day-strip.today {
+  border-color: color-mix(in srgb, var(--hot-1) 45%, transparent);
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--hot-1) 18%, transparent);
+}
+
+.week-strip-info {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+  min-width: 130px;
+  flex: none;
+}
+
+.week-strip-info .day-long {
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: var(--ink);
+}
+
+.week-strip-info .date-short {
+  font-size: 0.78rem;
+  color: var(--muted);
+  font-family: var(--mono);
+}
+
+.week-day-strip .mini-hour-strip {
+  display: flex;
+  flex: 1;
+  min-width: 140px;
+  height: 22px;
+  border-radius: 5px;
+  overflow: hidden;
+  gap: 1px;
+}
+
+.week-day-strip .mini-hour-cell {
+  flex: 1;
+}
+
+.week-strip-meta {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex: none;
+  flex-wrap: wrap;
+}
+
+/* Mobile: header stays visible; on desktop we hide it via the sidebar rule above */
+.mobile-only-header {
+  display: block;
+}
+
 
 

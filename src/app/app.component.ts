@@ -2,11 +2,11 @@ import { Component, OnInit, OnDestroy, HostListener, NgZone, ViewChild, ElementR
 import { CommonModule } from '@angular/common';
 import { HeaderComponent } from './components/header/header.component';
 import { CategoryPickerComponent } from './components/category-picker/category-picker.component';
-import { TrackerGridComponent } from './components/tracker-grid/tracker-grid.component';
 import { StatsDashboardComponent } from './components/stats-dashboard/stats-dashboard.component';
 import { SettingsModalComponent } from './components/settings-modal/settings-modal.component';
-import { DailyGlanceComponent } from './components/daily-glance/daily-glance.component';
 import { DayProgressBarComponent } from './components/shared/day-progress-bar/day-progress-bar.component';
+import { TodayViewComponent } from './components/today-view/today-view.component';
+import { WeekViewComponent } from './components/week-view/week-view.component';
 import { Category, DayRecord, Settings, SyncState } from './types';
 import { DbService } from './services/db.service';
 
@@ -46,9 +46,9 @@ const getStartOfWeekSunday = (d: Date): Date => {
   return date;
 };
 
-const generateDateRange = (startDate: Date): string[] => {
+const generateDateRange = (startDate: Date, length: number): string[] => {
   const dates: string[] = [];
-  for (let i = 0; i < 14; i++) {
+  for (let i = 0; i < length; i++) {
     const d = new Date(startDate);
     d.setDate(startDate.getDate() + i);
     dates.push(getLocalDateString(d));
@@ -63,24 +63,34 @@ const generateDateRange = (startDate: Date): string[] => {
     CommonModule,
     HeaderComponent,
     CategoryPickerComponent,
-    TrackerGridComponent,
     StatsDashboardComponent,
     SettingsModalComponent,
-    DailyGlanceComponent,
-    DayProgressBarComponent
+    DayProgressBarComponent,
+    TodayViewComponent,
+    WeekViewComponent
   ],
   templateUrl: './app.component.html',
   styleUrl: './app.component.css'
 })
 export class AppComponent implements OnInit, OnDestroy {
+  // 14-day window: still the source of truth for Insights/stats aggregates
+  // (long-range data lives there, never as a pixel grid — see step 7 of
+  // ADHD-KILLER-PLAN.md). Not shown as a grid anywhere anymore.
   startDate: Date = getStartOfWeekSunday(new Date());
-  dates: string[] = generateDateRange(this.startDate);
+  dates: string[] = generateDateRange(this.startDate, 14);
+
+  // 7-day window for the Week (rhythm) tab.
+  weekStartDate: Date = getStartOfWeekSunday(new Date());
+  weekDates: string[] = generateDateRange(this.weekStartDate, 7);
+
+  todayDate: string = getLocalDateString(new Date());
+
   isDarkMode = true;
 
   @ViewChild('kbFrame') kbFrame?: ElementRef<HTMLIFrameElement>;
 
   records: Record<string, DayRecord> = {};
-  
+
   settings: Settings = {
     supabaseUrl: '',
     supabaseAnonKey: '',
@@ -90,8 +100,8 @@ export class AppComponent implements OnInit, OnDestroy {
 
   activeCategoryId = 'work';
   selectedDate: string = getLocalDateString(new Date());
-  
-  activeTab: 'grid' | 'stats' | 'glance' | 'learn' = 'grid';
+
+  activeTab: 'today' | 'week' | 'stats' | 'learn' = 'today';
   isSettingsOpen = false;
   syncState: SyncState = { status: 'idle' };
 
@@ -695,24 +705,50 @@ export class AppComponent implements OnInit, OnDestroy {
     this.applyCssVariables();
   }
 
-  // Period shifting functions
+  // Period shifting functions (drives the 14-day Insights aggregate window)
   handlePrevPeriod(): void {
     const newStart = new Date(this.startDate);
     newStart.setDate(this.startDate.getDate() - 14);
     this.startDate = newStart;
-    this.dates = generateDateRange(this.startDate);
+    this.dates = generateDateRange(this.startDate, 14);
   }
 
   handleNextPeriod(): void {
     const newStart = new Date(this.startDate);
     newStart.setDate(this.startDate.getDate() + 14);
     this.startDate = newStart;
-    this.dates = generateDateRange(this.startDate);
+    this.dates = generateDateRange(this.startDate, 14);
   }
 
   handleResetPeriod(): void {
     this.startDate = getStartOfWeekSunday(new Date());
-    this.dates = generateDateRange(this.startDate);
+    this.dates = generateDateRange(this.startDate, 14);
+  }
+
+  // Week (rhythm) tab navigation — independent 7-day window
+  handlePrevWeek(): void {
+    const newStart = new Date(this.weekStartDate);
+    newStart.setDate(this.weekStartDate.getDate() - 7);
+    this.weekStartDate = newStart;
+    this.weekDates = generateDateRange(this.weekStartDate, 7);
+  }
+
+  handleNextWeek(): void {
+    const newStart = new Date(this.weekStartDate);
+    newStart.setDate(this.weekStartDate.getDate() + 7);
+    this.weekStartDate = newStart;
+    this.weekDates = generateDateRange(this.weekStartDate, 7);
+  }
+
+  // Week's "edit this day" opens the Today view scoped to that date — same
+  // 24-hour timeline UI, just not necessarily *today*.
+  handleOpenWeekDay(dateStr: string): void {
+    this.selectedDate = dateStr;
+    this.activeTab = 'today';
+  }
+
+  get todayViewRecord(): DayRecord | null {
+    return this.records[this.selectedDate] || null;
   }
 
   // Backup Export/Import
@@ -784,8 +820,9 @@ export class AppComponent implements OnInit, OnDestroy {
     return `${startStr} – ${endStr}, ${endYear}`;
   }
 
-  handleSelectDateAndTab(event: { date: string; tab: 'grid' | 'stats' | 'glance' }): void {
-    this.selectedDate = event.date;
-    this.activeTab = event.tab;
+  // "Jump back to today" — used by the Today tab when it's showing a
+  // non-today date opened from Week.
+  handleReturnToToday(): void {
+    this.selectedDate = this.todayDate;
   }
 }
